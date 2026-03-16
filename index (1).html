@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>FreshVault</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FreshVault">
+<meta name="theme-color" content="#ffffff">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f5f3;--white:#fff;--black:#0e0e0e;
+  --g1:#f0efed;--g2:#e4e3df;--g3:#b5b3ac;--g4:#6e6d68;
+  --text:#1a1917;--muted:#9a9890;
+  --green:#2d6a4f;--green-l:#e8f4ee;
+  --blue:#1a56a0;--blue-l:#e8f0fb;
+  --red:#c0392b;--red-l:#fdf0ee;
+  --orange:#c4580a;--orange-l:#fef3ea;
+  --yellow:#a07c00;--yellow-l:#fdf8e6;
+  --r:14px;--rs:8px;
+  --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
+}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent}
+
+/* AUTH */
+#auth-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#f5f5f3,#e8f4ee)}
+.auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:32px}
+.auth-logo-box{width:50px;height:50px;border-radius:14px;background:var(--black);display:flex;align-items:center;justify-content:center}
+.auth-logo-name{font-weight:700;font-size:24px;letter-spacing:-.6px}
+.auth-logo-tag{font-size:11px;color:var(--muted);margin-top:-2px}
+.auth-card{background:var(--white);border:1px solid var(--g2);border-radius:20px;padding:26px 22px;width:100%;max-width:380px;box-shadow:0 8px 40px rgba(0,0,0,.08)}
+.auth-title{font-size:19px;font-weight:700;letter-spacing:-.4px;margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.auth-tabs{display:flex;gap:6px;margin-bottom:18px}
+.auth-tab{flex:1;padding:9px;border-radius:9px;border:1px solid var(--g2);background:var(--g1);font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all .15s}
+.auth-tab.on{background:var(--black);color:white;border-color:var(--black)}
+.a-field{margin-bottom:11px}
+.a-field label{display:block;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.a-field input{width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:12px 13px;color:var(--text);font-size:16px;font-family:inherit;outline:none;transition:border-color .15s}
+.a-field input:focus{border-color:var(--black);background:var(--white)}
+.a-field input::placeholder{color:var(--muted)}
+.auth-error{font-size:12px;color:var(--red);margin-bottom:10px;min-height:16px;font-weight:500}
+.auth-btn{width:100%;background:var(--black);color:white;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px}
+
+/* APP */
+#app-screen{display:none}
+nav{background:var(--white);border-bottom:1px solid var(--g2);position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:58px;gap:10px}
+.logo{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.logo-box{width:30px;height:30px;border-radius:8px;background:var(--black);display:flex;align-items:center;justify-content:center}
+.logo-name{font-weight:700;font-size:16px;letter-spacing:-.4px}
+.logo-tag{font-size:9px;color:var(--muted);margin-top:-2px}
+.nav-tabs{display:flex;gap:2px;overflow-x:auto}
+.tab{padding:7px 13px;border-radius:8px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s;white-space:nowrap}
+.tab.on{background:var(--g1);color:var(--black);font-weight:600}
+.nav-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.user-pill{font-size:11px;color:var(--muted);background:var(--g1);border:1px solid var(--g2);border-radius:999px;padding:4px 10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.logout-btn{background:none;border:1px solid var(--g2);border-radius:8px;color:var(--g4);font-size:12px;padding:6px 10px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.notif-btn{position:relative;width:32px;height:32px;border-radius:8px;background:var(--g1);border:1px solid var(--g2);display:flex;align-items:center;justify-content:center;cursor:pointer}
+.notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--white);display:none}
+
+.page{display:none}
+.page.active{display:block}
+.wrap{max-width:860px;margin:0 auto;padding:20px 16px 90px}
+
+.top-row{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.kpi{background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px 12px;box-shadow:var(--shadow)}
+.kpi-val{font-size:24px;font-weight:700;letter-spacing:-1px;line-height:1}
+.kpi-lbl{font-size:10px;color:var(--muted);margin-top:4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.kpi-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.kpi.alert{border-color:var(--red);background:var(--red-l);animation:blink 2s ease infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.65}}
+
+.zones-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.zone-card{background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.zone-card::after{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.zone-card.cold::after{background:linear-gradient(90deg,#60a5fa,#93c5fd)}
+.zone-card.fresh::after{background:linear-gradient(90deg,#4ade80,#86efac)}
+.zone-card.dry::after{background:linear-gradient(90deg,#fbbf24,#fde68a)}
+.zone-card.crisper::after{background:linear-gradient(90deg,#a78bfa,#c4b5fd)}
+.zone-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.zone-name{font-weight:700;font-size:13px}
+.zone-metrics{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:10px}
+.metric{background:var(--g1);border-radius:8px;padding:9px}
+.metric-val{font-size:18px;font-weight:700;letter-spacing:-.5px}
+.metric-lbl{font-size:10px;color:var(--muted);font-weight:500}
+.zone-items{display:flex;flex-wrap:wrap;gap:4px}
+.zone-pill{font-size:11px;padding:2px 8px;border-radius:999px;background:var(--g1);color:var(--g4);font-weight:500;border:1px solid var(--g2)}
+.zone-pill.warn{background:var(--orange-l);color:var(--orange);border-color:transparent}
+.zone-pill.gone{background:var(--red-l);color:var(--red);border-color:transparent}
+.zone-empty{font-size:11px;color:var(--muted)}
+
+.list-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.list-title{font-size:12px;font-weight:700;color:var(--black);text-transform:uppercase;letter-spacing:.6px}
+.btn-add-sm{background:var(--black);color:white;border:none;border-radius:7px;padding:7px 13px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer}
+.filters{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:999px;border:1px solid var(--g2);background:var(--white);font-size:12px;font-weight:500;font-family:inherit;color:var(--g4);cursor:pointer;transition:all .15s}
+.chip.on{background:var(--black);color:white;border-color:var(--black)}
+.items{display:flex;flex-direction:column;gap:6px}
+.card{background:var(--white);border:1px solid var(--g2);border-left:3px solid transparent;border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);animation:up .25s ease}
+@keyframes up{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.card.ok{border-left-color:var(--green)}
+.card.soon{border-left-color:#f0a500}
+.card.urgent{border-left-color:var(--orange)}
+.card.gone{border-left-color:var(--red)}
+.card-emoji{width:38px;height:38px;border-radius:9px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.card-body{flex:1;min-width:0}
+.card-name{font-weight:600;font-size:14px}
+.card-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.tag{font-size:11px;font-weight:600;padding:3px 9px;border-radius:999px;white-space:nowrap;flex-shrink:0}
+.tag.ok{color:var(--green);background:var(--green-l)}
+.tag.soon{color:var(--yellow);background:var(--yellow-l)}
+.tag.urgent{color:var(--orange);background:var(--orange-l)}
+.tag.gone{color:var(--red);background:var(--red-l)}
+.del{width:30px;height:30px;border-radius:6px;background:none;border:1px solid var(--g2);color:var(--g3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;transition:all .15s}
+.del:active{background:var(--red-l);border-color:var(--red);color:var(--red)}
+.edit-btn{width:30px;height:30px;border-radius:6px;background:none;border:1px solid var(--g2);color:var(--g3);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit;transition:all .15s}
+.edit-btn:active{background:var(--blue-l);border-color:var(--blue);color:var(--blue)}
+.empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+
+.alerts-list{display:flex;flex-direction:column;gap:8px}
+.alert-card{background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px 16px;display:flex;align-items:flex-start;gap:12px;box-shadow:var(--shadow)}
+.alert-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.alert-card.warn .alert-icon{background:var(--orange-l)}
+.alert-card.crit .alert-icon{background:var(--red-l)}
+.alert-title{font-weight:600;font-size:14px}
+.alert-desc{font-size:12px;color:var(--muted);margin-top:3px;line-height:1.5}
+.alert-time{font-size:10px;color:var(--muted);margin-top:4px}
+.no-alerts{text-align:center;padding:60px 20px;color:var(--muted)}
+.no-alerts-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+
+.settings-section{margin-bottom:22px}
+.settings-title{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:10px}
+.setting-row{background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--shadow);margin-bottom:6px}
+.setting-label{font-weight:600;font-size:14px}
+.setting-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:40px;height:22px}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--g2);border-radius:999px;cursor:pointer;transition:.3s}
+.toggle-slider::before{content:'';position:absolute;width:16px;height:16px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.3s}
+.toggle input:checked+.toggle-slider{background:var(--black)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px)}
+.temp-slider{width:110px;accent-color:var(--black)}
+.zone-temp-val{font-weight:700;font-size:14px;min-width:38px;text-align:right}
+
+/* OVERLAY / BOTTOM SHEET */
+.overlay{position:fixed;inset:0;background:rgba(14,14,14,.5);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.open{opacity:1;pointer-events:all}
+.sheet{background:var(--white);border-radius:22px 22px 0 0;padding:0 20px max(28px,env(safe-area-inset-bottom));width:100%;max-width:520px;transform:translateY(100%);transition:transform .32s cubic-bezier(.32,0,.15,1);max-height:92vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.overlay.open .sheet{transform:translateY(0)}
+.sheet-handle{width:40px;height:4px;background:var(--g2);border-radius:99px;margin:14px auto 20px}
+.sheet-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.sheet-title{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.sheet-edit-badge{font-size:11px;background:var(--blue-l);color:var(--blue);border-radius:6px;padding:2px 8px;font-weight:600;display:none}
+.sheet-edit-badge.show{display:inline-block}
+.sheet-close{width:32px;height:32px;border-radius:50%;background:var(--g1);border:none;font-size:15px;cursor:pointer;font-family:inherit;color:var(--g4);display:flex;align-items:center;justify-content:center}
+.field{margin-bottom:13px}
+.field label{display:block;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px}
+.field input,.field select{width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:13px;color:var(--text);font-size:16px;font-family:inherit;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none}
+.field input:focus,.field select:focus{border-color:var(--black);background:var(--white)}
+.field input::placeholder{color:var(--muted)}
+.btn-confirm{width:100%;margin-top:8px;background:var(--black);color:white;border:none;border-radius:var(--r);padding:16px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer}
+.btn-confirm:disabled{opacity:.5}
+
+.btn-scan{width:100%;border:1.5px dashed var(--g2);background:var(--g1);border-radius:var(--r);padding:11px;color:var(--g4);font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;margin-bottom:12px}
+#scanner-wrap{display:none;border-radius:var(--r);overflow:hidden;margin-bottom:12px;position:relative;background:#000}
+#scanner-wrap.active{display:block}
+#scanner-video{width:100%;max-height:200px;object-fit:cover;display:block}
+.scan-frame{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:180px;height:95px;border:2px solid white;border-radius:10px;box-shadow:0 0 0 9999px rgba(0,0,0,.5);pointer-events:none}
+.scan-bar{position:absolute;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,white,transparent);animation:sweep 1.6s ease-in-out infinite;top:50%}
+@keyframes sweep{0%,100%{transform:translateY(-36px)}50%{transform:translateY(36px)}}
+.scan-label{position:absolute;bottom:8px;left:0;right:0;text-align:center;font-size:12px;color:white;font-weight:500;pointer-events:none}
+#scan-close{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);border:none;border-radius:6px;color:white;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+.lookup{display:none;align-items:center;gap:9px;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:10px 13px;font-size:13px;color:var(--g4);margin-bottom:12px}
+.lookup.show{display:flex}
+.spin{width:15px;height:15px;border:2px solid var(--g2);border-top-color:var(--green);border-radius:50%;animation:rot .7s linear infinite;flex-shrink:0}
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* AUTOCOMPLETE */
+.autocomplete-wrap{position:relative}
+.autocomplete-dropdown{position:absolute;top:100%;left:0;right:0;background:var(--white);border:1px solid var(--g2);border-radius:var(--rs);box-shadow:0 6px 20px rgba(0,0,0,.1);z-index:300;max-height:200px;overflow-y:auto;display:none}
+.autocomplete-dropdown.open{display:block}
+.ac-item{padding:12px 13px;font-size:14px;cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
+.ac-item:active,.ac-item.focused{background:var(--g1)}
+.ac-item-name{font-weight:600;flex:1}
+.ac-item-meta{font-size:11px;color:var(--muted)}
+
+/* BOTTOM NAV */
+.bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;z-index:100;background:var(--white);border-top:1px solid var(--g2);padding:6px 0 max(6px,env(safe-area-inset-bottom))}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;font-family:inherit;font-size:10px;color:var(--muted);cursor:pointer;padding:4px 0;font-weight:500}
+.bnav-btn.on{color:var(--black);font-weight:700}
+.bnav-icon{font-size:19px}
+
+@media(max-width:640px){
+  .top-row{grid-template-columns:1fr 1fr}
+  .zones-grid{grid-template-columns:1fr}
+  .nav-tabs,.nav-right .user-pill,.nav-right .logout-btn{display:none}
+  .bottom-nav{display:flex}
+}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-logo">
+    <div class="auth-logo-box">
+      <svg width="26" height="26" viewBox="0 0 18 18" fill="none">
+        <path d="M4 7h10v7a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 014 14V7z" fill="white" fill-opacity=".9"/>
+        <path d="M3 5h12v2H3z" fill="white" fill-opacity=".5"/>
+        <ellipse cx="9" cy="4.5" rx="1.8" ry="1.8" fill="white" fill-opacity=".3"/>
+        <ellipse cx="9" cy="4.5" rx=".9" ry=".9" fill="white"/>
+        <path d="M6.5 10.5 Q9 8.5 11.5 10.5 Q9 12.5 6.5 10.5z" fill="#86efac"/>
+      </svg>
+    </div>
+    <div>
+      <div class="auth-logo-name">FreshVault</div>
+      <div class="auth-logo-tag">Keep it fresh.</div>
+    </div>
+  </div>
+  <div class="auth-card">
+    <div class="auth-title" id="auth-title">Willkommen zurück</div>
+    <div class="auth-sub" id="auth-sub">Meld dich an um deinen Kühlschrank zu verwalten.</div>
+    <div class="auth-tabs">
+      <button class="auth-tab on" id="tab-login">Anmelden</button>
+      <button class="auth-tab" id="tab-register">Registrieren</button>
+    </div>
+    <div class="a-field"><label>E-Mail</label><input id="a-email" type="email" placeholder="deine@email.de" autocomplete="email"></div>
+    <div class="a-field"><label>Passwort</label><input id="a-pass" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <div class="auth-error" id="auth-error"></div>
+    <button class="auth-btn" id="btn-auth">Anmelden</button>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app-screen">
+  <nav>
+    <div class="logo">
+      <div class="logo-box">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+          <path d="M4 7h10v7a1.5 1.5 0 01-1.5 1.5h-7A1.5 1.5 0 014 14V7z" fill="white" fill-opacity=".9"/>
+          <path d="M3 5h12v2H3z" fill="white" fill-opacity=".5"/>
+          <ellipse cx="9" cy="4.5" rx="1.8" ry="1.8" fill="white" fill-opacity=".3"/>
+          <ellipse cx="9" cy="4.5" rx=".9" ry=".9" fill="white"/>
+          <path d="M6.5 10.5 Q9 8.5 11.5 10.5 Q9 12.5 6.5 10.5z" fill="#86efac"/>
+        </svg>
+      </div>
+      <div><div class="logo-name">FreshVault</div><div class="logo-tag">Keep it fresh.</div></div>
+    </div>
+    <div class="nav-tabs">
+      <button class="tab on" id="nav-dashboard">Dashboard</button>
+      <button class="tab" id="nav-products">Produkte</button>
+      <button class="tab" id="nav-alerts">Warnungen</button>
+      <button class="tab" id="nav-settings">Einstellungen</button>
+    </div>
+    <div class="nav-right">
+      <span class="user-pill" id="user-email"></span>
+      <button class="notif-btn" id="nav-notif">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="notif-dot" id="notif-dot"></div>
+      </button>
+      <button class="logout-btn" id="nav-logout">Abmelden</button>
+    </div>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <div class="page active" id="page-dashboard">
+    <div class="wrap">
+      <div class="top-row">
+        <div class="kpi"><div class="kpi-val" id="kpi-total">0</div><div class="kpi-lbl">Produkte</div><div class="kpi-sub">im Kühlschrank</div></div>
+        <div class="kpi"><div class="kpi-val" id="kpi-warn" style="color:var(--orange)">0</div><div class="kpi-lbl">Bald ablaufend</div><div class="kpi-sub">in 3 Tagen</div></div>
+        <div class="kpi" id="kpi-exp-card"><div class="kpi-val" id="kpi-exp" style="color:var(--red)">0</div><div class="kpi-lbl">Abgelaufen</div><div class="kpi-sub">bitte entfernen</div></div>
+        <div class="kpi"><div class="kpi-val" style="color:var(--blue)">4</div><div class="kpi-lbl">Zonen aktiv</div><div class="kpi-sub">alle online</div></div>
+      </div>
+      <div class="zones-grid" id="zones-grid"></div>
+      <div class="list-header">
+        <div class="list-title">Produkte</div>
+        <button class="btn-add-sm" id="btn-open-modal-dash">+ Hinzufügen</button>
+      </div>
+      <div class="filters">
+        <button class="chip on" id="chip-dash-all">Alle</button>
+        <button class="chip" id="chip-dash-urgent">Dringend</button>
+        <button class="chip" id="chip-dash-ok">Frisch</button>
+      </div>
+      <div class="items" id="items-dash"></div>
+    </div>
+  </div>
+
+  <!-- PRODUCTS -->
+  <div class="page" id="page-products">
+    <div class="wrap">
+      <div class="list-header">
+        <div class="list-title">Alle Produkte</div>
+        <button class="btn-add-sm" id="btn-open-modal-prod">+ Hinzufügen</button>
+      </div>
+      <div class="filters">
+        <button class="chip on" id="chip-prod-all">Alle</button>
+        <button class="chip" id="chip-prod-urgent">Dringend</button>
+        <button class="chip" id="chip-prod-ok">Frisch</button>
+        <button class="chip" id="chip-prod-kalt">❄️ Kalt</button>
+        <button class="chip" id="chip-prod-frisch">🌿 Frisch</button>
+      </div>
+      <div class="items" id="items-prod"></div>
+    </div>
+  </div>
+
+  <!-- ALERTS -->
+  <div class="page" id="page-alerts">
+    <div class="wrap">
+      <div class="list-header" style="margin-bottom:14px">
+        <div class="list-title">Warnungen</div>
+        <button class="btn-add-sm" style="background:var(--g2);color:var(--black)" id="btn-clear-alerts">Löschen</button>
+      </div>
+      <div class="alerts-list" id="alerts-list"></div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="page-settings">
+    <div class="wrap">
+      <div class="settings-section">
+        <div class="settings-title">Konto</div>
+        <div class="setting-row">
+          <div><div class="setting-label">Angemeldet als</div><div class="setting-sub" id="settings-email">–</div></div>
+          <button class="logout-btn" id="settings-logout">Abmelden</button>
+        </div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Kühlzonen – Zieltemperatur</div>
+        <div id="zone-settings"></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Benachrichtigungen</div>
+        <div class="setting-row"><div><div class="setting-label">Ablauf-Warnung</div><div class="setting-sub">3 Tage vor Ablauf</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+        <div class="setting-row"><div><div class="setting-label">Temperatur-Alarm</div><div class="setting-sub">Bei Abweichung > 2°C</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Gerät</div>
+        <div class="setting-row"><div><div class="setting-label">FreshVault Core v1</div><div class="setting-sub">Verbunden · Firmware 2.1.4</div></div><span style="font-size:12px;color:var(--green);font-weight:600">● Online</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="bnav-btn on" id="bn-dashboard"><span class="bnav-icon">🏠</span>Home</button>
+    <button class="bnav-btn" id="bn-products"><span class="bnav-icon">📦</span>Produkte</button>
+    <button class="bnav-btn" id="bn-add"><span class="bnav-icon">➕</span>Neu</button>
+    <button class="bnav-btn" id="bn-alerts"><span class="bnav-icon">🔔</span>Warnungen</button>
+    <button class="bnav-btn" id="bn-settings"><span class="bnav-icon">⚙️</span>Einstellungen</button>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="sheet-title" id="modal-title">Produkt hinzufügen</div>
+        <span class="sheet-edit-badge" id="edit-badge">Bearbeiten</span>
+      </div>
+      <button class="sheet-close" id="btn-close-modal">✕</button>
+    </div>
+    <button class="btn-scan" id="btn-scan">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg>
+      Barcode scannen
+    </button>
+    <div id="scanner-wrap">
+      <video id="scanner-video" autoplay playsinline muted></video>
+      <div class="scan-frame"><div class="scan-bar"></div></div>
+      <div class="scan-label" id="scan-status">Barcode in den Rahmen halten</div>
+      <button id="scan-close">✕</button>
+    </div>
+    <div class="lookup" id="lookup">
+      <div class="spin" id="spin"></div>
+      <span id="lookup-text">Suche läuft…</span>
+    </div>
+    <div class="field">
+      <label>Name</label>
+      <div class="autocomplete-wrap">
+        <input id="f-name" type="text" placeholder="z.B. Tomaten, Joghurt …" autocomplete="off">
+        <div class="autocomplete-dropdown" id="ac-dropdown"></div>
+      </div>
+    </div>
+    <div class="field"><label>Kategorie</label>
+      <select id="f-cat">
+        <option>🥬 Gemüse</option><option>🍎 Obst</option>
+        <option>🥛 Milchprodukte</option><option>🥩 Fleisch</option>
+        <option>🧀 Käse</option><option>🍳 Sonstiges</option>
+      </select>
+    </div>
+    <div class="field"><label>Zone</label>
+      <select id="f-zone">
+        <option value="kalt">❄️ Kaltzone</option>
+        <option value="frisch">🌿 Frischzone</option>
+        <option value="trocken">🌾 Trockenzone</option>
+        <option value="feucht">💧 Feuchtigkeitszone</option>
+      </select>
+    </div>
+    <div class="field"><label>Ablaufdatum</label><input id="f-date" type="date"></div>
+    <button class="btn-confirm" id="btn-confirm">Hinzufügen</button>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   ALLES IN EINEM SCRIPT – kein Timing-Problem
+═══════════════════════════════════════════════════ */
+
+// ── LOCAL STORAGE AUTH & DATA ──────────────────────
+const DB_USERS = 'fv_users';
+const DB_ITEMS = 'fv_items';
+let currentUser = null;
+let editingId   = null;
+let alerts      = [];
+let filterDash  = 'all';
+let filterProd  = 'all';
+let codeReader  = null;
+let scanning    = false;
+let acIndex     = -1;
+
+function getUsers(){ try{ return JSON.parse(localStorage.getItem(DB_USERS)||'{}'); }catch(e){ return {}; } }
+function saveUsers(u){ localStorage.setItem(DB_USERS, JSON.stringify(u)); }
+function getItems(){ try{ return JSON.parse(localStorage.getItem(DB_ITEMS)||'[]'); }catch(e){ return []; } }
+function saveItems(arr){ localStorage.setItem(DB_ITEMS, JSON.stringify(arr)); }
+function uid(){ return Math.random().toString(36).slice(2)+Date.now().toString(36); }
+
+function myItems(){
+  if(!currentUser) return [];
+  return getItems().filter(i => i.uid === currentUser.uid);
+}
+
+function addItemToStorage(item){
+  const arr = getItems();
+  arr.push({ ...item, id: uid(), uid: currentUser.uid, createdAt: Date.now() });
+  saveItems(arr);
+}
+
+function updateItemInStorage(id, data){
+  const arr = getItems();
+  const idx = arr.findIndex(i => i.id === id);
+  if(idx !== -1){ Object.assign(arr[idx], data); saveItems(arr); }
+}
+
+function deleteItemFromStorage(id){
+  saveItems(getItems().filter(i => i.id !== id));
+}
+
+// ── ZONES & HELPERS ────────────────────────────────
+const ZONES = {
+  kalt:    {name:"Kaltzone",          icon:"❄️",  color:"cold",    temp:-2, humid:70,  desc:"Fleisch & Fisch"},
+  frisch:  {name:"Frischzone",        icon:"🌿",  color:"fresh",   temp:4,  humid:85,  desc:"Gemüse & Obst"},
+  trocken: {name:"Trockenzone",       icon:"🌾",  color:"dry",     temp:6,  humid:55,  desc:"Käse & Wurst"},
+  feucht:  {name:"Feuchtigkeitszone", icon:"💧", color:"crisper", temp:3,  humid:95,  desc:"Kräuter & Salat"},
+};
+
+const FOOD_LIST = [
+  {name:"Tomaten",cat:"🥬 Gemüse",zone:"frisch"},{name:"Paprika",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Gurke",cat:"🥬 Gemüse",zone:"frisch"},{name:"Karotten",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Spinat",cat:"🥬 Gemüse",zone:"feucht"},{name:"Salat",cat:"🥬 Gemüse",zone:"feucht"},
+  {name:"Brokkoli",cat:"🥬 Gemüse",zone:"frisch"},{name:"Zucchini",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Zwiebeln",cat:"🥬 Gemüse",zone:"trocken"},{name:"Knoblauch",cat:"🥬 Gemüse",zone:"trocken"},
+  {name:"Äpfel",cat:"🍎 Obst",zone:"frisch"},{name:"Bananen",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Erdbeeren",cat:"🍎 Obst",zone:"frisch"},{name:"Trauben",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Orangen",cat:"🍎 Obst",zone:"frisch"},{name:"Zitronen",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Milch",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Joghurt",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Butter",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Sahne",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Quark",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Frischkäse",cat:"🧀 Käse",zone:"trocken"},
+  {name:"Gouda",cat:"🧀 Käse",zone:"trocken"},{name:"Mozzarella",cat:"🧀 Käse",zone:"kalt"},
+  {name:"Hähnchenbrust",cat:"🥩 Fleisch",zone:"kalt"},{name:"Hackfleisch",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Lachs",cat:"🥩 Fleisch",zone:"kalt"},{name:"Salami",cat:"🥩 Fleisch",zone:"trocken"},
+  {name:"Schinken",cat:"🥩 Fleisch",zone:"trocken"},{name:"Eier",cat:"🍳 Sonstiges",zone:"kalt"},
+  {name:"Petersilie",cat:"🥬 Gemüse",zone:"feucht"},{name:"Basilikum",cat:"🥬 Gemüse",zone:"feucht"},
+];
+
+function off(d){ const t=new Date(); t.setDate(t.getDate()+d); return t.toISOString().split("T")[0]; }
+function dl(e){ return Math.round((new Date(e)-new Date(new Date().toDateString()))/86400000); }
+function state(d){ return d<=0?"gone":d<=2?"urgent":d<=4?"soon":"ok"; }
+function tagTxt(d){ return d<=0?"Abgelaufen":d===1?"Heute!":d<=3?"Bald":"Noch "+d+"d"; }
+
+// ── AUTH ───────────────────────────────────────────
+function friendlyErr(code){
+  return ({
+    'auth/invalid-email':        'Ungültige E-Mail-Adresse.',
+    'auth/user-not-found':       'Kein Konto mit dieser E-Mail.',
+    'auth/wrong-password':       'Falsches Passwort.',
+    'auth/email-already-in-use': 'E-Mail bereits registriert.',
+    'auth/weak-password':        'Passwort mind. 6 Zeichen.',
+  })[code] || code;
+}
+
+function showApp(user){
+  currentUser = user;
+  sessionStorage.setItem('fv_session', JSON.stringify(user));
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display  = 'block';
+  document.getElementById('user-email').textContent     = user.email;
+  document.getElementById('settings-email').textContent = user.email;
+  renderAll();
+}
+
+function doLogout(){
+  currentUser = null;
+  sessionStorage.removeItem('fv_session');
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app-screen').style.display  = 'none';
+  document.getElementById('btn-auth').textContent = 'Anmelden';
+  document.getElementById('a-email').value = '';
+  document.getElementById('a-pass').value  = '';
+}
+
+function doAuth(){
+  const email = document.getElementById('a-email').value.trim();
+  const pass  = document.getElementById('a-pass').value;
+  const errEl = document.getElementById('auth-error');
+  errEl.textContent = '';
+
+  if(!email || !pass){ errEl.textContent = 'Bitte E-Mail und Passwort eingeben.'; return; }
+  if(!/\S+@\S+\.\S+/.test(email)){ errEl.textContent = friendlyErr('auth/invalid-email'); return; }
+
+  const isLogin = document.getElementById('tab-login').classList.contains('on');
+  const users   = getUsers();
+
+  if(isLogin){
+    const u = users[email];
+    if(!u){ errEl.textContent = friendlyErr('auth/user-not-found'); return; }
+    if(u.pass !== pass){ errEl.textContent = friendlyErr('auth/wrong-password'); return; }
+    showApp({ uid: u.uid, email });
+  } else {
+    if(pass.length < 6){ errEl.textContent = friendlyErr('auth/weak-password'); return; }
+    if(users[email]){ errEl.textContent = friendlyErr('auth/email-already-in-use'); return; }
+    const id = uid();
+    users[email] = { uid: id, pass };
+    saveUsers(users);
+    showApp({ uid: id, email });
+  }
+}
+
+function switchTab(tab){
+  const isLogin = tab === 'login';
+  document.getElementById('tab-login').classList.toggle('on', isLogin);
+  document.getElementById('tab-register').classList.toggle('on', !isLogin);
+  document.getElementById('auth-title').textContent = isLogin ? 'Willkommen zurück' : 'Konto erstellen';
+  document.getElementById('auth-sub').textContent   = isLogin ? 'Meld dich an um deinen Kühlschrank zu verwalten.' : 'Registriere dich kostenlos.';
+  document.getElementById('btn-auth').textContent   = isLogin ? 'Anmelden' : 'Konto erstellen';
+  document.getElementById('auth-error').textContent = '';
+}
+
+// ── NAVIGATION ─────────────────────────────────────
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  const navBtn = document.getElementById('nav-'+id);
+  if(navBtn) navBtn.classList.add('on');
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('on'));
+  const bnBtn = document.getElementById('bn-'+id);
+  if(bnBtn) bnBtn.classList.add('on');
+}
+
+// ── MODAL ──────────────────────────────────────────
+function openModal(){
+  editingId = null;
+  document.getElementById('f-name').value   = '';
+  document.getElementById('f-cat').value    = '🥬 Gemüse';
+  document.getElementById('f-zone').value   = 'frisch';
+  document.getElementById('f-date').value   = off(4);
+  document.getElementById('modal-title').textContent = 'Produkt hinzufügen';
+  document.getElementById('edit-badge').classList.remove('show');
+  document.getElementById('btn-confirm').textContent = 'Hinzufügen';
+  document.getElementById('btn-scan').style.display = '';
+  acClose();
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-name').focus(), 350);
+}
+
+function openEditModal(id){
+  const item = myItems().find(i => i.id === id);
+  if(!item) return;
+  editingId = id;
+  document.getElementById('f-name').value   = item.name;
+  document.getElementById('f-cat').value    = item.cat;
+  document.getElementById('f-zone').value   = item.zone;
+  document.getElementById('f-date').value   = item.expiry;
+  document.getElementById('modal-title').textContent = 'Produkt bearbeiten';
+  document.getElementById('edit-badge').classList.add('show');
+  document.getElementById('btn-confirm').textContent = 'Speichern';
+  document.getElementById('btn-scan').style.display = 'none';
+  acClose();
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal(){
+  stopScanner();
+  document.getElementById('overlay').classList.remove('open');
+  acClose();
+  editingId = null;
+}
+
+function confirmItem(){
+  const name   = document.getElementById('f-name').value.trim();
+  const cat    = document.getElementById('f-cat').value;
+  const zone   = document.getElementById('f-zone').value;
+  const expiry = document.getElementById('f-date').value;
+
+  if(!name){
+    document.getElementById('f-name').style.borderColor = 'var(--red)';
+    document.getElementById('f-name').focus();
+    setTimeout(() => document.getElementById('f-name').style.borderColor = '', 1400);
+    return;
+  }
+  if(!expiry){
+    document.getElementById('f-date').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('f-date').style.borderColor = '', 1400);
+    return;
+  }
+
+  if(editingId){
+    updateItemInStorage(editingId, {name, cat, zone, expiry});
+  } else {
+    addItemToStorage({name, cat, zone, expiry});
+  }
+  closeModal();
+  renderAll();
+}
+
+function deleteItem(id){
+  deleteItemFromStorage(id);
+  renderAll();
+}
+
+// ── RENDER ─────────────────────────────────────────
+function renderAll(){
+  const items = myItems();
+  renderKPIs(items);
+  renderZones(items);
+  renderItems('items-dash', items, filterDash);
+  renderItems('items-prod', items, filterProd);
+  renderAlerts(items);
+  renderSettings();
+}
+
+function renderKPIs(items){
+  const exp  = items.filter(i => dl(i.expiry) <= 0).length;
+  const warn = items.filter(i => { const d=dl(i.expiry); return d>0&&d<=3; }).length;
+  document.getElementById('kpi-total').textContent = items.length;
+  document.getElementById('kpi-warn').textContent  = warn;
+  document.getElementById('kpi-exp').textContent   = exp;
+  document.getElementById('kpi-exp-card').classList.toggle('alert', exp > 0);
+  document.getElementById('notif-dot').style.display = (exp+warn > 0) ? 'block' : 'none';
+}
+
+function renderZones(items){
+  document.getElementById('zones-grid').innerHTML = Object.entries(ZONES).map(([key,z]) => {
+    const zItems = items.filter(i => i.zone === key);
+    const pills  = zItems.length
+      ? zItems.map(i => { const d=dl(i.expiry),s=state(d); return `<span class="zone-pill ${s==='gone'?'gone':s==='urgent'?'warn':''}">${i.cat.split(' ')[0]} ${i.name}</span>`; }).join('')
+      : '<span class="zone-empty">Leer</span>';
+    const tDisp = (z.temp+(Math.random()*.4-.2)).toFixed(1);
+    const hDisp = Math.round(z.humid+(Math.random()*4-2));
+    return `<div class="zone-card ${z.color}">
+      <div class="zone-header">
+        <div><div class="zone-name">${z.icon} ${z.name}</div><div style="font-size:10px;color:var(--muted);margin-top:1px">${z.desc}</div></div>
+        <span style="font-size:10px;font-weight:600;color:var(--green)">● Online</span>
+      </div>
+      <div class="zone-metrics">
+        <div class="metric"><div class="metric-val">${tDisp}°C</div><div class="metric-lbl">Temperatur</div></div>
+        <div class="metric"><div class="metric-val">${hDisp}%</div><div class="metric-lbl">Feuchtigkeit</div></div>
+      </div>
+      <div class="zone-items">${pills}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderItems(targetId, items, filter){
+  let list = [...items].sort((a,b) => dl(a.expiry)-dl(b.expiry));
+  if(filter === 'urgent')          list = list.filter(i => dl(i.expiry) <= 3);
+  else if(filter === 'ok')         list = list.filter(i => dl(i.expiry) > 3);
+  else if(filter.startsWith('zone-')) list = list.filter(i => i.zone === filter.replace('zone-',''));
+  const el = document.getElementById(targetId);
+  if(!list.length){ el.innerHTML = '<div class="empty">Noch keine Produkte – füge welche hinzu! 🌿</div>'; return; }
+  el.innerHTML = list.map(item => {
+    const d = dl(item.expiry), s = state(d);
+    const emoji   = item.cat.split(' ')[0];
+    const catName = item.cat.replace(/^\S+\s/,'');
+    const date    = new Date(item.expiry).toLocaleDateString('de-DE',{day:'2-digit',month:'short'});
+    const zone    = ZONES[item.zone];
+    return `<div class="card ${s}">
+      <div class="card-emoji">${emoji}</div>
+      <div class="card-body">
+        <div class="card-name">${item.name}</div>
+        <div class="card-sub">${catName} · ${zone?zone.icon+' '+zone.name:''} · ${date}</div>
+      </div>
+      <div class="tag ${s}">${tagTxt(d)}</div>
+      <button class="edit-btn" data-edit="${item.id}">✎</button>
+      <button class="del" data-del="${item.id}">✕</button>
+    </div>`;
+  }).join('');
+  // Bind delete and edit via event delegation
+  el.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', () => deleteItem(btn.dataset.del)));
+  el.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => openEditModal(btn.dataset.edit)));
+}
+
+function renderAlerts(items){
+  const el = document.getElementById('alerts-list');
+  const list = [];
+  items.filter(i => dl(i.expiry) <= 0).forEach(i => list.push({type:'crit',icon:'❌',title:i.name+' abgelaufen!',desc:'Bitte aus dem Kühlschrank entfernen.',time:'Jetzt'}));
+  items.filter(i => { const d=dl(i.expiry); return d>0&&d<=2; }).forEach(i => list.push({type:'warn',icon:'⚠️',title:i.name+' läuft bald ab!',desc:'Noch '+dl(i.expiry)+' Tag(e). Bald essen!',time:'Heute'}));
+  if(!list.length){ el.innerHTML = '<div class="no-alerts"><div class="no-alerts-icon">🔔</div><div>Keine Warnungen</div></div>'; return; }
+  el.innerHTML = list.map(a => `<div class="alert-card ${a.type}">
+    <div class="alert-icon">${a.icon}</div>
+    <div><div class="alert-title">${a.title}</div><div class="alert-desc">${a.desc}</div><div class="alert-time">${a.time}</div></div>
+  </div>`).join('');
+}
+
+function renderSettings(){
+  document.getElementById('zone-settings').innerHTML = Object.entries(ZONES).map(([key,z]) => `
+    <div class="setting-row">
+      <div><div class="setting-label">${z.icon} ${z.name}</div><div class="setting-sub">${z.desc}</div></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="range" class="temp-slider" min="-5" max="10" value="${z.temp}"
+          oninput="ZONES['${key}'].temp=parseFloat(this.value);this.nextElementSibling.textContent=parseFloat(this.value).toFixed(0)+'°C'">
+        <div class="zone-temp-val">${z.temp}°C</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── FILTER ─────────────────────────────────────────
+function setFilter(page, filter, activeBtn){
+  if(page === 'd'){ filterDash = filter; }
+  else            { filterProd = filter; }
+  const group = activeBtn.closest('.filters');
+  group.querySelectorAll('.chip').forEach(c => c.classList.remove('on'));
+  activeBtn.classList.add('on');
+  renderItems(page === 'd' ? 'items-dash' : 'items-prod', myItems(), filter);
+}
+
+// ── AUTOCOMPLETE ───────────────────────────────────
+function acInput(val){
+  acIndex = -1;
+  const drop = document.getElementById('ac-dropdown');
+  if(!val){ acClose(); return; }
+  const q = val.toLowerCase();
+  const matches = FOOD_LIST.filter(f => f.name.toLowerCase().startsWith(q)).slice(0,6);
+  if(!matches.length){ acClose(); return; }
+  drop.innerHTML = matches.map((f,i) => `
+    <div class="ac-item" data-idx="${i}">
+      <span class="ac-item-name">${f.name}</span>
+      <span class="ac-item-meta">${f.cat} · ${ZONES[f.zone]?.icon||''} ${ZONES[f.zone]?.name||''}</span>
+    </div>`).join('');
+  drop.querySelectorAll('.ac-item').forEach((el,i) => {
+    el.addEventListener('mousedown', e => { e.preventDefault(); acApply(matches[i]); });
+    el.addEventListener('touchend',  e => { e.preventDefault(); acApply(matches[i]); });
+  });
+  drop.classList.add('open');
+  drop._matches = matches;
+}
+
+function acKey(e){
+  const drop = document.getElementById('ac-dropdown');
+  const items = drop.querySelectorAll('.ac-item');
+  if(!drop.classList.contains('open')) return;
+  if(e.key==='ArrowDown'){ e.preventDefault(); acIndex=Math.min(acIndex+1,items.length-1); items.forEach((it,i)=>it.classList.toggle('focused',i===acIndex)); }
+  else if(e.key==='ArrowUp'){ e.preventDefault(); acIndex=Math.max(acIndex-1,-1); items.forEach((it,i)=>it.classList.toggle('focused',i===acIndex)); }
+  else if(e.key==='Enter'&&acIndex>=0){ e.preventDefault(); acApply(drop._matches[acIndex]); }
+  else if(e.key==='Escape'){ acClose(); }
+}
+
+function acApply(f){
+  document.getElementById('f-name').value = f.name;
+  document.getElementById('f-cat').value  = f.cat;
+  document.getElementById('f-zone').value = f.zone;
+  acClose();
+}
+
+function acClose(){
+  const drop = document.getElementById('ac-dropdown');
+  if(drop){ drop.classList.remove('open'); drop.innerHTML = ''; }
+  acIndex = -1;
+}
+
+// ── SCANNER ────────────────────────────────────────
+async function toggleScanner(){
+  if(scanning){ stopScanner(); return; }
+  document.getElementById('scanner-wrap').classList.add('active');
+  document.getElementById('btn-scan').textContent = '⏹ Scanner stoppen';
+  document.getElementById('scan-status').textContent = 'Barcode in den Rahmen halten';
+  scanning = true;
+  try{
+    if(typeof ZXing === 'undefined') throw new Error('ZXing nicht geladen');
+    codeReader = new ZXing.BrowserMultiFormatReader();
+    const devs = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
+    const id   = devs.find(d=>/back|rear|environment/i.test(d.label))?.deviceId || devs[0]?.deviceId;
+    await codeReader.decodeFromVideoDevice(id,'scanner-video', async(res) => {
+      if(res){ document.getElementById('scan-status').textContent = '✓ '+res.getText(); stopScanner(); await lookupBarcode(res.getText()); }
+    });
+  }catch(e){ document.getElementById('scan-status').textContent = 'Kamera nicht verfügbar'; }
+}
+
+function stopScanner(){
+  if(codeReader){ try{ codeReader.reset(); }catch(e){} codeReader = null; }
+  scanning = false;
+  document.getElementById('scanner-wrap').classList.remove('active');
+  document.getElementById('btn-scan').innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg> Barcode scannen`;
+}
+
+function guesscat(p){
+  const s = ((p.categories_tags||[]).join(' ')+' '+(p.product_name||'')).toLowerCase();
+  if(/milk|milch|dairy|yogurt|joghurt|butter|cream|sahne/.test(s)) return '🥛 Milchprodukte';
+  if(/meat|fleisch|chicken|beef|pork|wurst|sausage|ham/.test(s))   return '🥩 Fleisch';
+  if(/vegetable|gemüse|spinach|pepper|paprika|carrot|tomate/.test(s)) return '🥬 Gemüse';
+  if(/fruit|obst|apple|apfel|banana|orange|berry/.test(s))          return '🍎 Obst';
+  if(/cheese|käse/.test(s))                                          return '🧀 Käse';
+  return '🍳 Sonstiges';
+}
+
+async function lookupBarcode(barcode){
+  const lk = document.getElementById('lookup');
+  lk.classList.add('show');
+  document.getElementById('lookup-text').textContent = 'Produkt wird gesucht…';
+  document.getElementById('spin').style.display = 'block';
+  try{
+    const r = await fetch('https://world.openfoodfacts.org/api/v0/product/'+barcode+'.json');
+    const d = await r.json();
+    if(d.status===1&&d.product){
+      const name = d.product.product_name_de||d.product.product_name||'';
+      if(name){ document.getElementById('f-name').value=name; document.getElementById('f-cat').value=guesscat(d.product); document.getElementById('lookup-text').textContent='✓ Gefunden: '+name; document.getElementById('spin').style.display='none'; setTimeout(()=>lk.classList.remove('show'),2500); }
+      else{ document.getElementById('lookup-text').textContent='Kein Name – bitte manuell eingeben.'; document.getElementById('spin').style.display='none'; setTimeout(()=>lk.classList.remove('show'),2500); }
+    } else { document.getElementById('lookup-text').textContent='Nicht gefunden.'; document.getElementById('spin').style.display='none'; setTimeout(()=>lk.classList.remove('show'),2500); }
+  }catch(e){ document.getElementById('lookup-text').textContent='Offline – bitte manuell eingeben.'; document.getElementById('spin').style.display='none'; setTimeout(()=>lk.classList.remove('show'),2500); }
+}
+
+// ── SWIPE TO CLOSE ─────────────────────────────────
+(function(){
+  let startY=0, dragging=false;
+  const handle = () => document.querySelector('.sheet-handle');
+  document.addEventListener('touchstart', e=>{
+    if(handle()&&handle().contains(e.target)){ startY=e.touches[0].clientY; dragging=true; }
+  },{passive:true});
+  document.addEventListener('touchmove', e=>{
+    if(!dragging) return;
+    const dy=e.touches[0].clientY-startY;
+    if(dy>0){ const s=document.getElementById('sheet'); if(s) s.style.transform=`translateY(${dy}px)`; }
+  },{passive:true});
+  document.addEventListener('touchend', e=>{
+    if(!dragging) return; dragging=false;
+    const dy=e.changedTouches[0].clientY-startY;
+    const s=document.getElementById('sheet'); if(s) s.style.transform='';
+    if(dy>80) closeModal();
+  });
+})();
+
+// ── WIRE UP ALL EVENT LISTENERS ────────────────────
+document.addEventListener('DOMContentLoaded', function(){
+
+  // Auth
+  document.getElementById('btn-auth').addEventListener('click', doAuth);
+  document.getElementById('a-pass').addEventListener('keydown', e => { if(e.key==='Enter') doAuth(); });
+  document.getElementById('tab-login').addEventListener('click', () => switchTab('login'));
+  document.getElementById('tab-register').addEventListener('click', () => switchTab('register'));
+
+  // Logout
+  document.getElementById('nav-logout').addEventListener('click', doLogout);
+  document.getElementById('settings-logout').addEventListener('click', doLogout);
+
+  // Nav tabs
+  document.getElementById('nav-dashboard').addEventListener('click', () => showPage('dashboard'));
+  document.getElementById('nav-products').addEventListener('click',  () => showPage('products'));
+  document.getElementById('nav-alerts').addEventListener('click',    () => showPage('alerts'));
+  document.getElementById('nav-settings').addEventListener('click',  () => showPage('settings'));
+  document.getElementById('nav-notif').addEventListener('click',     () => showPage('alerts'));
+
+  // Bottom nav
+  document.getElementById('bn-dashboard').addEventListener('click', () => showPage('dashboard'));
+  document.getElementById('bn-products').addEventListener('click',  () => showPage('products'));
+  document.getElementById('bn-add').addEventListener('click',       openModal);
+  document.getElementById('bn-alerts').addEventListener('click',    () => showPage('alerts'));
+  document.getElementById('bn-settings').addEventListener('click',  () => showPage('settings'));
+
+  // Add buttons
+  document.getElementById('btn-open-modal-dash').addEventListener('click', openModal);
+  document.getElementById('btn-open-modal-prod').addEventListener('click', openModal);
+
+  // Modal
+  document.getElementById('btn-close-modal').addEventListener('click', closeModal);
+  document.getElementById('btn-confirm').addEventListener('click', confirmItem);
+  document.getElementById('overlay').addEventListener('click', e => { if(e.target===document.getElementById('overlay')) closeModal(); });
+
+  // Scanner
+  document.getElementById('btn-scan').addEventListener('click', toggleScanner);
+  document.getElementById('scan-close').addEventListener('click', stopScanner);
+
+  // Autocomplete
+  document.getElementById('f-name').addEventListener('input',   e => acInput(e.target.value));
+  document.getElementById('f-name').addEventListener('keydown', acKey);
+  document.addEventListener('click', e => { if(!e.target.closest('.autocomplete-wrap')) acClose(); });
+
+  // Filters dashboard
+  document.getElementById('chip-dash-all').addEventListener('click',    e => setFilter('d','all',e.target));
+  document.getElementById('chip-dash-urgent').addEventListener('click', e => setFilter('d','urgent',e.target));
+  document.getElementById('chip-dash-ok').addEventListener('click',     e => setFilter('d','ok',e.target));
+
+  // Filters products
+  document.getElementById('chip-prod-all').addEventListener('click',    e => setFilter('p','all',e.target));
+  document.getElementById('chip-prod-urgent').addEventListener('click', e => setFilter('p','urgent',e.target));
+  document.getElementById('chip-prod-ok').addEventListener('click',     e => setFilter('p','ok',e.target));
+  document.getElementById('chip-prod-kalt').addEventListener('click',   e => setFilter('p','zone-kalt',e.target));
+  document.getElementById('chip-prod-frisch').addEventListener('click', e => setFilter('p','zone-frisch',e.target));
+
+  // Clear alerts
+  document.getElementById('btn-clear-alerts').addEventListener('click', () => {
+    document.getElementById('alerts-list').innerHTML = '<div class="no-alerts"><div class="no-alerts-icon">🔔</div><div>Keine Warnungen</div></div>';
+  });
+
+  // Restore session
+  try{
+    const saved = sessionStorage.getItem('fv_session');
+    if(saved){ const u=JSON.parse(saved); if(u&&u.uid&&u.email) showApp(u); }
+  }catch(e){}
+
+  // Zone temp refresh
+  setInterval(() => { if(currentUser) renderZones(myItems()); }, 8000);
+});
+</script>
+</body>
+</html>
