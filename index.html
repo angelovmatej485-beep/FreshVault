@@ -950,13 +950,131 @@ function renderFridge(items){
       <div class="fridge-items">
         ${byZone[key].length ? byZone[key].map(i=>{
           const d=dl(i.expiry),s=state(d);
-          return `<span class="fridge-item ${s}" title="${fmt(i.expiry)}">${i.cat.split(' ')[0]} ${i.name}</span>`;
+          return `<span class="fridge-item ${s}" title="${fmt(i.expiry)}">${getEmoji(i.name)} ${i.name}</span>`;
         }).join('') : '<span style="font-size:11px;color:var(--muted)">Leer</span>'}
       </div>
     </div>`).join('');
 }
 
 // ── ITEMS ──────────────────────────────────────
+// ── PRODUKT EMOJI MAP ──────────────────────────
+function getEmoji(name){
+  const n=name.toLowerCase();
+  // Gemüse
+  if(/tomate|kirschtomate|straucht|fleischt|cocktail/.test(n)) return '🍅';
+  if(/paprika/.test(n)) return '🫑';
+  if(/gurke/.test(n)) return '🥒';
+  if(/zucchini/.test(n)) return '🥬';
+  if(/karotte|möhre|baby/.test(n)) return '🥕';
+  if(/brokkoli|brokk/.test(n)) return '🥦';
+  if(/blumenkohl|romanesco/.test(n)) return '🥦';
+  if(/spinat|babyspin/.test(n)) return '🥬';
+  if(/salat|eisberg|rucola|feldsalat|lollo|romana|endivie|radicchio/.test(n)) return '🥗';
+  if(/zwiebel|schalotte/.test(n)) return '🧅';
+  if(/knoblauch/.test(n)) return '🧄';
+  if(/lauch|staudensell/.test(n)) return '🌿';
+  if(/sellerie/.test(n)) return '🌿';
+  if(/kohlrabi|rotkohl|weißkohl|wirsing|grünkohl/.test(n)) return '🥬';
+  if(/spargel/.test(n)) return '🌿';
+  if(/champignon|pfifferling|shiitake/.test(n)) return '🍄';
+  if(/aubergine/.test(n)) return '🍆';
+  if(/kartoffel|drillinge|süßkart/.test(n)) return '🥔';
+  if(/petersilie|basilikum|schnittlauch|dill|minze|thymian|rosmarin/.test(n)) return '🌿';
+  if(/ingwer/.test(n)) return '🫚';
+  if(/chili/.test(n)) return '🌶️';
+  if(/mais/.test(n)) return '🌽';
+  if(/erbsen/.test(n)) return '🟢';
+  if(/bohnen/.test(n)) return '🫘';
+  if(/rote bete/.test(n)) return '🫀';
+  // Obst
+  if(/apfel|äpfel/.test(n)) return '🍎';
+  if(/birne/.test(n)) return '🍐';
+  if(/banane/.test(n)) return '🍌';
+  if(/erdbeere/.test(n)) return '🍓';
+  if(/heidelbeere|blaubeere/.test(n)) return '🫐';
+  if(/himbeere/.test(n)) return '🍒';
+  if(/brombeere/.test(n)) return '🍇';
+  if(/traube|weintraube/.test(n)) return '🍇';
+  if(/orange|blutorange/.test(n)) return '🍊';
+  if(/zitrone/.test(n)) return '🍋';
+  if(/limette/.test(n)) return '🍋';
+  if(/mandarine|clementine/.test(n)) return '🍊';
+  if(/grapefruit/.test(n)) return '🍊';
+  if(/kiwi/.test(n)) return '🥝';
+  if(/mango/.test(n)) return '🥭';
+  if(/ananas/.test(n)) return '🍍';
+  if(/melone|wassermelone/.test(n)) return '🍈';
+  if(/pfirsich|nektarine/.test(n)) return '🍑';
+  if(/pflaume|zwetschge/.test(n)) return '🍑';
+  if(/kirsche/.test(n)) return '🍒';
+  if(/avocado/.test(n)) return '🥑';
+  // Milchprodukte
+  if(/milch/.test(n)) return '🥛';
+  if(/joghurt|skyr/.test(n)) return '🫙';
+  if(/butter|margarine/.test(n)) return '🧈';
+  if(/sahne|schlag|crème|schmand|saure/.test(n)) return '🫙';
+  if(/quark/.test(n)) return '🫙';
+  if(/kefir|buttermilch/.test(n)) return '🥛';
+  if(/pudding|milchreis/.test(n)) return '🍮';
+  // Käse
+  if(/mozzarella|büffel/.test(n)) return '🧀';
+  if(/gouda|edamer|emmentaler|parmesan|tilsiter|bergkäse|gruyère|allgäuer|harzer/.test(n)) return '🧀';
+  if(/frischkäse|camembert|brie|feta|ricotta|mascarpone|hüttenk|scheiblett|schmelz/.test(n)) return '🧀';
+  // Fleisch
+  if(/hähnchen|hähnchenb|hähnchenf|hähnchens|hähnchenauf/.test(n)) return '🍗';
+  if(/hackfleisch|rinderhack|schweinehack/.test(n)) return '🥩';
+  if(/schweine|schnitzel|braten|filet/.test(n)) return '🥩';
+  if(/rind|steak|gulasch/.test(n)) return '🥩';
+  if(/pute/.test(n)) return '🍗';
+  if(/lamm/.test(n)) return '🥩';
+  if(/lachs|lachsf|räucherlachs/.test(n)) return '🐟';
+  if(/forelle/.test(n)) return '🐟';
+  if(/thunfisch/.test(n)) return '🐟';
+  if(/garnele/.test(n)) return '🦐';
+  // Wurst
+  if(/lyoner|fleischwurst|mortadella|bierschinken|jagdwurst|gelbwurst/.test(n)) return '🌭';
+  if(/weißwurst|bratwurst|wiener|frankfurter|bockwurst|nürnberger/.test(n)) return '🌭';
+  if(/salami|pepperoni|chorizo/.test(n)) return '🍕';
+  if(/schinken|prosciutto|serrano|parmasch|schwarzwälder/.test(n)) return '🥓';
+  if(/bacon|speck/.test(n)) return '🥓';
+  if(/leberwurst|teewurst|mettwurst|blutwurst|sülze/.test(n)) return '🌭';
+  if(/roastbeef|truthahn|hähnchenauf/.test(n)) return '🍖';
+  // Getränke
+  if(/cola|coca|pepsi/.test(n)) return '🥤';
+  if(/fanta|sprite|mezzo|schweppes|bionade|fritz|club mate/.test(n)) return '🥤';
+  if(/red bull|monster/.test(n)) return '⚡';
+  if(/eistee|lipton/.test(n)) return '🍵';
+  if(/orangensaft|apfelsaft|multivitamin|traubensaft|tomatensaft/.test(n)) return '🧃';
+  if(/smoothie/.test(n)) return '🥤';
+  if(/bier|weizen|pils|radler/.test(n)) return '🍺';
+  if(/weißwein|rotwein|rosé|sekt|prosecco/.test(n)) return '🍷';
+  if(/mineralwasser|sprudel/.test(n)) return '💧';
+  if(/capri|biond/.test(n)) return '🧃';
+  // Eis
+  if(/vanilleeis|schokoladeneis|erdbeereis|himbeereis|mangoeis|zitroneneis|pistazieneis|nusseis|cookies/.test(n)) return '🍨';
+  if(/magnum|cornetto|solero|calippo|twister|häagen|ben &|eis am|wassereis|frozen|sorbet|eiscreme/.test(n)) return '🍦';
+  // Soßen
+  if(/ketchup/.test(n)) return '🍅';
+  if(/mayo|mayonnaise/.test(n)) return '🫙';
+  if(/senf/.test(n)) return '🟡';
+  if(/maggi|worcestershire|soja|teriyaki|sriracha|tabasco|bbq|chili sauce|knoblauchsauce/.test(n)) return '🫙';
+  if(/cocktailsauce|remoulade|tartar|hollandaise|béarnaise/.test(n)) return '🫙';
+  if(/dressing|caesar|balsamico|ranch|salatdressing|honig senf|aioli/.test(n)) return '🫙';
+  if(/guacamole/.test(n)) return '🥑';
+  if(/salsa/.test(n)) return '🍅';
+  if(/pesto/.test(n)) return '🌿';
+  if(/tomatenmark|currypaste/.test(n)) return '🫙';
+  // Sonstiges
+  if(/ei |eier|6er|10er/.test(n)) return '🥚';
+  if(/tofu/.test(n)) return '🫙';
+  if(/hummus/.test(n)) return '🫙';
+  if(/tzatziki/.test(n)) return '🫙';
+  if(/pizza/.test(n)) return '🍕';
+  if(/lasagne/.test(n)) return '🍝';
+  // Fallback nach Kategorie
+  return '🛒';
+}
+
 function renderItems(targetId, items, filter){
   let list=[...items].sort((a,b)=>dl(a.expiry)-dl(b.expiry));
   if(filter==='urgent')          list=list.filter(i=>dl(i.expiry)<=3);
@@ -966,7 +1084,7 @@ function renderItems(targetId, items, filter){
   if(!list.length){el.innerHTML='<div class="empty">Noch keine Produkte – füge welche hinzu! 🌿</div>';return;}
   el.innerHTML=list.map(item=>{
     const d=dl(item.expiry),s=state(d);
-    const emoji=item.cat.split(' ')[0];
+    const emoji=getEmoji(item.name);
     const catName=item.cat.replace(/^\S+\s/,'');
     const zone=ZONES[item.zone];
     const price=(PRICES[item.cat]||2).toFixed(2);
@@ -1077,7 +1195,7 @@ function renderShopping(){
     <div class="shop-item">
       <div class="shop-check ${item.done?'done':''}" data-check="${item.id}">${item.done?'✓':''}</div>
       <div style="flex:1">
-        <div class="shop-name ${item.done?'done':''}">${item.cat?item.cat.split(' ')[0]+' ':''} ${item.name}</div>
+        <div class="shop-name ${item.done?'done':''}">${getEmoji(item.name)} ${item.name}</div>
         ${item.auto?'<div class="shop-cat" style="color:var(--orange)">⚠️ Abgelaufen – neu kaufen</div>':''}
       </div>
       <button data-del-shop="${item.id}" style="background:none;border:none;color:var(--g3);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
@@ -1192,12 +1310,18 @@ function closeModal(){
 }
 
 function confirmItem(){
+  // Wenn Multi-Feld Text hat aber noch nicht geparst wurde, jetzt parsen
+  const multiText=document.getElementById('f-multi').value.trim();
+  if(multiText && multiProducts.length===0){
+    multiProducts=parseProducts(multiText);
+  }
   if(multiProducts.length>0){
     const defaultDate=off(4);
     multiProducts.forEach(p=>addItemToStorage({name:p.name,cat:p.cat,zone:p.zone,expiry:defaultDate}));
     multiProducts=[];
     closeModal(); renderAll(); return;
   }
+  // Einzelprodukt
   const name=document.getElementById('f-name').value.trim();
   const cat=document.getElementById('f-cat').value;
   const zone=document.getElementById('f-zone').value;
@@ -1264,6 +1388,7 @@ function renderMultiPreview(products){
   if(!products.length){preview.style.display='none';return;}
   list.innerHTML=products.map((p,i)=>`
     <div style="background:var(--g1);border:1px solid ${p.found?'var(--g2)':'var(--orange)'};border-radius:10px;padding:9px 12px;display:flex;align-items:center;gap:10px">
+      <div style="font-size:20px">${getEmoji(p.name)}</div>
       <div style="flex:1"><div style="font-weight:600;font-size:13px">${p.name}</div><div style="font-size:11px;color:var(--muted);margin-top:2px">${p.cat} · ${ZONES[p.zone]?.icon||''} ${ZONES[p.zone]?.name||''}</div></div>
       <span style="font-size:12px;font-weight:700;color:${p.found?'var(--green)':'var(--orange)'}">${p.found?'✓':'?'}</span>
       <button onclick="removeMultiProduct(${i})" style="background:none;border:none;color:var(--g3);font-size:16px;cursor:pointer;padding:0 2px">✕</button>
@@ -1497,7 +1622,17 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('btn-scan').addEventListener('click',toggleVoice);
   document.getElementById('btn-stop-voice').addEventListener('click',stopVoice);
   document.getElementById('btn-parse').addEventListener('click',parseAndPreview);
-  document.getElementById('f-multi').addEventListener('keydown',e=>{if(e.key==='Enter')parseAndPreview();});
+
+  // Auto-Erkennung beim Tippen (mit kurzer Verzögerung)
+  let autoParseTimer=null;
+  document.getElementById('f-multi').addEventListener('input',e=>{
+    clearTimeout(autoParseTimer);
+    const val=e.target.value.trim();
+    if(!val){ multiProducts=[]; document.getElementById('multi-preview').style.display='none'; document.getElementById('btn-confirm').textContent='Hinzufügen'; return; }
+    autoParseTimer=setTimeout(()=>{ renderMultiPreview(parseProducts(val)); },400);
+  });
+  document.getElementById('f-multi').addEventListener('keydown',e=>{if(e.key==='Enter'){clearTimeout(autoParseTimer);parseAndPreview();}});
+
   document.getElementById('f-name').addEventListener('input',e=>acInput(e.target.value));
   document.getElementById('f-name').addEventListener('keydown',acKey);
   document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete-wrap'))acClose();});
