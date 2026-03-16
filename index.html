@@ -365,41 +365,58 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);position:sticky;to
       <button class="sheet-close" id="btn-close-modal">✕</button>
     </div>
     <button class="btn-scan" id="btn-scan">
-      🎙️ Produkt ansagen
+      🎙️ Produkte ansagen
     </button>
     <!-- Sprach-Status -->
     <div id="voice-status" style="display:none;align-items:center;gap:10px;background:var(--red-l);border:1px solid var(--red);border-radius:var(--rs);padding:12px 14px;margin-bottom:12px;font-size:13px;color:var(--red);font-weight:600">
-      <div id="voice-pulse" style="width:12px;height:12px;border-radius:50%;background:var(--red);animation:blink .8s ease infinite;flex-shrink:0"></div>
-      <span id="voice-text">Spreche…</span>
+      <div style="width:12px;height:12px;border-radius:50%;background:var(--red);animation:blink .8s ease infinite;flex-shrink:0"></div>
+      <span id="voice-text">Spreche jetzt…</span>
       <button id="btn-stop-voice" style="margin-left:auto;background:var(--red);color:white;border:none;border-radius:6px;padding:4px 10px;font-size:12px;font-family:inherit;cursor:pointer">Stop</button>
     </div>
-    <div class="lookup" id="lookup">
-      <div class="spin" id="spin"></div>
-      <span id="lookup-text">Suche läuft…</span>
-    </div>
+    <!-- Multi-Produkt Eingabe -->
     <div class="field">
-      <label>Name</label>
-      <div class="autocomplete-wrap">
-        <input id="f-name" type="text" placeholder="z.B. Tomaten, Joghurt …" autocomplete="off">
-        <div class="autocomplete-dropdown" id="ac-dropdown"></div>
+      <label>Produkte (mehrere mit Komma trennen)</label>
+      <div style="display:flex;gap:8px">
+        <input id="f-multi" type="text" placeholder="z.B. Tomaten, Lyoner, Vollmilch…" autocomplete="off" style="flex:1;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:13px;color:var(--text);font-size:16px;font-family:inherit;outline:none">
+        <button id="btn-parse" style="background:var(--black);color:white;border:none;border-radius:var(--rs);padding:13px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap">Erkennen</button>
       </div>
     </div>
-    <div class="field"><label>Kategorie</label>
-      <select id="f-cat">
-        <option>🥬 Gemüse</option><option>🍎 Obst</option>
-        <option>🥛 Milchprodukte</option><option>🥩 Fleisch</option>
-        <option>🧀 Käse</option><option>🍳 Sonstiges</option>
-      </select>
+    <!-- Erkannte Produkte Vorschau -->
+    <div id="multi-preview" style="display:none;margin-bottom:12px">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Erkannte Produkte</div>
+      <div id="multi-list" style="display:flex;flex-direction:column;gap:6px"></div>
     </div>
-    <div class="field"><label>Zone</label>
-      <select id="f-zone">
-        <option value="kalt">❄️ Kaltzone</option>
-        <option value="frisch">🌿 Frischzone</option>
-        <option value="trocken">🌾 Trockenzone</option>
-        <option value="feucht">💧 Feuchtigkeitszone</option>
-      </select>
+    <!-- Einzelprodukt (Fallback) -->
+    <div id="single-mode">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="flex:1;height:1px;background:var(--g2)"></div>
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap">oder einzeln</span>
+        <div style="flex:1;height:1px;background:var(--g2)"></div>
+      </div>
+      <div class="field">
+        <label>Name</label>
+        <div class="autocomplete-wrap">
+          <input id="f-name" type="text" placeholder="z.B. Tomaten, Joghurt …" autocomplete="off">
+          <div class="autocomplete-dropdown" id="ac-dropdown"></div>
+        </div>
+      </div>
+      <div class="field"><label>Kategorie</label>
+        <select id="f-cat">
+          <option>🥬 Gemüse</option><option>🍎 Obst</option>
+          <option>🥛 Milchprodukte</option><option>🥩 Fleisch</option>
+          <option>🧀 Käse</option><option>🍳 Sonstiges</option>
+        </select>
+      </div>
+      <div class="field"><label>Zone</label>
+        <select id="f-zone">
+          <option value="kalt">❄️ Kaltzone</option>
+          <option value="frisch">🌿 Frischzone</option>
+          <option value="trocken">🌾 Trockenzone</option>
+          <option value="feucht">💧 Feuchtigkeitszone</option>
+        </select>
+      </div>
+      <div class="field"><label>Ablaufdatum</label><input id="f-date" type="date"></div>
     </div>
-    <div class="field"><label>Ablaufdatum</label><input id="f-date" type="date"></div>
     <button class="btn-confirm" id="btn-confirm">Hinzufügen</button>
   </div>
 </div>
@@ -697,23 +714,31 @@ function showPage(id){
 // ── MODAL ──────────────────────────────────────────
 function openModal(){
   editingId = null;
+  multiProducts = [];
+  document.getElementById('f-multi').value   = '';
+  document.getElementById('multi-preview').style.display = 'none';
+  document.getElementById('multi-list').innerHTML = '';
   document.getElementById('f-name').value   = '';
   document.getElementById('f-cat').value    = '🥬 Gemüse';
   document.getElementById('f-zone').value   = 'frisch';
   document.getElementById('f-date').value   = off(4);
-  document.getElementById('modal-title').textContent = 'Produkt hinzufügen';
+  document.getElementById('modal-title').textContent = 'Produkte hinzufügen';
   document.getElementById('edit-badge').classList.remove('show');
   document.getElementById('btn-confirm').textContent = 'Hinzufügen';
   document.getElementById('btn-scan').style.display = '';
+  document.getElementById('single-mode').style.display = 'block';
   acClose();
   document.getElementById('overlay').classList.add('open');
-  setTimeout(() => document.getElementById('f-name').focus(), 350);
+  setTimeout(() => document.getElementById('f-multi').focus(), 350);
 }
 
 function openEditModal(id){
   const item = myItems().find(i => i.id === id);
   if(!item) return;
   editingId = id;
+  multiProducts = [];
+  document.getElementById('f-multi').value = '';
+  document.getElementById('multi-preview').style.display = 'none';
   document.getElementById('f-name').value   = item.name;
   document.getElementById('f-cat').value    = item.cat;
   document.getElementById('f-zone').value   = item.zone;
@@ -722,6 +747,7 @@ function openEditModal(id){
   document.getElementById('edit-badge').classList.add('show');
   document.getElementById('btn-confirm').textContent = 'Speichern';
   document.getElementById('btn-scan').style.display = 'none';
+  document.getElementById('single-mode').style.display = 'block';
   acClose();
   document.getElementById('overlay').classList.add('open');
 }
@@ -734,27 +760,37 @@ function closeModal(){
 }
 
 function confirmItem(){
+  // Multi-Produkt Modus
+  if(multiProducts.length > 0){
+    const defaultDate = off(4);
+    multiProducts.forEach(p => {
+      addItemToStorage({name:p.name, cat:p.cat, zone:p.zone, expiry:defaultDate});
+    });
+    multiProducts = [];
+    closeModal();
+    renderAll();
+    return;
+  }
+  // Einzelprodukt Modus
   const name   = document.getElementById('f-name').value.trim();
   const cat    = document.getElementById('f-cat').value;
   const zone   = document.getElementById('f-zone').value;
   const expiry = document.getElementById('f-date').value;
-
   if(!name){
-    document.getElementById('f-name').style.borderColor = 'var(--red)';
+    document.getElementById('f-name').style.borderColor='var(--red)';
     document.getElementById('f-name').focus();
-    setTimeout(() => document.getElementById('f-name').style.borderColor = '', 1400);
+    setTimeout(()=>document.getElementById('f-name').style.borderColor='',1400);
     return;
   }
   if(!expiry){
-    document.getElementById('f-date').style.borderColor = 'var(--red)';
-    setTimeout(() => document.getElementById('f-date').style.borderColor = '', 1400);
+    document.getElementById('f-date').style.borderColor='var(--red)';
+    setTimeout(()=>document.getElementById('f-date').style.borderColor='',1400);
     return;
   }
-
   if(editingId){
-    updateItemInStorage(editingId, {name, cat, zone, expiry});
+    updateItemInStorage(editingId,{name,cat,zone,expiry});
   } else {
-    addItemToStorage({name, cat, zone, expiry});
+    addItemToStorage({name,cat,zone,expiry});
   }
   closeModal();
   renderAll();
@@ -915,76 +951,109 @@ function acClose(){
   acIndex = -1;
 }
 
+// ── MULTI-PRODUKT ERKENNUNG ────────────────────────
+let multiProducts = [];
+
+function parseProducts(text){
+  // Trenne bei Komma, "und", Semikolon, Zeilenumbruch
+  const parts = text.split(/[,;\/\n]|\s+und\s+|\s+sowie\s+/i)
+    .map(p => p.trim()).filter(p => p.length > 1);
+
+  return parts.map(part => {
+    const q = part.toLowerCase();
+    const match = FOOD_LIST.find(f => f.name.toLowerCase() === q)
+               || FOOD_LIST.find(f => f.name.toLowerCase().startsWith(q))
+               || FOOD_LIST.find(f => q.startsWith(f.name.toLowerCase()))
+               || FOOD_LIST.find(f => f.name.toLowerCase().includes(q))
+               || FOOD_LIST.find(f => q.includes(f.name.toLowerCase()));
+    return {
+      name:  match ? match.name : part.charAt(0).toUpperCase() + part.slice(1),
+      cat:   match ? match.cat  : '🍳 Sonstiges',
+      zone:  match ? match.zone : 'kalt',
+      found: !!match
+    };
+  });
+}
+
+function renderMultiPreview(products){
+  multiProducts = products;
+  const preview = document.getElementById('multi-preview');
+  const list    = document.getElementById('multi-list');
+  if(!products.length){ preview.style.display='none'; return; }
+
+  list.innerHTML = products.map((p,i) => `
+    <div style="background:var(--g1);border:1px solid ${p.found?'var(--g2)':'var(--orange)'};border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px">
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:14px">${p.name}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${p.cat} · ${ZONES[p.zone]?.icon||''} ${ZONES[p.zone]?.name||''}</div>
+      </div>
+      ${p.found ? '<span style="font-size:11px;color:var(--green);font-weight:600">✓</span>' : '<span style="font-size:11px;color:var(--orange);font-weight:600">?</span>'}
+      <button onclick="removeMultiProduct(${i})" style="background:none;border:none;color:var(--g3);font-size:16px;cursor:pointer;padding:0 4px">✕</button>
+    </div>`).join('');
+
+  preview.style.display = 'block';
+  document.getElementById('btn-confirm').textContent = `${products.length} Produkt${products.length>1?'e':''} hinzufügen`;
+}
+window.removeMultiProduct = (i) => {
+  multiProducts.splice(i,1);
+  renderMultiPreview(multiProducts);
+};
+
+function parseAndPreview(){
+  const text = document.getElementById('f-multi').value.trim();
+  if(!text) return;
+  const products = parseProducts(text);
+  renderMultiPreview(products);
+}
+
 // ── SPRACHEINGABE ──────────────────────────────────
 let voiceRecognition = null;
 let voiceActive = false;
 
 function toggleVoice(){
   if(voiceActive){ stopVoice(); return; }
-
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SpeechRecognition){
-    alert('Spracheingabe wird auf diesem Gerät nicht unterstützt. Bitte manuell eingeben.');
+    alert('Spracheingabe wird nicht unterstützt. Bitte manuell eingeben.');
     return;
   }
-
   voiceRecognition = new SpeechRecognition();
   voiceRecognition.lang = 'de-DE';
   voiceRecognition.continuous = false;
   voiceRecognition.interimResults = true;
-  voiceRecognition.maxAlternatives = 3;
+  voiceRecognition.maxAlternatives = 1;
 
   voiceActive = true;
   document.getElementById('btn-scan').textContent = '⏹ Aufnahme stoppen';
   document.getElementById('voice-status').style.display = 'flex';
-  document.getElementById('voice-text').textContent = 'Spreche jetzt…';
+  document.getElementById('voice-text').textContent = 'Spreche jetzt… (z.B. "Tomaten, Lyoner, Vollmilch")';
 
   voiceRecognition.onresult = (e) => {
-    const results = e.results[e.results.length - 1];
+    const results = e.results[e.results.length-1];
     const transcript = results[0].transcript.trim();
     const isFinal = results.isFinal;
-
-    document.getElementById('voice-text').textContent = isFinal ? '✓ "' + transcript + '"' : transcript + '…';
-
+    document.getElementById('voice-text').textContent = isFinal ? '✓ "'+transcript+'"' : transcript+'…';
     if(isFinal){
-      // Ins Namensfeld eintragen
-      document.getElementById('f-name').value = transcript;
-      // Autocomplete auslösen um Kategorie/Zone zu finden
-      acInput(transcript);
-      // Bestes Match direkt anwenden
-      const q = transcript.toLowerCase();
-      const match = FOOD_LIST.find(f => f.name.toLowerCase() === q)
-                 || FOOD_LIST.find(f => f.name.toLowerCase().startsWith(q))
-                 || FOOD_LIST.find(f => q.includes(f.name.toLowerCase()))
-                 || FOOD_LIST.find(f => f.name.toLowerCase().includes(q));
-      if(match){
-        document.getElementById('f-cat').value  = match.cat;
-        document.getElementById('f-zone').value = match.zone;
-        acClose();
-      }
+      document.getElementById('f-multi').value = transcript;
+      const products = parseProducts(transcript);
+      renderMultiPreview(products);
       stopVoice();
     }
   };
-
   voiceRecognition.onerror = (e) => {
-    document.getElementById('voice-text').textContent = e.error === 'no-speech' ? 'Nichts gehört – nochmal?' : 'Fehler: '+e.error;
+    document.getElementById('voice-text').textContent = e.error==='no-speech'?'Nichts gehört – nochmal?':'Fehler: '+e.error;
     setTimeout(stopVoice, 2000);
   };
-
-  voiceRecognition.onend = () => {
-    if(voiceActive) stopVoice();
-  };
-
+  voiceRecognition.onend = () => { if(voiceActive) stopVoice(); };
   voiceRecognition.start();
 }
 
 function stopVoice(){
   voiceActive = false;
   if(voiceRecognition){ try{ voiceRecognition.stop(); }catch(e){} voiceRecognition = null; }
-  document.getElementById('btn-scan').textContent = '🎙️ Produkt ansagen';
-  setTimeout(()=>{ document.getElementById('voice-status').style.display = 'none'; }, 1500);
+  document.getElementById('btn-scan').textContent = '🎙️ Produkte ansagen';
+  setTimeout(()=>{ document.getElementById('voice-status').style.display='none'; }, 1500);
 }
-
 function stopScanner(){ stopVoice(); }
 
 function guesscat(p){
@@ -1089,6 +1158,8 @@ document.addEventListener('DOMContentLoaded', function(){
   // Scanner
   document.getElementById('btn-scan').addEventListener('click', toggleVoice);
   document.getElementById('btn-stop-voice').addEventListener('click', stopVoice);
+  document.getElementById('btn-parse').addEventListener('click', parseAndPreview);
+  document.getElementById('f-multi').addEventListener('keydown', e => { if(e.key==='Enter') parseAndPreview(); });
 
   // Autocomplete
   document.getElementById('f-name').addEventListener('input',   e => acInput(e.target.value));
