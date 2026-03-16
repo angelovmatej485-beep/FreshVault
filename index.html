@@ -459,22 +459,80 @@ const ZONES = {
 };
 
 const FOOD_LIST = [
-  {name:"Tomaten",cat:"🥬 Gemüse",zone:"frisch"},{name:"Paprika",cat:"🥬 Gemüse",zone:"frisch"},
-  {name:"Gurke",cat:"🥬 Gemüse",zone:"frisch"},{name:"Karotten",cat:"🥬 Gemüse",zone:"frisch"},
+  // Gemüse
+  {name:"Tomaten",cat:"🥬 Gemüse",zone:"frisch"},{name:"Kirschtomaten",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Paprika rot",cat:"🥬 Gemüse",zone:"frisch"},{name:"Paprika gelb",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Paprika grün",cat:"🥬 Gemüse",zone:"frisch"},{name:"Gurke",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Zucchini",cat:"🥬 Gemüse",zone:"frisch"},{name:"Karotten",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Brokkoli",cat:"🥬 Gemüse",zone:"frisch"},{name:"Blumenkohl",cat:"🥬 Gemüse",zone:"frisch"},
   {name:"Spinat",cat:"🥬 Gemüse",zone:"feucht"},{name:"Salat",cat:"🥬 Gemüse",zone:"feucht"},
-  {name:"Brokkoli",cat:"🥬 Gemüse",zone:"frisch"},{name:"Zucchini",cat:"🥬 Gemüse",zone:"frisch"},
-  {name:"Zwiebeln",cat:"🥬 Gemüse",zone:"trocken"},{name:"Knoblauch",cat:"🥬 Gemüse",zone:"trocken"},
-  {name:"Äpfel",cat:"🍎 Obst",zone:"frisch"},{name:"Bananen",cat:"🍎 Obst",zone:"frisch"},
-  {name:"Erdbeeren",cat:"🍎 Obst",zone:"frisch"},{name:"Trauben",cat:"🍎 Obst",zone:"frisch"},
-  {name:"Orangen",cat:"🍎 Obst",zone:"frisch"},{name:"Zitronen",cat:"🍎 Obst",zone:"frisch"},
-  {name:"Milch",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Joghurt",cat:"🥛 Milchprodukte",zone:"kalt"},
-  {name:"Butter",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Sahne",cat:"🥛 Milchprodukte",zone:"kalt"},
-  {name:"Quark",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Frischkäse",cat:"🧀 Käse",zone:"trocken"},
-  {name:"Gouda",cat:"🧀 Käse",zone:"trocken"},{name:"Mozzarella",cat:"🧀 Käse",zone:"kalt"},
-  {name:"Hähnchenbrust",cat:"🥩 Fleisch",zone:"kalt"},{name:"Hackfleisch",cat:"🥩 Fleisch",zone:"kalt"},
-  {name:"Lachs",cat:"🥩 Fleisch",zone:"kalt"},{name:"Salami",cat:"🥩 Fleisch",zone:"trocken"},
-  {name:"Schinken",cat:"🥩 Fleisch",zone:"trocken"},{name:"Eier",cat:"🍳 Sonstiges",zone:"kalt"},
+  {name:"Eisbergsalat",cat:"🥬 Gemüse",zone:"feucht"},{name:"Rucola",cat:"🥬 Gemüse",zone:"feucht"},
+  {name:"Feldsalat",cat:"🥬 Gemüse",zone:"feucht"},{name:"Zwiebeln",cat:"🥬 Gemüse",zone:"trocken"},
+  {name:"Rote Zwiebeln",cat:"🥬 Gemüse",zone:"trocken"},{name:"Knoblauch",cat:"🥬 Gemüse",zone:"trocken"},
+  {name:"Lauch",cat:"🥬 Gemüse",zone:"frisch"},{name:"Sellerie",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Kohlrabi",cat:"🥬 Gemüse",zone:"frisch"},{name:"Rotkohl",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Spargel",cat:"🥬 Gemüse",zone:"feucht"},{name:"Champignons",cat:"🥬 Gemüse",zone:"frisch"},
+  {name:"Aubergine",cat:"🥬 Gemüse",zone:"frisch"},{name:"Kartoffeln",cat:"🥬 Gemüse",zone:"trocken"},
   {name:"Petersilie",cat:"🥬 Gemüse",zone:"feucht"},{name:"Basilikum",cat:"🥬 Gemüse",zone:"feucht"},
+  {name:"Schnittlauch",cat:"🥬 Gemüse",zone:"feucht"},{name:"Dill",cat:"🥬 Gemüse",zone:"feucht"},
+  {name:"Ingwer",cat:"🥬 Gemüse",zone:"trocken"},
+  // Obst
+  {name:"Äpfel",cat:"🍎 Obst",zone:"frisch"},{name:"Birnen",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Bananen",cat:"🍎 Obst",zone:"frisch"},{name:"Erdbeeren",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Heidelbeeren",cat:"🍎 Obst",zone:"frisch"},{name:"Himbeeren",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Brombeeren",cat:"🍎 Obst",zone:"frisch"},{name:"Trauben",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Orangen",cat:"🍎 Obst",zone:"frisch"},{name:"Zitronen",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Limetten",cat:"🍎 Obst",zone:"frisch"},{name:"Mandarinen",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Kiwi",cat:"🍎 Obst",zone:"frisch"},{name:"Mango",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Melone",cat:"🍎 Obst",zone:"frisch"},{name:"Pfirsich",cat:"🍎 Obst",zone:"frisch"},
+  {name:"Kirschen",cat:"🍎 Obst",zone:"frisch"},{name:"Pflaumen",cat:"🍎 Obst",zone:"frisch"},
+  // Milchprodukte
+  {name:"Vollmilch 3,5%",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Fettarme Milch 1,5%",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Laktosefreie Milch",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Hafermilch",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Mandelmilch",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Sojamilch",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Naturjoghurt",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Fruchtjoghurt Erdbeere",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Fruchtjoghurt Himbeere",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Fruchtjoghurt Pfirsich",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Griechischer Joghurt",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Skyr",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Butter",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Margarine",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Sahne",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Schlagsahne",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Crème fraîche",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Saure Sahne",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Schmand",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Quark",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Magerquark",cat:"🥛 Milchprodukte",zone:"kalt"},{name:"Kefir",cat:"🥛 Milchprodukte",zone:"kalt"},
+  {name:"Buttermilch",cat:"🥛 Milchprodukte",zone:"kalt"},
+  // Käse
+  {name:"Gouda",cat:"🧀 Käse",zone:"trocken"},{name:"Gouda jung",cat:"🧀 Käse",zone:"trocken"},
+  {name:"Gouda gereift",cat:"🧀 Käse",zone:"trocken"},{name:"Edamer",cat:"🧀 Käse",zone:"trocken"},
+  {name:"Emmentaler",cat:"🧀 Käse",zone:"trocken"},{name:"Mozzarella",cat:"🧀 Käse",zone:"kalt"},
+  {name:"Büffelmozzarella",cat:"🧀 Käse",zone:"kalt"},{name:"Frischkäse",cat:"🧀 Käse",zone:"kalt"},
+  {name:"Frischkäse Kräuter",cat:"🧀 Käse",zone:"kalt"},{name:"Camembert",cat:"🧀 Käse",zone:"kalt"},
+  {name:"Brie",cat:"🧀 Käse",zone:"kalt"},{name:"Parmesan",cat:"🧀 Käse",zone:"trocken"},
+  {name:"Feta",cat:"🧀 Käse",zone:"kalt"},{name:"Ricotta",cat:"🧀 Käse",zone:"kalt"},
+  {name:"Mascarpone",cat:"🧀 Käse",zone:"kalt"},{name:"Hüttenkäse",cat:"🧀 Käse",zone:"kalt"},
+  {name:"Scheibletten",cat:"🧀 Käse",zone:"kalt"},{name:"Schmelzkäse",cat:"🧀 Käse",zone:"kalt"},
+  // Fleisch & Wurst
+  {name:"Hähnchenbrust",cat:"🥩 Fleisch",zone:"kalt"},{name:"Hähnchenfilet",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Hähnchenschenkel",cat:"🥩 Fleisch",zone:"kalt"},{name:"Hackfleisch gemischt",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Rinderhack",cat:"🥩 Fleisch",zone:"kalt"},{name:"Schweinefilet",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Schweinebauch",cat:"🥩 Fleisch",zone:"kalt"},{name:"Putenbrust",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Rindersteak",cat:"🥩 Fleisch",zone:"kalt"},{name:"Lachs",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Lachsfilet",cat:"🥩 Fleisch",zone:"kalt"},{name:"Garnelen",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Salami",cat:"🥩 Fleisch",zone:"trocken"},{name:"Salami Milano",cat:"🥩 Fleisch",zone:"trocken"},
+  {name:"Pepperoni",cat:"🥩 Fleisch",zone:"trocken"},{name:"Schinken gekocht",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Schwarzwälder Schinken",cat:"🥩 Fleisch",zone:"trocken"},{name:"Prosciutto",cat:"🥩 Fleisch",zone:"trocken"},
+  {name:"Mortadella",cat:"🥩 Fleisch",zone:"kalt"},{name:"Lyoner",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Fleischwurst",cat:"🥩 Fleisch",zone:"kalt"},{name:"Bierschinken",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Wiener Würstchen",cat:"🥩 Fleisch",zone:"kalt"},{name:"Bratwurst",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Weißwurst",cat:"🥩 Fleisch",zone:"kalt"},{name:"Chorizo",cat:"🥩 Fleisch",zone:"trocken"},
+  {name:"Bacon",cat:"🥩 Fleisch",zone:"kalt"},{name:"Leberwurst",cat:"🥩 Fleisch",zone:"kalt"},
+  {name:"Teewurst",cat:"🥩 Fleisch",zone:"kalt"},{name:"Mettwurst",cat:"🥩 Fleisch",zone:"kalt"},
+  // Sonstiges
+  {name:"Eier",cat:"🍳 Sonstiges",zone:"kalt"},{name:"Eier 6er",cat:"🍳 Sonstiges",zone:"kalt"},
+  {name:"Orangensaft",cat:"🍳 Sonstiges",zone:"kalt"},{name:"Apfelsaft",cat:"🍳 Sonstiges",zone:"kalt"},
+  {name:"Tofu",cat:"🍳 Sonstiges",zone:"kalt"},{name:"Hummus",cat:"🍳 Sonstiges",zone:"kalt"},
+  {name:"Tzatziki",cat:"🍳 Sonstiges",zone:"kalt"},{name:"Pesto",cat:"🍳 Sonstiges",zone:"kalt"},
+  {name:"Mayonnaise",cat:"🍳 Sonstiges",zone:"kalt"},{name:"Ketchup",cat:"🍳 Sonstiges",zone:"kalt"},
+  {name:"Senf",cat:"🍳 Sonstiges",zone:"kalt"},{name:"Marmelade",cat:"🍳 Sonstiges",zone:"kalt"},
+  {name:"Pizza",cat:"🍳 Sonstiges",zone:"kalt"},{name:"Tiefkühlpizza",cat:"🍳 Sonstiges",zone:"kalt"},
 ];
 
 function off(d){ const t=new Date(); t.setDate(t.getDate()+d); return t.toISOString().split("T")[0]; }
@@ -745,7 +803,7 @@ function acInput(val){
   const drop = document.getElementById('ac-dropdown');
   if(!val){ acClose(); return; }
   const q = val.toLowerCase();
-  const matches = FOOD_LIST.filter(f => f.name.toLowerCase().startsWith(q)).slice(0,6);
+  const matches = FOOD_LIST.filter(f => f.name.toLowerCase().includes(q)).slice(0,8);
   if(!matches.length){ acClose(); return; }
   drop.innerHTML = matches.map((f,i) => `
     <div class="ac-item" data-idx="${i}">
