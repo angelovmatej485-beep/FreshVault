@@ -1019,32 +1019,54 @@ function toggleVoice(){
   }
   voiceRecognition = new SpeechRecognition();
   voiceRecognition.lang = 'de-DE';
-  voiceRecognition.continuous = false;
+  voiceRecognition.continuous = true;  // weiterhören!
   voiceRecognition.interimResults = true;
   voiceRecognition.maxAlternatives = 1;
 
   voiceActive = true;
-  document.getElementById('btn-scan').textContent = '⏹ Aufnahme stoppen';
+  document.getElementById('btn-scan').textContent = '⏹ Fertig';
   document.getElementById('voice-status').style.display = 'flex';
-  document.getElementById('voice-text').textContent = 'Spreche jetzt… (z.B. "Tomaten, Lyoner, Vollmilch")';
+  document.getElementById('voice-text').textContent = 'Nenn Produkte – jedes wird automatisch getrennt…';
+
+  let currentInterim = '';
 
   voiceRecognition.onresult = (e) => {
-    const results = e.results[e.results.length-1];
-    const transcript = results[0].transcript.trim();
-    const isFinal = results.isFinal;
-    document.getElementById('voice-text').textContent = isFinal ? '✓ "'+transcript+'"' : transcript+'…';
-    if(isFinal){
-      document.getElementById('f-multi').value = transcript;
-      const products = parseProducts(transcript);
-      renderMultiPreview(products);
-      stopVoice();
+    let interim = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      const transcript = e.results[i][0].transcript.trim();
+      if(e.results[i].isFinal){
+        // Fertiges Wort/Phrase mit Komma anhängen
+        const current = document.getElementById('f-multi').value;
+        const separator = current.length > 0 && !current.endsWith(', ') ? ', ' : '';
+        document.getElementById('f-multi').value = current + separator + transcript;
+        currentInterim = '';
+        document.getElementById('voice-text').textContent = '✓ "' + transcript + '" – weiter sprechen oder ⏹ drücken';
+        // Vorschau sofort aktualisieren
+        const products = parseProducts(document.getElementById('f-multi').value);
+        renderMultiPreview(products);
+      } else {
+        interim = transcript;
+      }
+    }
+    if(interim){
+      currentInterim = interim;
+      document.getElementById('voice-text').textContent = interim + '…';
     }
   };
+
   voiceRecognition.onerror = (e) => {
-    document.getElementById('voice-text').textContent = e.error==='no-speech'?'Nichts gehört – nochmal?':'Fehler: '+e.error;
+    if(e.error === 'no-speech') return; // einfach weiterhorchen
+    document.getElementById('voice-text').textContent = 'Fehler: ' + e.error;
     setTimeout(stopVoice, 2000);
   };
-  voiceRecognition.onend = () => { if(voiceActive) stopVoice(); };
+
+  voiceRecognition.onend = () => {
+    // Wenn noch aktiv, neu starten (continuous auf manchen Geräten begrenzt)
+    if(voiceActive){
+      try{ voiceRecognition.start(); }catch(e){ stopVoice(); }
+    }
+  };
+
   voiceRecognition.start();
 }
 
