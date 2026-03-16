@@ -809,6 +809,7 @@ async function toggleScanner(){
           if(codes.length > 0){
             const code = codes[0].rawValue;
             document.getElementById('scan-status').textContent = '✓ '+code;
+            openModal(); // Modal ZUERST öffnen
             stopScanner();
             await lookupBarcode(code);
             return;
@@ -855,8 +856,6 @@ async function lookupBarcode(barcode){
   lk.classList.add('show');
   document.getElementById('lookup-text').textContent = 'Produkt wird gesucht…';
   document.getElementById('spin').style.display = 'block';
-  // Stelle sicher dass Modal offen ist
-  document.getElementById('overlay').classList.add('open');
   try{
     const r = await fetch('https://world.openfoodfacts.org/api/v0/product/'+barcode+'.json');
     const d = await r.json();
@@ -867,21 +866,21 @@ async function lookupBarcode(barcode){
         document.getElementById('f-cat').value  = guesscat(d.product);
         document.getElementById('lookup-text').textContent = '✓ Gefunden: '+name;
         document.getElementById('spin').style.display = 'none';
-        setTimeout(()=>lk.classList.remove('show'), 2500);
+        setTimeout(()=>lk.classList.remove('show'), 3000);
       } else {
         document.getElementById('lookup-text').textContent = 'Kein Name – bitte manuell eingeben.';
         document.getElementById('spin').style.display = 'none';
-        setTimeout(()=>lk.classList.remove('show'), 2500);
+        setTimeout(()=>lk.classList.remove('show'), 3000);
       }
     } else {
       document.getElementById('lookup-text').textContent = 'Nicht gefunden – bitte manuell eingeben.';
       document.getElementById('spin').style.display = 'none';
-      setTimeout(()=>lk.classList.remove('show'), 2500);
+      setTimeout(()=>lk.classList.remove('show'), 3000);
     }
   }catch(e){
     document.getElementById('lookup-text').textContent = 'Offline – bitte manuell eingeben.';
     document.getElementById('spin').style.display = 'none';
-    setTimeout(()=>lk.classList.remove('show'), 2500);
+    setTimeout(()=>lk.classList.remove('show'), 3000);
   }
 }
 
