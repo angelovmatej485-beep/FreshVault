@@ -787,22 +787,55 @@ async function toggleScanner(){
   if(scanning){ stopScanner(); return; }
   document.getElementById('scanner-wrap').classList.add('active');
   document.getElementById('btn-scan').textContent = '⏹ Scanner stoppen';
-  document.getElementById('scan-status').textContent = 'Barcode in den Rahmen halten';
+  document.getElementById('scan-status').textContent = 'Kamera wird gestartet…';
   scanning = true;
   try{
-    if(typeof ZXing === 'undefined') throw new Error('ZXing nicht geladen');
-    codeReader = new ZXing.BrowserMultiFormatReader();
-    const devs = await ZXing.BrowserMultiFormatReader.listVideoInputDevices();
-    const id   = devs.find(d=>/back|rear|environment/i.test(d.label))?.deviceId || devs[0]?.deviceId;
-    await codeReader.decodeFromVideoDevice(id,'scanner-video', async(res) => {
-      if(res){ document.getElementById('scan-status').textContent = '✓ '+res.getText(); stopScanner(); await lookupBarcode(res.getText()); }
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }
     });
-  }catch(e){ document.getElementById('scan-status').textContent = 'Kamera nicht verfügbar'; }
+    const video = document.getElementById('scanner-video');
+    video.srcObject = stream;
+    await video.play();
+    document.getElementById('scan-status').textContent = 'Barcode in den Rahmen halten';
+    codeReader = stream;
+
+    // BarcodeDetector API (Chrome/Android) 
+    if('BarcodeDetector' in window){
+      const detector = new BarcodeDetector({formats:['ean_13','ean_8','qr_code','code_128','upc_a','upc_e']});
+      const scan = async () => {
+        if(!scanning) return;
+        try{
+          const codes = await detector.detect(video);
+          if(codes.length > 0){
+            const code = codes[0].rawValue;
+            document.getElementById('scan-status').textContent = '✓ '+code;
+            stopScanner();
+            await lookupBarcode(code);
+            return;
+          }
+        }catch(e){}
+        if(scanning) requestAnimationFrame(scan);
+      };
+      requestAnimationFrame(scan);
+    } else {
+      // Fallback: manuelle Eingabe anbieten
+      document.getElementById('scan-status').textContent = 'Barcode-Scanner nicht unterstützt – bitte manuell eingeben';
+      setTimeout(stopScanner, 3000);
+    }
+  }catch(e){
+    document.getElementById('scan-status').textContent = 'Kamera nicht verfügbar – Berechtigung erteilen?';
+    scanning = false;
+  }
 }
 
 function stopScanner(){
-  if(codeReader){ try{ codeReader.reset(); }catch(e){} codeReader = null; }
+  if(codeReader && codeReader.getTracks){
+    codeReader.getTracks().forEach(t => t.stop());
+  }
+  codeReader = null;
   scanning = false;
+  const video = document.getElementById('scanner-video');
+  video.srcObject = null;
   document.getElementById('scanner-wrap').classList.remove('active');
   document.getElementById('btn-scan').innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7V5a2 2 0 012-2h2M17 3h2a2 2 0 012 2v2M21 17v2a2 2 0 01-2 2h-2M7 21H5a2 2 0 01-2-2v-2"/><rect x="7" y="7" width="10" height="10" rx="1.5"/></svg> Barcode scannen`;
 }
