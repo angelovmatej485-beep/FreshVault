@@ -1017,57 +1017,58 @@ function toggleVoice(){
     alert('Spracheingabe wird nicht unterstützt. Bitte manuell eingeben.');
     return;
   }
-  voiceRecognition = new SpeechRecognition();
-  voiceRecognition.lang = 'de-DE';
-  voiceRecognition.continuous = true;  // weiterhören!
-  voiceRecognition.interimResults = true;
-  voiceRecognition.maxAlternatives = 1;
 
   voiceActive = true;
+  let lastFinalIndex = -1; // verhindert doppelte Ergebnisse
+  let restarting = false;
+
+  function startRecognition(){
+    voiceRecognition = new SpeechRecognition();
+    voiceRecognition.lang = 'de-DE';
+    voiceRecognition.continuous = false; // false = stabiler, kein Spam
+    voiceRecognition.interimResults = true;
+    voiceRecognition.maxAlternatives = 1;
+
+    voiceRecognition.onresult = (e) => {
+      for(let i = e.resultIndex; i < e.results.length; i++){
+        const transcript = e.results[i][0].transcript.trim();
+        if(e.results[i].isFinal){
+          if(i <= lastFinalIndex) return; // bereits verarbeitet
+          lastFinalIndex = i;
+          const current = document.getElementById('f-multi').value;
+          const separator = current.length > 0 ? ', ' : '';
+          document.getElementById('f-multi').value = current + separator + transcript;
+          document.getElementById('voice-text').textContent = '✓ "' + transcript + '" – weiter sprechen oder ⏹ drücken';
+          renderMultiPreview(parseProducts(document.getElementById('f-multi').value));
+        } else {
+          document.getElementById('voice-text').textContent = transcript + '…';
+        }
+      }
+    };
+
+    voiceRecognition.onerror = (e) => {
+      if(e.error === 'no-speech' || e.error === 'aborted') return;
+      document.getElementById('voice-text').textContent = 'Fehler: ' + e.error;
+      setTimeout(stopVoice, 2000);
+    };
+
+    voiceRecognition.onend = () => {
+      if(!voiceActive || restarting) return;
+      restarting = true;
+      lastFinalIndex = -1; // reset für neue Session
+      setTimeout(() => {
+        restarting = false;
+        if(voiceActive) startRecognition();
+      }, 200); // kurze Pause verhindert Spam
+    };
+
+    try{ voiceRecognition.start(); }catch(e){ stopVoice(); }
+  }
+
   document.getElementById('btn-scan').textContent = '⏹ Fertig';
   document.getElementById('voice-status').style.display = 'flex';
   document.getElementById('voice-text').textContent = 'Nenn Produkte – jedes wird automatisch getrennt…';
-
-  let currentInterim = '';
-
-  voiceRecognition.onresult = (e) => {
-    let interim = '';
-    for(let i = e.resultIndex; i < e.results.length; i++){
-      const transcript = e.results[i][0].transcript.trim();
-      if(e.results[i].isFinal){
-        // Fertiges Wort/Phrase mit Komma anhängen
-        const current = document.getElementById('f-multi').value;
-        const separator = current.length > 0 && !current.endsWith(', ') ? ', ' : '';
-        document.getElementById('f-multi').value = current + separator + transcript;
-        currentInterim = '';
-        document.getElementById('voice-text').textContent = '✓ "' + transcript + '" – weiter sprechen oder ⏹ drücken';
-        // Vorschau sofort aktualisieren
-        const products = parseProducts(document.getElementById('f-multi').value);
-        renderMultiPreview(products);
-      } else {
-        interim = transcript;
-      }
-    }
-    if(interim){
-      currentInterim = interim;
-      document.getElementById('voice-text').textContent = interim + '…';
-    }
-  };
-
-  voiceRecognition.onerror = (e) => {
-    if(e.error === 'no-speech') return; // einfach weiterhorchen
-    document.getElementById('voice-text').textContent = 'Fehler: ' + e.error;
-    setTimeout(stopVoice, 2000);
-  };
-
-  voiceRecognition.onend = () => {
-    // Wenn noch aktiv, neu starten (continuous auf manchen Geräten begrenzt)
-    if(voiceActive){
-      try{ voiceRecognition.start(); }catch(e){ stopVoice(); }
-    }
-  };
-
-  voiceRecognition.start();
+  startRecognition();
 }
 
 function stopVoice(){
