@@ -494,7 +494,7 @@ function friendlyErr(code){
 
 function showApp(user){
   currentUser = user;
-  sessionStorage.setItem('fv_session', JSON.stringify(user));
+  localStorage.setItem('fv_session', JSON.stringify(user));
   document.getElementById('auth-screen').style.display = 'none';
   document.getElementById('app-screen').style.display  = 'block';
   document.getElementById('user-email').textContent     = user.email;
@@ -504,7 +504,7 @@ function showApp(user){
 
 function doLogout(){
   currentUser = null;
-  sessionStorage.removeItem('fv_session');
+  localStorage.removeItem('fv_session');
   document.getElementById('auth-screen').style.display = 'flex';
   document.getElementById('app-screen').style.display  = 'none';
   document.getElementById('btn-auth').textContent = 'Anmelden';
@@ -855,15 +855,34 @@ async function lookupBarcode(barcode){
   lk.classList.add('show');
   document.getElementById('lookup-text').textContent = 'Produkt wird gesucht…';
   document.getElementById('spin').style.display = 'block';
+  // Stelle sicher dass Modal offen ist
+  document.getElementById('overlay').classList.add('open');
   try{
     const r = await fetch('https://world.openfoodfacts.org/api/v0/product/'+barcode+'.json');
     const d = await r.json();
     if(d.status===1&&d.product){
       const name = d.product.product_name_de||d.product.product_name||'';
-      if(name){ document.getElementById('f-name').value=name; document.getElementById('f-cat').value=guesscat(d.product); document.getElementById('lookup-text').textContent='✓ Gefunden: '+name; document.getElementById('spin').style.display='none'; setTimeout(()=>lk.classList.remove('show'),2500); }
-      else{ document.getElementById('lookup-text').textContent='Kein Name – bitte manuell eingeben.'; document.getElementById('spin').style.display='none'; setTimeout(()=>lk.classList.remove('show'),2500); }
-    } else { document.getElementById('lookup-text').textContent='Nicht gefunden.'; document.getElementById('spin').style.display='none'; setTimeout(()=>lk.classList.remove('show'),2500); }
-  }catch(e){ document.getElementById('lookup-text').textContent='Offline – bitte manuell eingeben.'; document.getElementById('spin').style.display='none'; setTimeout(()=>lk.classList.remove('show'),2500); }
+      if(name){
+        document.getElementById('f-name').value = name;
+        document.getElementById('f-cat').value  = guesscat(d.product);
+        document.getElementById('lookup-text').textContent = '✓ Gefunden: '+name;
+        document.getElementById('spin').style.display = 'none';
+        setTimeout(()=>lk.classList.remove('show'), 2500);
+      } else {
+        document.getElementById('lookup-text').textContent = 'Kein Name – bitte manuell eingeben.';
+        document.getElementById('spin').style.display = 'none';
+        setTimeout(()=>lk.classList.remove('show'), 2500);
+      }
+    } else {
+      document.getElementById('lookup-text').textContent = 'Nicht gefunden – bitte manuell eingeben.';
+      document.getElementById('spin').style.display = 'none';
+      setTimeout(()=>lk.classList.remove('show'), 2500);
+    }
+  }catch(e){
+    document.getElementById('lookup-text').textContent = 'Offline – bitte manuell eingeben.';
+    document.getElementById('spin').style.display = 'none';
+    setTimeout(()=>lk.classList.remove('show'), 2500);
+  }
 }
 
 // ── SWIPE TO CLOSE ─────────────────────────────────
@@ -950,7 +969,7 @@ document.addEventListener('DOMContentLoaded', function(){
 
   // Restore session
   try{
-    const saved = sessionStorage.getItem('fv_session');
+    const saved = localStorage.getItem('fv_session');
     if(saved){ const u=JSON.parse(saved); if(u&&u.uid&&u.email) showApp(u); }
   }catch(e){}
 
