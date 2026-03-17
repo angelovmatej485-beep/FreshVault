@@ -10,6 +10,7 @@
 <meta name="theme-color" content="#2d6a4f">
 <link rel="manifest" id="pwa-manifest">
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -106,7 +107,7 @@ html{height:100%;overflow:hidden}
 /* PAGES */
 .page{display:none;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:none;flex:1;min-height:0}
 .page.active{display:block}
-#page-chatbot.active{display:flex;flex-direction:column;overflow:hidden}
+
 
 /* AUTH */
 #auth-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#f5f5f3,#e8f4ee)}
@@ -526,6 +527,9 @@ nav{
   <div class="page" id="page-recipes">
     <div class="wrap">
       <div class="page-title">🍽️ Rezeptvorschläge</div>
+      <div style="background:var(--green-l);border:1px solid var(--green);border-radius:var(--rs);padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px">
+        <span>✨</span><span>Über 50 Rezepte – neue kommen regelmäßig dazu!</span>
+      </div>
       <!-- Filter Bar -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
         <select id="recipe-filter-kcal" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
@@ -740,36 +744,6 @@ nav{
     </div>
   </div>
 
-  <!-- ── KI CHATBOT PAGE ── -->
-  <div class="page" id="page-chatbot">
-    <div style="background:var(--white);border-bottom:1px solid var(--g2);padding:14px 16px;flex-shrink:0">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🤖</div>
-        <div>
-          <div style="font-size:15px;font-weight:700;letter-spacing:-.3px">FreshVault KI</div>
-          <div style="font-size:11px;color:var(--muted)">Küchen-Assistent · immer online</div>
-        </div>
-        <button onclick="clearChat()" style="margin-left:auto;background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;font-family:inherit;color:var(--muted);cursor:pointer">Löschen</button>
-      </div>
-    </div>
-    <div style="display:flex;gap:6px;padding:10px 14px;overflow-x:auto;flex-shrink:0;border-bottom:1px solid var(--g1);-webkit-overflow-scrolling:touch">
-      <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Wie lange hält Milch?</button>
-      <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Was kann ich kochen?</button>
-      <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Was läuft bald ab?</button>
-      <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Food Waste Tipps</button>
-      <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Kühlzonen erklären</button>
-    </div>
-    <div class="chat-msgs" id="chat-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px">
-      <div style="display:flex;gap:8px;align-items:flex-start">
-        <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--blue),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
-        <div style="background:var(--g1);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:14px;line-height:1.5;color:var(--text);max-width:80%">👋 Hallo! Ich bin dein FreshVault KI-Assistent. Ich kenne deinen Kühlschrankinhalt und helfe dir mit Rezepten, Haltbarkeitstipps und Food-Waste-Tipps. Was möchtest du wissen?</div>
-      </div>
-    </div>
-    <div style="background:var(--white);border-top:1px solid var(--g2);padding:10px 14px max(14px,env(safe-area-inset-bottom));flex-shrink:0;display:flex;gap:8px;align-items:flex-end">
-      <textarea class="chat-input" id="chat-input" placeholder="Frag mich etwas…" rows="1" style="flex:1;background:var(--g1);border:1px solid var(--g2);border-radius:12px;padding:10px 14px;font-size:14px;font-family:inherit;color:var(--text);outline:none;resize:none;max-height:100px;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
-      <button class="chat-send" onclick="sendChat()" style="background:var(--green);border:none;border-radius:12px;color:white;width:44px;height:44px;cursor:pointer;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center">➤</button>
-    </div>
-  </div>
 
   <!-- ── OVERLAYS (QR + Join) ── -->
   <div class="overlay" id="qr-overlay" onclick="if(event.target===this)this.classList.remove('open')">
@@ -777,8 +751,9 @@ nav{
       <div class="sheet-handle"></div>
       <div style="font-size:17px;font-weight:700;margin-bottom:4px">📱 QR-Code</div>
       <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Lass deine Familie diesen Code scannen</div>
-      <canvas id="qr-canvas" class="qr-canvas"></canvas>
-      <div style="font-size:24px;font-weight:800;letter-spacing:4px;color:var(--green);margin:12px 0" id="qr-code-text"></div>
+      <div id="qr-canvas" style="display:flex;justify-content:center;margin:0 auto 8px"></div>
+      <div style="font-size:20px;font-weight:800;letter-spacing:4px;color:var(--green);margin:8px 0" id="qr-code-text"></div>
+      <div style="font-size:11px;color:var(--muted);margin-bottom:14px">Oder teile den Code manuell über "📋 Teilen-Code"</div>
       <button onclick="document.getElementById('qr-overlay').classList.remove('open')" style="width:100%;background:var(--black);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Fertig</button>
     </div>
   </div>
@@ -795,6 +770,7 @@ nav{
     </div>
   </div>
 
+
   <!-- BOTTOM NAV - nur 4 Tabs -->
   <div class="bottom-nav">
     <div class="bnav-inner">
@@ -808,7 +784,6 @@ nav{
   <!-- FAB -->
   <div class="fab-wrap" id="fab-wrap">
     <div class="fab-menu" id="fab-menu">
-      <div class="fab-item" data-page="chatbot"><span class="fab-item-label">KI-Tipps</span><button class="fab-item-btn" style="background:var(--blue-l)">🤖</button></div>
       <div class="fab-item" data-page="sharing"><span class="fab-item-label">Familie</span><button class="fab-item-btn" style="background:var(--purple-l)">👨‍👩‍👧</button></div>
       <div class="fab-item" data-page="gamification"><span class="fab-item-label">Achievements</span><button class="fab-item-btn" style="background:var(--yellow-l)">🏆</button></div>
       <div class="fab-item" data-page="stats"><span class="fab-item-label">Statistiken</span><button class="fab-item-btn" style="background:var(--blue-l)">📊</button></div>
@@ -1066,7 +1041,7 @@ const addItemToStorage = item => {
   const newItem = {...item, id:genId(), uid:currentUser.uid, createdAt:Date.now()};
   arr.push(newItem);
   saveItems(arr);
-  logGroupEvent('add', {name:item.name});
+  if(typeof logGroupEvent==='function') logGroupEvent('add', {name:item.name});
 };
 const updateItemInStorage = (id, data) => {
   const arr = getItems();
@@ -1076,7 +1051,7 @@ const updateItemInStorage = (id, data) => {
 const deleteItemFromStorage = id => {
   const item = getItems().find(i=>i.id===id);
   saveItems(getItems().filter(i=>i.id!==id));
-  if(item) logGroupEvent('del', {name:item.name});
+  if(item && typeof logGroupEvent==='function') logGroupEvent('del', {name:item.name});
 };
 
 // ── ZONES ──────────────────────────────────────
@@ -1398,6 +1373,78 @@ const RECIPES = [
   {title:"Schinken-Käse Sandwich",kcal:420,protein:26,carbs:36,fat:18,time:"5 Min",timeMin:5,diff:"Einfach",
    ing:["Schinken gekocht","Gouda Scheiben","Butter"],
    steps:"1. Brot mit Butter bestreichen.\n2. Schinken und Käse auflegen.\n3. Optional: in Pfanne von beiden Seiten goldbraun toasten.\n4. Halbieren und servieren."},
+  {title:"Klassische Bolognese",kcal:580,protein:38,carbs:52,fat:22,time:"40 Min",timeMin:40,diff:"Mittel",
+   ing:["Rinderhack","Tomatensauce","Zwiebeln gelb"],
+   steps:"1. Zwiebeln fein hacken und in Öl glasig dünsten.\n2. Hackfleisch dazugeben und krümelig anbraten.\n3. Tomatensauce einrühren, salzen und pfeffern.\n4. 20 Min bei kleiner Hitze köcheln.\n5. Mit Nudeln und Parmesan servieren."},
+  {title:"Griechischer Bauernsalat",kcal:280,protein:10,carbs:12,fat:22,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Feta","Tomaten","Gurke"],
+   steps:"1. Tomaten und Gurke in Würfel schneiden.\n2. Feta grob zerbröseln.\n3. Alles in eine Schüssel geben.\n4. Mit Olivenöl, Oregano und Pfeffer würzen.\n5. Kalt servieren."},
+  {title:"Bacon-Spiegeleier",kcal:520,protein:28,carbs:2,fat:44,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Eier","Bacon Streifen","Butter"],
+   steps:"1. Bacon in der Pfanne knusprig braten, herausnehmen.\n2. Butter in die Pfanne, Eier aufschlagen.\n3. Spiegeleier nach Wunsch braten.\n4. Mit Bacon servieren, salzen und pfeffern."},
+  {title:"Kartoffelsuppe",kcal:320,protein:8,carbs:42,fat:12,time:"35 Min",timeMin:35,diff:"Einfach",
+   ing:["Kartoffel","Zwiebeln gelb","Butter"],
+   steps:"1. Kartoffeln schälen und würfeln.\n2. Zwiebeln in Butter andünsten.\n3. Kartoffeln dazu, mit Brühe aufgießen.\n4. 20 Min köcheln bis weich.\n5. Mit Stabmixer pürieren, abschmecken."},
+  {title:"Putenbrust mit Paprika",kcal:380,protein:44,carbs:10,fat:16,time:"25 Min",timeMin:25,diff:"Einfach",
+   ing:["Putenbrust","Paprika rot","Zwiebeln gelb"],
+   steps:"1. Putenbrust in Scheiben schneiden.\n2. In Öl von beiden Seiten anbraten.\n3. Paprika und Zwiebeln dazugeben.\n4. 10 Min mitbraten, würzen.\n5. Mit Reis oder Brot servieren."},
+  {title:"Champignon-Rahm-Sauce",kcal:310,protein:8,carbs:12,fat:26,time:"20 Min",timeMin:20,diff:"Einfach",
+   ing:["Champignon","Sahne","Butter"],
+   steps:"1. Champignons in Scheiben schneiden.\n2. In Butter anbraten bis goldbraun.\n3. Sahne angießen, aufkochen lassen.\n4. Mit Salz, Pfeffer und Thymian würzen.\n5. Zu Nudeln oder Fleisch servieren."},
+  {title:"Lachs-Nudeln",kcal:560,protein:36,carbs:58,fat:18,time:"20 Min",timeMin:20,diff:"Einfach",
+   ing:["Räucherlachs","Sahne","Zitrone"],
+   steps:"1. Nudeln nach Packung kochen.\n2. Sahne in Pfanne erhitzen.\n3. Räucherlachs in Streifen dazugeben.\n4. Mit Zitronensaft und Dill würzen.\n5. Nudeln unterheben und servieren."},
+  {title:"Tomatensuppe",kcal:180,protein:4,carbs:22,fat:6,time:"20 Min",timeMin:20,diff:"Einfach",
+   ing:["Tomaten","Zwiebeln gelb","Tomatensauce"],
+   steps:"1. Zwiebeln andünsten.\n2. Tomaten würfeln und dazugeben.\n3. Tomatensauce und Brühe angießen.\n4. 15 Min köcheln lassen.\n5. Pürieren, mit Sahne und Basilikum servieren."},
+  {title:"Zucchini-Pfanne",kcal:220,protein:6,carbs:14,fat:14,time:"15 Min",timeMin:15,diff:"Einfach",
+   ing:["Zucchini","Knoblauch","Tomaten"],
+   steps:"1. Zucchini in Scheiben schneiden.\n2. Knoblauch fein hacken.\n3. In Olivenöl anbraten.\n4. Tomaten würfeln und dazugeben.\n5. Mit Salz, Pfeffer und Basilikum würzen."},
+  {title:"Hackfleisch-Auflauf",kcal:620,protein:42,carbs:28,fat:38,time:"45 Min",timeMin:45,diff:"Mittel",
+   ing:["Hackfleisch gemischt","Kartoffel","Zwiebeln gelb"],
+   steps:"1. Kartoffeln in Scheiben kochen, Zwiebeln hacken.\n2. Hackfleisch anbraten und würzen.\n3. Alles in Auflaufform schichten.\n4. Mit Käse bestreuen.\n5. Bei 200°C 25 Min backen."},
+  {title:"Hähnchen-Wrap",kcal:450,protein:36,carbs:40,fat:16,time:"20 Min",timeMin:20,diff:"Einfach",
+   ing:["Hähnchenbrust","Paprika rot","Eisbergsalat"],
+   steps:"1. Hähnchen in Streifen schneiden und anbraten.\n2. Paprika in Streifen schneiden.\n3. Salat waschen.\n4. Tortilla mit allen Zutaten belegen.\n5. Fest einrollen und servieren."},
+  {title:"Spinat mit Ei",kcal:280,protein:18,carbs:8,fat:18,time:"15 Min",timeMin:15,diff:"Einfach",
+   ing:["Spinat","Eier","Knoblauch"],
+   steps:"1. Knoblauch in Öl anbraten.\n2. Spinat dazugeben und zusammenfallen lassen.\n3. Mulden drücken, Eier hineingeben.\n4. Deckel drauf, stocken lassen.\n5. Mit Brot servieren."},
+  {title:"Karotten-Ingwer-Suppe",kcal:160,protein:3,carbs:24,fat:5,time:"30 Min",timeMin:30,diff:"Einfach",
+   ing:["Karotten","Ingwer","Zwiebeln gelb"],
+   steps:"1. Karotten, Zwiebeln und Ingwer schälen und klein schneiden.\n2. In Öl andünsten.\n3. Mit Brühe aufgießen, 20 Min köcheln.\n4. Pürieren und abschmecken.\n5. Mit Sahne und Koriander servieren."},
+  {title:"Mozzarella-Tomate Bruschetta",kcal:340,protein:14,carbs:34,fat:16,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Mozzarella","Tomaten","Basilikum"],
+   steps:"1. Brot toasten.\n2. Tomaten würfeln, mit Olivenöl und Basilikum marinieren.\n3. Mozzarella reißen.\n4. Beides auf das Brot geben.\n5. Mit Salz und Pfeffer abschmecken."},
+  {title:"Wiener Würstchen mit Kartoffeln",kcal:540,protein:22,carbs:38,fat:34,time:"25 Min",timeMin:25,diff:"Einfach",
+   ing:["Wiener Würstchen","Kartoffel","Senf mittelscharf"],
+   steps:"1. Kartoffeln als Pellkartoffeln kochen.\n2. Würstchen in heißem Wasser erhitzen.\n3. Kartoffeln schälen und halbieren.\n4. Alles auf dem Teller anrichten.\n5. Mit Senf servieren."},
+  {title:"Kräuterquark mit Gemüse",kcal:180,protein:12,carbs:14,fat:6,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Quark","Gurke","Karotten"],
+   steps:"1. Quark mit Salz, Pfeffer und Kräutern verrühren.\n2. Gurke und Karotten in Stifte schneiden.\n3. Quark in Schüssel geben.\n4. Gemüse daneben anrichten.\n5. Als Dip oder Brotaufstrich genießen."},
+  {title:"Speck-Käse-Omelette",kcal:480,protein:30,carbs:4,fat:38,time:"12 Min",timeMin:12,diff:"Einfach",
+   ing:["Eier","Speck","Gouda Scheiben"],
+   steps:"1. Speck in Würfel schneiden und anbraten.\n2. Eier verquirlen, salzen.\n3. In die Pfanne geben und stocken lassen.\n4. Käse und Speck auf eine Hälfte.\n5. Zusammenklappen und servieren."},
+  {title:"Rindfleisch-Gemüse-Pfanne",kcal:490,protein:42,carbs:16,fat:28,time:"30 Min",timeMin:30,diff:"Mittel",
+   ing:["Rindersteak","Paprika rot","Zucchini"],
+   steps:"1. Rind in Streifen schneiden und scharf anbraten.\n2. Herausnehmen, Gemüse in derselben Pfanne braten.\n3. Fleisch wieder dazu.\n4. Mit Sojasauce und Knoblauch würzen.\n5. Mit Reis servieren."},
+  {title:"Käsesuppe",kcal:420,protein:16,carbs:20,fat:32,time:"25 Min",timeMin:25,diff:"Einfach",
+   ing:["Schmelzkäse","Kartoffel","Zwiebeln gelb"],
+   steps:"1. Zwiebeln andünsten, Kartoffeln würfeln.\n2. Mit Brühe aufkochen, 15 Min köcheln.\n3. Schmelzkäse einrühren.\n4. Mit Pfeffer und Petersilie würzen.\n5. Mit Brot servieren."},
+  {title:"Thunfisch-Pasta",kcal:470,protein:32,carbs:56,fat:10,time:"15 Min",timeMin:15,diff:"Einfach",
+   ing:["Thunfisch","Tomatensauce","Knoblauch"],
+   steps:"1. Nudeln kochen.\n2. Knoblauch in Öl anbraten.\n3. Thunfisch und Tomatensauce dazugeben.\n4. 5 Min köcheln.\n5. Mit Nudeln und Petersilie servieren."},
+  {title:"Brokkoli-Auflauf",kcal:380,protein:20,carbs:22,fat:24,time:"40 Min",timeMin:40,diff:"Mittel",
+   ing:["Brokkoli","Sahne","Parmesan gerieben"],
+   steps:"1. Brokkoli in Röschen teilen, kurz blanchieren.\n2. In Auflaufform geben.\n3. Sahne mit Salz und Pfeffer darübergießen.\n4. Mit Parmesan bestreuen.\n5. Bei 200°C 20 Min backen."},
+  {title:"Leberwurst-Brot",kcal:380,protein:16,carbs:28,fat:24,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Leberwurst fein","Butter","Zwiebeln gelb"],
+   steps:"1. Brot mit Butter bestreichen.\n2. Leberwurst großzügig aufstreichen.\n3. Zwiebeln in Ringe schneiden.\n4. Ringe auf die Leberwurst legen.\n5. Mit Salz und Pfeffer abschmecken."},
+  {title:"Mango-Joghurt Bowl",kcal:260,protein:10,carbs:42,fat:4,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Griechischer Joghurt 10%","Mango","Heidelbeeren"],
+   steps:"1. Joghurt in eine Schüssel geben.\n2. Mango schälen und würfeln.\n3. Beeren waschen.\n4. Früchte auf dem Joghurt anrichten.\n5. Optional mit Granola oder Honig toppen."},
+  {title:"Chorizo-Paprika-Pfanne",kcal:540,protein:24,carbs:14,fat:42,time:"20 Min",timeMin:20,diff:"Einfach",
+   ing:["Chorizo","Paprika rot","Zwiebeln gelb"],
+   steps:"1. Chorizo in Scheiben schneiden.\n2. In der Pfanne anbraten bis das Fett austritt.\n3. Paprika und Zwiebeln dazugeben.\n4. 10 Min mitbraten.\n5. Mit Brot oder Reis servieren."},
 ];
 
 // ── HELPERS ────────────────────────────────────
@@ -1436,13 +1483,18 @@ const OB_STEPS = [
     target:'bn-add', pos:'above', action:'addProduct'
   },
   {
+    emoji:'🍽️', title:'Rezeptvorschläge',
+    desc:'FreshVault schlägt dir automatisch Rezepte vor die du mit deinen aktuellen Zutaten kochen kannst – über 50 Rezepte mit Kalorien, Nährwerten und Schritt-für-Schritt Anleitung. Fehlende Zutaten direkt auf die Einkaufsliste!',
+    target:'fab-btn', pos:'above', action:null
+  },
+  {
     emoji:'🛒', title:'Einkaufsliste',
     desc:'Abgelaufene Produkte landen automatisch auf deiner Einkaufsliste. Du kannst auch manuell Sachen hinzufügen und abhaken wenn du einkaufen warst.',
     target:'bn-shopping', pos:'above', action:null
   },
   {
     emoji:'➕', title:'Schnellmenü',
-    desc:'Das grüne Plus öffnet ein Menü mit KI-Tipps, Familien-Sharing, Achievements, Rezepten, Statistiken, Warnungen und Einstellungen.',
+    desc:'Das grüne Plus öffnet ein Menü mit Familien-Sharing, Achievements, Rezepten, Statistiken, Warnungen und Einstellungen – alles griffbereit.',
     target:'fab-btn', pos:'above', action:null
   },
   {
@@ -1486,7 +1538,6 @@ function obRender(){
   document.getElementById('ob-title').textContent = step.title;
   document.getElementById('ob-desc').textContent = step.desc;
 
-  // Button label
   let btnLabel = obStep === total-1 ? '🚀 Fertig!' : 'Weiter →';
   if(step.action === 'addProduct') btnLabel = '➕ Produkt hinzufügen';
   document.getElementById('ob-next').textContent = btnLabel;
@@ -1499,75 +1550,25 @@ function obRender(){
   const card = document.getElementById('ob-card');
   const hl   = document.getElementById('ob-highlight');
 
+  // Card ALWAYS stays fixed at the top center – no jumping
+  const vw = window.innerWidth;
+  const cardW = Math.min(320, vw - 32);
+  const cardLeft = Math.round((vw - cardW) / 2);
+  card.style.cssText = `left:${cardLeft}px;top:16px;transform:none;width:${cardW}px`;
+
+  // Highlight the target element if there is one
   if(!step.target){
-    card.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%)';
     hl.style.opacity = '0';
     return;
   }
-
   const targetEl = document.getElementById(step.target) || document.querySelector('.'+step.target);
   if(!targetEl){
-    card.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%)';
     hl.style.opacity = '0';
     return;
   }
-
-  const r   = targetEl.getBoundingClientRect();
+  const r = targetEl.getBoundingClientRect();
   const pad = 6;
-  const vp  = window.innerHeight;
-  const vw  = window.innerWidth;
-
-  // Highlight sits around target
   hl.style.cssText = `opacity:1;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`;
-
-  const cardW = Math.min(320, vw - 32);
-  const cardH = 240;
-  const gap   = 16; // min gap between card edge and target edge
-
-  const spaceAbove = r.top - pad - gap;
-  const spaceBelow = vp - r.bottom - pad - gap;
-
-  let cardTop;
-  if(step.pos === 'above'){
-    // Prefer above the element
-    if(spaceAbove >= cardH){
-      cardTop = r.top - pad - gap - cardH;
-    } else {
-      // Not enough room above → go below
-      cardTop = r.bottom + pad + gap;
-    }
-  } else if(step.pos === 'below'){
-    if(spaceBelow >= cardH){
-      cardTop = r.bottom + pad + gap;
-    } else {
-      cardTop = r.top - pad - gap - cardH;
-    }
-  } else {
-    // Auto: pick side with most space
-    cardTop = spaceAbove >= spaceBelow
-      ? r.top - pad - gap - cardH
-      : r.bottom + pad + gap;
-  }
-
-  // Hard clamp to screen, but NEVER overlap the target element
-  cardTop = Math.max(56, Math.min(cardTop, vp - cardH - 8));
-
-  // If card still overlaps target after clamp, push it away
-  const cardBottom = cardTop + cardH;
-  if(cardBottom > r.top - pad && cardTop < r.bottom + pad){
-    // Overlap detected → place on the side with more room
-    if(spaceAbove >= spaceBelow){
-      cardTop = r.top - pad - gap - cardH;
-    } else {
-      cardTop = r.bottom + pad + gap;
-    }
-    cardTop = Math.max(56, Math.min(cardTop, vp - cardH - 8));
-  }
-
-  let cardLeft = r.left + r.width/2 - cardW/2;
-  cardLeft = Math.max(16, Math.min(cardLeft, vw - cardW - 16));
-
-  card.style.cssText = `left:${cardLeft}px;top:${cardTop}px;transform:none;width:${cardW}px`;
 }
 
 function obNext(){
@@ -2190,7 +2191,6 @@ function saveDisplayName(){
 function saveApiKey(){
   const val = document.getElementById('api-key-input').value.trim();
   if(!val) return;
-  localStorage.setItem('fv_api_key', val);
   document.getElementById('api-key-input').value='';
   document.getElementById('api-key-status').textContent='✓ API-Key gespeichert';
   document.getElementById('api-key-status').style.color='var(--green)';
@@ -2210,8 +2210,6 @@ function renderSettings(){
   const nameInput = document.getElementById('display-name-input');
   const apiStatus = document.getElementById('api-key-status');
   if(nameInput) nameInput.value = getDisplayName();
-  if(apiStatus) apiStatus.textContent = localStorage.getItem('fv_api_key') ? '✓ API-Key hinterlegt' : 'Kein API-Key gespeichert';
-  if(apiStatus) apiStatus.style.color = localStorage.getItem('fv_api_key') ? 'var(--green)' : 'var(--muted)';
 
   // Basis-Temperatur Slider
   document.getElementById('zone-settings').innerHTML=`
@@ -2895,8 +2893,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(document.getElementById('onboarding').classList.contains('active')) obRender();
   });
 });
-</script>
-<script>
+
 // ══════════════════════════════════════════
 // 🏆 GAMIFICATION
 // ══════════════════════════════════════════
@@ -2909,7 +2906,6 @@ const BADGES = [
   {id:'week1',       icon:'📅', name:'Treuer Nutzer',     desc:'7 Tage dabei',            xp:30,  check:s=>s.daysUsed>=7},
   {id:'month1',      icon:'🏅', name:'Stammgast',         desc:'30 Tage dabei',           xp:100, check:s=>s.daysUsed>=30},
   {id:'family',      icon:'👨‍👩‍👧', name:'Familien-Chef',   desc:'Gruppe erstellt',         xp:50,  check:s=>s.createdGroup},
-  {id:'chat1',       icon:'🤖', name:'KI-Freund',         desc:'Mit KI gechattet',        xp:15,  check:s=>s.chatMsgs>=1},
   {id:'allzones',    icon:'❄️', name:'Zonen-Meister',    desc:'Alle 4 Zonen befüllt',    xp:40,  check:s=>s.zonesUsed>=4},
   {id:'recipes',     icon:'🍳', name:'Chefkoch',          desc:'5 Rezepte angesehen',     xp:20,  check:s=>s.recipesViewed>=5},
   {id:'barcode',     icon:'📦', name:'Scanner',           desc:'Barcode gescannt',        xp:20,  check:s=>s.barcodeScanned},
@@ -2933,7 +2929,7 @@ function addXP(amount, reason=''){
 
 function trackStat(key, val=1){
   const s = getStats();
-  if(['saved','totalAdded','chatMsgs','recipesViewed','zonesUsed','daysUsed','perfectWeeks'].includes(key)){
+  if(['saved','totalAdded','recipesViewed','zonesUsed','daysUsed','perfectWeeks'].includes(key)){
     s[key] = (s[key]||0) + val;
   } else {
     s[key] = val;
@@ -3198,39 +3194,28 @@ function leaveGroup(){
 }
 
 function drawQR(text){
-  const canvas=document.getElementById('qr-canvas');
-  if(!canvas) return;
-  const size=180; const ctx=canvas.getContext('2d');
-  canvas.width=size; canvas.height=size;
-  const isDark=document.body.classList.contains('dark');
-  ctx.fillStyle=isDark?'#1a1a1a':'#fff';
-  ctx.fillRect(0,0,size,size);
-  ctx.fillStyle=isDark?'#3a8a65':'#2d6a4f';
-  const cell=size/10;
-  const shortText=text.slice(0,6);
-  for(let i=0;i<shortText.length;i++){
-    const v=shortText.charCodeAt(i);
-    for(let r=0;r<10;r++) for(let c=0;c<10;c++){
-      if(((v*r+c*i)%3)===0) ctx.fillRect(c*cell,r*cell,cell,cell);
-    }
+  const container = document.getElementById('qr-canvas');
+  if(!container) return;
+  container.innerHTML = ''; // clear previous
+  try{
+    new QRCode(container, {
+      text: text,
+      width: 200,
+      height: 200,
+      colorDark: '#2d6a4f',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+  }catch(e){
+    // fallback if QRCode lib not loaded yet
+    container.innerHTML = `<div style="width:200px;height:200px;background:var(--g1);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--muted);padding:10px;text-align:center">QR-Code konnte nicht geladen werden.<br>Nutze den Teilen-Code.</div>`;
   }
-  [[0,0],[0,7],[7,0]].forEach(([r,c])=>{
-    ctx.fillStyle=isDark?'#3a8a65':'#2d6a4f';
-    ctx.fillRect(c*cell,r*cell,3*cell,3*cell);
-    ctx.fillStyle=isDark?'#1a1a1a':'#fff';
-    ctx.fillRect(c*cell+cell/2,r*cell+cell/2,2*cell,2*cell);
-    ctx.fillStyle=isDark?'#3a8a65':'#2d6a4f';
-    ctx.fillRect(c*cell+cell,r*cell+cell,cell,cell);
-  });
-  ctx.fillStyle=isDark?'#f0f0f0':'#0e0e0e';
-  ctx.font=`bold ${Math.round(cell*.85)}px Sora,sans-serif`;
-  ctx.textAlign='center';
-  ctx.fillText(shortText,size/2,size-cell*.3);
 }
 
 function showQR(){
   const shareCode = getShareableCode();
-  document.getElementById('qr-code-text').textContent = myGroup()?.code||'';
+  const shortCode = myGroup()?.code||'';
+  document.getElementById('qr-code-text').textContent = shortCode;
   drawQR(shareCode);
   document.getElementById('qr-overlay').classList.add('open');
 }
@@ -3291,130 +3276,6 @@ window.myItems = function(){
 };
 
 
-// ══════════════════════════════════════════
-// 🤖 KI CHATBOT
-// ══════════════════════════════════════════
-let chatHistory = [];
-
-async function sendChat(){
-  const input=document.getElementById('chat-input');
-  const msg=input.value.trim();
-  if(!msg) return;
-  input.value='';
-  input.style.height='';
-  addChatMsg(msg,'user');
-  getBotResponse(msg);
-}
-
-function sendChatSuggestion(btn){
-  document.getElementById('chat-input').value=btn.textContent;
-  sendChat();
-}
-
-function clearChat(){
-  chatHistory=[];
-  const msgs=document.getElementById('chat-msgs');
-  msgs.innerHTML=`<div style="display:flex;gap:8px;align-items:flex-start;max-width:100%">
-    <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--blue),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
-    <div style="background:var(--g1);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:14px;line-height:1.5;color:var(--text)">👋 Hallo! Ich bin wieder da. Was kann ich für dich tun?</div>
-  </div>`;
-}
-
-function addChatMsg(text,role){
-  const msgs=document.getElementById('chat-msgs');
-  const wrap=document.createElement('div');
-  wrap.style.cssText='display:flex;gap:8px;align-items:flex-start;animation:fadeUp .2s ease';
-  if(role==='user'){
-    wrap.style.justifyContent='flex-end';
-    const bubble=document.createElement('div');
-    bubble.style.cssText='background:var(--green);color:white;border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:14px;line-height:1.5;max-width:80%';
-    bubble.textContent=text;
-    wrap.appendChild(bubble);
-  } else {
-    const avatar=document.createElement('div');
-    avatar.style.cssText='width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--blue),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0';
-    avatar.textContent='🤖';
-    const bubble=document.createElement('div');
-    bubble.style.cssText=`background:var(--g1);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:14px;line-height:1.5;color:${text==='tippt…'?'var(--muted)':'var(--text)'};font-style:${text==='tippt…'?'italic':'normal'};max-width:80%`;
-    bubble.textContent=text;
-    wrap.appendChild(avatar);
-    wrap.appendChild(bubble);
-    wrap._bubble=bubble;
-  }
-  msgs.appendChild(wrap);
-  msgs.scrollTop=msgs.scrollHeight;
-  return wrap;
-}
-
-async function getBotResponse(userMsg){
-  const loadWrap=addChatMsg('tippt…','bot');
-  const loadBubble=loadWrap._bubble||loadWrap.querySelector('div:last-child');
-  trackStat('chatMsgs');
-
-  const items=myItems();
-  const expiring=items.filter(i=>dl(i.expiry)<=3&&dl(i.expiry)>=0);
-  const expired=items.filter(i=>dl(i.expiry)<0);
-  const itemList=items.length>0
-    ? items.slice(0,20).map(i=>`${i.name} (${i.cat?.replace(/^\S+\s/,'')||''}, MHD: ${fmt(i.expiry)}, noch ${dl(i.expiry)}d)`).join('\n')
-    : 'Keine Produkte eingetragen';
-
-  const systemPrompt=`Du bist FreshVault KI, ein freundlicher Kühlschrank-Assistent. Antworte immer auf Deutsch, kurz und praktisch (max. 120 Wörter). Nutze gelegentlich Emojis. Sei persönlich und hilfreich.
-
-Aktueller Kühlschrankinhalt:
-${itemList}
-${expiring.length>0?`\n⚠️ Bald ablaufend (≤3 Tage): ${expiring.map(i=>i.name+'('+dl(i.expiry)+'d)').join(', ')}`:''}
-${expired.length>0?`\n❌ Abgelaufen: ${expired.map(i=>i.name).join(', ')}`:''}
-
-Hilf bei: Haltbarkeit, Aufbewahrung, Rezepten, Food-Waste-Tipps, Kühlzonen.`;
-
-  chatHistory.push({role:'user',content:userMsg});
-
-  // Get stored API key or ask user
-  let apiKey = localStorage.getItem('fv_api_key')||'';
-  if(!apiKey){
-    apiKey = prompt('Bitte gib deinen Anthropic API-Key ein (wird nur lokal gespeichert):');
-    if(!apiKey){
-      chatHistory.pop();
-      if(loadBubble){ loadBubble.textContent='❌ Kein API-Key. Bitte in den Einstellungen hinterlegen.'; loadBubble.style.color='var(--red)'; loadBubble.style.fontStyle='normal'; }
-      return;
-    }
-    localStorage.setItem('fv_api_key', apiKey.trim());
-  }
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'x-api-key': apiKey.trim(),
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-callouts':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:500,
-        system: systemPrompt,
-        messages:chatHistory.slice(-8)
-      })
-    });
-    const data=await res.json();
-    if(data.error){
-      // Invalid key – clear it so user can re-enter
-      if(data.error.type==='authentication_error') localStorage.removeItem('fv_api_key');
-      throw new Error(data.error.message);
-    }
-    const reply=data.content?.[0]?.text||'Entschuldigung, keine Antwort erhalten.';
-    chatHistory.push({role:'assistant',content:reply});
-    if(loadBubble){ loadBubble.textContent=reply; loadBubble.style.fontStyle='normal'; loadBubble.style.color='var(--text)'; }
-    addXP(2,'KI-Tipp erhalten');
-  }catch(e){
-    if(loadBubble){ loadBubble.textContent=`❌ Fehler: ${e.message||'KI nicht erreichbar.'}. Tippe nochmal um es zu versuchen.`; loadBubble.style.fontStyle='normal'; loadBubble.style.color='var(--red)'; }
-    console.error('Chat error:',e);
-  }
-  document.getElementById('chat-msgs').scrollTop=9999;
-}
-  document.getElementById('chat-msgs').scrollTop=9999;
-}
 
 // ══════════════════════════════════════════
 // 🔗 NAV INTEGRATION
