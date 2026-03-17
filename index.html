@@ -42,6 +42,42 @@ body.dark .sheet{background:var(--white)}
 body.dark .autocomplete-dropdown{background:var(--white);border-color:var(--g2)}
 body.dark input,body.dark select{color:var(--text);background:var(--g1);border-color:var(--g2)}
 body.dark .splash{background:linear-gradient(160deg,#0a1f16 0%,#1a3d2d 50%,#0a1510 100%)}
+
+/* ── GAMIFICATION ── */
+.xp-bar-wrap{background:var(--g1);border-radius:999px;height:8px;overflow:hidden;margin:6px 0}
+.xp-bar{height:100%;background:linear-gradient(90deg,var(--green),#4ade80);border-radius:999px;transition:width .6s ease}
+.badge-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:12px}
+.badge-item{background:var(--g1);border:1px solid var(--g2);border-radius:12px;padding:12px 8px;text-align:center;transition:all .2s}
+.badge-item.earned{background:var(--green-l);border-color:var(--green)}
+.badge-item.locked{opacity:.4}
+.badge-icon{font-size:26px;margin-bottom:4px}
+.badge-name{font-size:10px;font-weight:600;color:var(--text)}
+.badge-desc{font-size:9px;color:var(--muted);margin-top:2px}
+.level-badge{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,var(--green),#16a34a);color:white;border-radius:999px;padding:5px 12px;font-size:12px;font-weight:700}
+
+/* ── SHARING ── */
+.group-card{background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:10px}
+.group-code{font-size:32px;font-weight:800;letter-spacing:6px;color:var(--green);text-align:center;padding:16px;background:var(--green-l);border-radius:10px;margin:10px 0;cursor:pointer}
+.group-member{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--g1)}
+.group-member:last-child{border-bottom:none}
+.member-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--green),#4ade80);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:white;flex-shrink:0}
+.member-info{flex:1}
+.member-name{font-size:13px;font-weight:600}
+.member-role{font-size:11px;color:var(--muted)}
+.qr-canvas{display:block;margin:0 auto;border-radius:10px;max-width:180px;width:100%}
+
+/* ── KI CHATBOT ── */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 180px);max-height:500px}
+.chat-msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px}
+.chat-msg{max-width:82%;padding:10px 14px;border-radius:16px;font-size:14px;line-height:1.5;animation:fadeUp .2s ease}
+.chat-msg.user{align-self:flex-end;background:var(--green);color:white;border-radius:16px 16px 4px 16px}
+.chat-msg.bot{align-self:flex-start;background:var(--g1);color:var(--text);border-radius:16px 16px 16px 4px}
+.chat-msg.bot.loading{color:var(--muted);font-style:italic}
+.chat-input-wrap{display:flex;gap:8px;padding:12px;border-top:1px solid var(--g2)}
+.chat-input{flex:1;background:var(--g1);border:1px solid var(--g2);border-radius:12px;padding:10px 14px;font-size:14px;font-family:inherit;color:var(--text);outline:none;resize:none;max-height:80px}
+.chat-send{background:var(--green);border:none;border-radius:10px;color:white;width:40px;height:40px;cursor:pointer;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
+.chat-sug-btn{background:var(--green-l);border:1px solid var(--green);color:var(--green);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
 body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height:100vh;overflow:hidden;-webkit-tap-highlight-color:transparent}
 
 /* SPLASH SCREEN */
@@ -2571,5 +2607,539 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 </script>
-</body>
-</html>
+<!-- ── GAMIFICATION PAGE ── -->
+<div class="page" id="page-gamification" style="overflow-y:auto">
+  <div class="wrap">
+    <div class="page-title">🏆 Achievements</div>
+    <div class="group-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div>
+          <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Dein Level</div>
+          <div style="font-size:22px;font-weight:800;margin-top:2px" id="xp-level-name">🌱 Frischling</div>
+        </div>
+        <span class="level-badge" id="xp-level-badge">Level 1</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px"><span id="xp-current">0</span> / <span id="xp-next">100</span> XP</div>
+      <div class="xp-bar-wrap"><div class="xp-bar" id="xp-bar" style="width:0%"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px" id="xp-total-saved">Du hast bisher <strong id="xp-products-saved">0</strong> Produkte vor dem Ablauf gerettet! 🎉</div>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)">Deine Badges</div>
+    <div class="badge-grid" id="badge-grid"></div>
+  </div>
+</div>
+
+<!-- ── SHARING PAGE ── -->
+<div class="page" id="page-sharing" style="overflow-y:auto">
+  <div class="wrap">
+    <div class="page-title">👨‍👩‍👧 Familien-Sharing</div>
+    <div id="sharing-no-group">
+      <div class="group-card" style="text-align:center">
+        <div style="font-size:40px;margin-bottom:12px">🏠</div>
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px">Noch keine Gruppe</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Erstelle eine Familiengruppe oder tritt einer bei</div>
+        <button onclick="createGroup()" style="width:100%;background:var(--green);color:white;border:none;border-radius:var(--r);padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px">➕ Neue Gruppe erstellen</button>
+        <button onclick="document.getElementById('join-group-overlay').classList.add('open')" style="width:100%;background:var(--g1);color:var(--text);border:1px solid var(--g2);border-radius:var(--r);padding:13px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">🔑 Gruppe beitreten</button>
+      </div>
+    </div>
+    <div id="sharing-has-group" style="display:none">
+      <div class="group-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:16px;font-weight:700" id="group-name-display">Meine Familie</div>
+          <span style="font-size:11px;background:var(--green-l);color:var(--green);border-radius:999px;padding:3px 10px;font-weight:600" id="group-role-badge">Admin</span>
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Gruppencode – tippe zum Kopieren:</div>
+        <div class="group-code" id="group-code-display" onclick="copyGroupCode()">ABC123</div>
+        <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:12px">📋 Tippen zum Kopieren · Teile den Code mit deiner Familie</div>
+        <button onclick="showQR()" style="width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:8px">📱 QR-Code anzeigen</button>
+        <button onclick="leaveGroup()" style="width:100%;background:var(--red-l);color:var(--red);border:1px solid var(--red);border-radius:10px;padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🚪 Gruppe verlassen</button>
+      </div>
+      <div class="group-card">
+        <div style="font-size:14px;font-weight:700;margin-bottom:10px">👥 Mitglieder</div>
+        <div id="group-members-list"></div>
+      </div>
+      <div class="group-card" style="background:var(--green-l);border-color:var(--green)">
+        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px">ℹ️ Wie Sharing funktioniert</div>
+        <div style="font-size:12px;color:var(--green)">Alle Gruppenmitglieder sehen denselben Kühlschrank. Produkte die ein Mitglied hinzufügt, sehen alle. Der Admin kann Mitglieder entfernen.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── KI CHATBOT PAGE ── -->
+<div class="page" id="page-chatbot" style="display:none;flex-direction:column;overflow:hidden">
+  <div class="wrap" style="padding-bottom:0;flex-shrink:0">
+    <div class="page-title" style="margin-bottom:4px">🤖 FreshVault KI</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Frag mich alles über Lebensmittel, Haltbarkeit & Küchentipps!</div>
+  </div>
+  <div class="chat-suggestions" id="chat-suggestions">
+    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Wie lange hält Milch?</button>
+    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Was kann ich mit Tomaten machen?</button>
+    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Tipps gegen Food Waste?</button>
+    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Was läuft bald ab?</button>
+  </div>
+  <div class="chat-wrap" style="height:calc(100vh - 240px)">
+    <div class="chat-msgs" id="chat-msgs">
+      <div class="chat-msg bot">👋 Hallo! Ich bin dein FreshVault KI-Assistent. Ich helfe dir dabei, Lebensmittel länger frisch zu halten, Food Waste zu reduzieren und gebe dir Küchentipps. Was möchtest du wissen?</div>
+    </div>
+    <div class="chat-input-wrap">
+      <textarea class="chat-input" id="chat-input" placeholder="Frag mich etwas..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+      <button class="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR OVERLAY -->
+<div class="overlay" id="qr-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="sheet" style="max-width:320px;text-align:center">
+    <div style="font-size:17px;font-weight:700;margin-bottom:4px">📱 QR-Code</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Lass deine Familie diesen Code scannen</div>
+    <canvas id="qr-canvas" class="qr-canvas"></canvas>
+    <div style="font-size:24px;font-weight:800;letter-spacing:4px;color:var(--green);margin:12px 0" id="qr-code-text"></div>
+    <button onclick="document.getElementById('qr-overlay').classList.remove('open')" style="width:100%;background:var(--black);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Fertig</button>
+  </div>
+</div>
+
+<!-- JOIN GROUP OVERLAY -->
+<div class="overlay" id="join-group-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="sheet" style="max-width:360px">
+    <div style="font-size:17px;font-weight:700;margin-bottom:16px">🔑 Gruppe beitreten</div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:5px">Gruppen-Code</label>
+      <input id="join-code-input" type="text" placeholder="z.B. ABC123" maxlength="6" style="width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:12px;font-size:20px;font-weight:700;letter-spacing:4px;text-align:center;font-family:inherit;color:var(--text);outline:none;text-transform:uppercase">
+    </div>
+    <div style="font-size:12px;color:var(--red);margin-bottom:10px;min-height:16px" id="join-error"></div>
+    <button onclick="joinGroup()" style="width:100%;background:var(--green);color:white;border:none;border-radius:var(--r);padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">Beitreten</button>
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════
+// 🏆 GAMIFICATION
+// ══════════════════════════════════════════
+const BADGES = [
+  {id:'first_add',   icon:'🥚', name:'Erster Schritt',  desc:'1. Produkt hinzugefügt',  xp:10,  check:s=>s.totalAdded>=1},
+  {id:'saver5',      icon:'🌱', name:'Frische-Held',    desc:'5 Produkte gerettet',     xp:25,  check:s=>s.saved>=5},
+  {id:'saver20',     icon:'🌿', name:'Food-Warrior',    desc:'20 Produkte gerettet',    xp:75,  check:s=>s.saved>=20},
+  {id:'saver50',     icon:'🌳', name:'Zero Waste Pro',  desc:'50 Produkte gerettet',    xp:200, check:s=>s.saved>=50},
+  {id:'week1',       icon:'📅', name:'Treuer Nutzer',   desc:'7 Tage dabei',            xp:30,  check:s=>s.daysUsed>=7},
+  {id:'month1',      icon:'🏅', name:'Stammgast',       desc:'30 Tage dabei',           xp:100, check:s=>s.daysUsed>=30},
+  {id:'family',      icon:'👨‍👩‍👧', name:'Familien-Chef',  desc:'Gruppe erstellt',         xp:50,  check:s=>s.createdGroup},
+  {id:'chat1',       icon:'🤖', name:'KI-Freund',       desc:'Mit KI gechattet',        xp:15,  check:s=>s.chatMsgs>=1},
+  {id:'allzones',    icon:'❄️', name:'Zonen-Meister',   desc:'Alle 4 Zonen befüllt',    xp:40,  check:s=>s.zonesUsed>=4},
+  {id:'recipes',     icon:'🍳', name:'Chefkoch',        desc:'5 Rezepte angesehen',     xp:20,  check:s=>s.recipesViewed>=5},
+  {id:'barcode',     icon:'📦', name:'Scanner',         desc:'Barcode gescannt',        xp:20,  check:s=>s.barcodeScanned},
+  {id:'nofoodwaste', icon:'🏆', name:'Food Waste Hero', desc:'1 Woche nix abgelaufen',  xp:150, check:s=>s.perfectWeeks>=1},
+];
+
+const LEVELS = [
+  {name:'🌱 Frischling', min:0},   {name:'🥬 Gemüse-Fan', min:50},
+  {name:'🍎 Frische-Held', min:150},{name:'🌿 Öko-Kämpfer', min:300},
+  {name:'🍃 Food-Guru', min:500},   {name:'🌳 Zero Waste Pro', min:800},
+  {name:'🏆 FreshVault Legend', min:1200},
+];
+
+function getStats(){
+  try{ return JSON.parse(localStorage.getItem('fv_stats')||'{}'); }catch{return {};}
+}
+function saveStats(s){ localStorage.setItem('fv_stats',JSON.stringify(s)); }
+
+function addXP(amount, reason=''){
+  const s = getStats();
+  s.xp = (s.xp||0) + amount;
+  saveStats(s);
+  showXPToast(amount, reason);
+  renderGamification();
+}
+
+function trackStat(key, val=1){
+  const s = getStats();
+  if(key==='saved'||key==='totalAdded'||key==='chatMsgs'||key==='recipesViewed'||key==='zonesUsed'||key==='daysUsed'||key==='perfectWeeks'){
+    s[key] = (s[key]||0) + val;
+  } else {
+    s[key] = val;
+  }
+  // Check new badges
+  const earned = s.earnedBadges||[];
+  BADGES.forEach(b=>{
+    if(!earned.includes(b.id) && b.check(s)){
+      earned.push(b.id);
+      s.xp = (s.xp||0) + b.xp;
+      showBadgeToast(b);
+    }
+  });
+  s.earnedBadges = earned;
+  saveStats(s);
+  renderGamification();
+}
+
+function showXPToast(amount, reason){
+  const t = document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:var(--green);color:white;padding:8px 18px;border-radius:999px;font-size:13px;font-weight:700;z-index:9999;animation:fadeUp .3s ease;pointer-events:none;white-space:nowrap`;
+  t.textContent = `+${amount} XP${reason?' · '+reason:''}`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2500);
+}
+
+function showBadgeToast(badge){
+  const t = document.createElement('div');
+  t.style.cssText=`position:fixed;top:80px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,var(--green),#16a34a);color:white;padding:12px 20px;border-radius:16px;font-size:14px;font-weight:700;z-index:9999;animation:fadeUp .3s ease;pointer-events:none;text-align:center;box-shadow:0 8px 24px rgba(0,0,0,.2);white-space:nowrap`;
+  t.innerHTML = `${badge.icon} Badge freigeschaltet!<br><span style="font-size:12px;font-weight:400;opacity:.9">${badge.name}</span>`;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+function renderGamification(){
+  const s = getStats();
+  const xp = s.xp||0;
+  const earned = s.earnedBadges||[];
+  // Level
+  let lvl = LEVELS[0], nextXp = LEVELS[1].min;
+  for(let i=LEVELS.length-1;i>=0;i--){
+    if(xp>=LEVELS[i].min){lvl=LEVELS[i];nextXp=LEVELS[i+1]?LEVELS[i+1].min:xp+1;break;}
+  }
+  const pct = Math.min(100,Math.round((xp-lvl.min)/(nextXp-lvl.min)*100));
+  const lvlIdx = LEVELS.indexOf(lvl)+1;
+
+  const nameEl=document.getElementById('xp-level-name');
+  const badgeEl=document.getElementById('xp-level-badge');
+  const curEl=document.getElementById('xp-current');
+  const nxtEl=document.getElementById('xp-next');
+  const barEl=document.getElementById('xp-bar');
+  const savedEl=document.getElementById('xp-products-saved');
+  if(nameEl) nameEl.textContent=lvl.name;
+  if(badgeEl) badgeEl.textContent=`Level ${lvlIdx}`;
+  if(curEl) curEl.textContent=xp;
+  if(nxtEl) nxtEl.textContent=nextXp;
+  if(barEl) barEl.style.width=pct+'%';
+  if(savedEl) savedEl.textContent=s.saved||0;
+
+  const grid=document.getElementById('badge-grid');
+  if(!grid)return;
+  grid.innerHTML=BADGES.map(b=>{
+    const e=earned.includes(b.id);
+    return `<div class="badge-item ${e?'earned':'locked'}">
+      <div class="badge-icon">${b.icon}</div>
+      <div class="badge-name">${b.name}</div>
+      <div class="badge-desc">${e?'✓ Verdient':b.desc}</div>
+    </div>`;
+  }).join('');
+}
+
+// Track first load date
+(function(){
+  const s=getStats();
+  if(!s.firstDay){s.firstDay=Date.now();saveStats(s);}
+  const days=Math.floor((Date.now()-s.firstDay)/86400000);
+  if(days>=(s.lastDayTracked||0)+1){
+    const ns={...s,daysUsed:(s.daysUsed||0)+1,lastDayTracked:days};
+    saveStats(ns);
+  }
+})();
+
+
+// ══════════════════════════════════════════
+// 👨‍👩‍👧 FAMILIEN-SHARING
+// ══════════════════════════════════════════
+function getGroups(){ try{return JSON.parse(localStorage.getItem('fv_groups')||'{}')}catch{return{}} }
+function saveGroups(g){ localStorage.setItem('fv_groups',JSON.stringify(g)) }
+function myGroup(){
+  if(!window.currentUser) return null;
+  const groups=getGroups();
+  for(const code in groups){
+    const g=groups[code];
+    if(g.members && g.members.find(m=>m.uid===currentUser.uid)) return {code,...g};
+  }
+  return null;
+}
+
+function genGroupCode(){
+  const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let c='';for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+
+function createGroup(){
+  if(!currentUser){return;}
+  const code=genGroupCode();
+  const groups=getGroups();
+  groups[code]={
+    name: currentUser.email.split('@')[0]+"'s Familie",
+    adminUid: currentUser.uid,
+    members:[{uid:currentUser.uid,email:currentUser.email,role:'Admin',joined:Date.now()}],
+    created:Date.now()
+  };
+  saveGroups(groups);
+  trackStat('createdGroup',true);
+  addXP(50,'Gruppe erstellt');
+  renderSharingPage();
+}
+
+function joinGroup(){
+  const code=document.getElementById('join-code-input').value.trim().toUpperCase();
+  const errEl=document.getElementById('join-error');
+  errEl.textContent='';
+  if(!code||code.length!==6){errEl.textContent='Bitte 6-stelligen Code eingeben.';return;}
+  const groups=getGroups();
+  if(!groups[code]){errEl.textContent='Gruppe nicht gefunden.';return;}
+  const existing=myGroup();
+  if(existing){errEl.textContent='Du bist bereits in einer Gruppe.';return;}
+  groups[code].members.push({uid:currentUser.uid,email:currentUser.email,role:'Mitglied',joined:Date.now()});
+  saveGroups(groups);
+  document.getElementById('join-group-overlay').classList.remove('open');
+  addXP(20,'Gruppe beigetreten');
+  renderSharingPage();
+  renderAll();
+}
+
+function leaveGroup(){
+  if(!confirm('Gruppe wirklich verlassen?')) return;
+  const groups=getGroups();
+  const g=myGroup();
+  if(!g) return;
+  const code=g.code;
+  groups[code].members=groups[code].members.filter(m=>m.uid!==currentUser.uid);
+  if(groups[code].members.length===0) delete groups[code];
+  saveGroups(groups);
+  renderSharingPage();
+  renderAll();
+}
+
+function copyGroupCode(){
+  const code=document.getElementById('group-code-display').textContent;
+  navigator.clipboard.writeText(code).then(()=>{
+    const el=document.getElementById('group-code-display');
+    el.textContent='✓ Kopiert!';
+    setTimeout(()=>el.textContent=code,1500);
+  }).catch(()=>{});
+}
+
+function showQR(){
+  const code=document.getElementById('group-code-display').textContent;
+  document.getElementById('qr-code-text').textContent=code;
+  drawQR(code);
+  document.getElementById('qr-overlay').classList.add('open');
+}
+
+function drawQR(text){
+  const canvas=document.getElementById('qr-canvas');
+  const size=180; const ctx=canvas.getContext('2d');
+  canvas.width=size; canvas.height=size;
+  // Simple QR-like visual (display-only, not real QR)
+  ctx.fillStyle=document.body.classList.contains('dark')?'#1a1a1a':'#fff';
+  ctx.fillRect(0,0,size,size);
+  ctx.fillStyle=document.body.classList.contains('dark')?'#3a8a65':'#2d6a4f';
+  const cell=size/10;
+  // Create a pattern from the code chars
+  for(let i=0;i<text.length;i++){
+    const v=text.charCodeAt(i);
+    for(let r=0;r<10;r++) for(let c=0;c<10;c++){
+      if(((v*r+c*i)%3)===0) ctx.fillRect(c*cell,r*cell,cell,cell);
+    }
+  }
+  // Corner markers
+  [[0,0],[0,7],[7,0]].forEach(([r,c])=>{
+    ctx.fillStyle=document.body.classList.contains('dark')?'#3a8a65':'#2d6a4f';
+    ctx.fillRect(c*cell,r*cell,3*cell,3*cell);
+    ctx.fillStyle=document.body.classList.contains('dark')?'#1a1a1a':'#fff';
+    ctx.fillRect(c*cell+cell/2,r*cell+cell/2,2*cell,2*cell);
+    ctx.fillStyle=document.body.classList.contains('dark')?'#3a8a65':'#2d6a4f';
+    ctx.fillRect(c*cell+cell,r*cell+cell,cell,cell);
+  });
+  // Code text
+  ctx.fillStyle=document.body.classList.contains('dark')?'#f0f0f0':'#0e0e0e';
+  ctx.font=`bold ${cell*.9}px Sora,sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(text,size/2,size-cell*.3);
+}
+
+function renderSharingPage(){
+  const g=myGroup();
+  document.getElementById('sharing-no-group').style.display=g?'none':'block';
+  document.getElementById('sharing-has-group').style.display=g?'block':'none';
+  if(!g) return;
+  document.getElementById('group-name-display').textContent=g.name;
+  const isAdmin=g.adminUid===currentUser.uid;
+  document.getElementById('group-role-badge').textContent=isAdmin?'👑 Admin':'Mitglied';
+  document.getElementById('group-code-display').textContent=g.code;
+  const list=document.getElementById('group-members-list');
+  list.innerHTML=(g.members||[]).map(m=>{
+    const isMe=m.uid===currentUser.uid;
+    const initials=m.email.slice(0,2).toUpperCase();
+    return `<div class="group-member">
+      <div class="member-avatar">${initials}</div>
+      <div class="member-info">
+        <div class="member-name">${m.email}${isMe?' (Du)':''}</div>
+        <div class="member-role">${m.role} · Beigetreten ${new Date(m.joined).toLocaleDateString('de-DE')}</div>
+      </div>
+      ${isAdmin&&!isMe?`<button onclick="kickMember('${g.code}','${m.uid}')" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit">Entfernen</button>`:''}
+    </div>`;
+  }).join('');
+}
+
+function kickMember(code,uid){
+  if(!confirm('Mitglied entfernen?')) return;
+  const groups=getGroups();
+  if(!groups[code]) return;
+  groups[code].members=groups[code].members.filter(m=>m.uid!==uid);
+  saveGroups(groups);
+  renderSharingPage();
+}
+
+// Override myItems to support group sharing
+const _origMyItems = window.myItems;
+window.myItems = function(){
+  const g=myGroup();
+  if(!g||!currentUser) return _origMyItems?_origMyItems():(()=>{
+    try{const d=JSON.parse(localStorage.getItem('fv_items')||'{}');return d[currentUser?.uid]||[];}catch{return [];}
+  })();
+  // Collect items from all group members
+  let all=[];
+  (g.members||[]).forEach(m=>{
+    try{
+      const d=JSON.parse(localStorage.getItem('fv_items')||'{}');
+      const uItems=(d[m.uid]||[]).map(i=>({...i,_ownerEmail:m.email,_isOwn:m.uid===currentUser.uid}));
+      all=[...all,...uItems];
+    }catch{}
+  });
+  return all;
+};
+
+
+// ══════════════════════════════════════════
+// 🤖 KI CHATBOT
+// ══════════════════════════════════════════
+let chatHistory = [];
+
+async function sendChat(){
+  const input=document.getElementById('chat-input');
+  const msg=input.value.trim();
+  if(!msg) return;
+  input.value='';
+  addChatMsg(msg,'user');
+  await getBotResponse(msg);
+}
+
+function sendChatSuggestion(btn){
+  document.getElementById('chat-input').value=btn.textContent;
+  sendChat();
+}
+
+function addChatMsg(text,role){
+  const msgs=document.getElementById('chat-msgs');
+  const div=document.createElement('div');
+  div.className=`chat-msg ${role}`;
+  div.textContent=text;
+  msgs.appendChild(div);
+  msgs.scrollTop=msgs.scrollHeight;
+  return div;
+}
+
+async function getBotResponse(userMsg){
+  const loadDiv=addChatMsg('...tippt','bot loading');
+  trackStat('chatMsgs');
+
+  // Build context with current fridge items
+  const items=window.myItems?myItems():[];
+  const itemList=items.length>0
+    ? items.slice(0,15).map(i=>`${i.name} (${i.cat||''}, läuft ab: ${i.expiry})`).join(', ')
+    : 'Keine Produkte im Kühlschrank';
+
+  chatHistory.push({role:'user',content:userMsg});
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:400,
+        system:`Du bist FreshVault, ein freundlicher KI-Assistent für Lebensmittel und Küche. Du gibst kurze, praktische Tipps auf Deutsch. Halte Antworten unter 120 Wörter. Sei freundlich und benutze manchmal Emojis.
+
+Aktueller Kühlschrankinhalt des Nutzers: ${itemList}
+
+Themen: Haltbarkeit von Lebensmitteln, Aufbewahrungstipps, Rezeptideen, Food Waste Tipps, Kühlzonen-Empfehlungen.`,
+        messages:chatHistory.slice(-6)
+      })
+    });
+    const data=await res.json();
+    const reply=data.content?.[0]?.text||'Entschuldigung, ich konnte keine Antwort generieren.';
+    chatHistory.push({role:'assistant',content:reply});
+    loadDiv.className='chat-msg bot';
+    loadDiv.textContent=reply;
+    addXP(2,'KI-Tipp erhalten');
+  }catch(e){
+    loadDiv.className='chat-msg bot';
+    loadDiv.textContent='❌ KI nicht erreichbar. Bitte prüfe deine Verbindung.';
+  }
+  document.getElementById('chat-msgs').scrollTop=9999;
+}
+
+// ══════════════════════════════════════════
+// 🔗 NAV INTEGRATION
+// ══════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  // Add nav buttons for new pages
+  const bnav=document.querySelector('.bottom-nav');
+  if(bnav){
+    // Replace "mehr" with dedicated buttons
+    const moreBtn=document.getElementById('bn-more');
+    if(moreBtn){
+      // Add sharing + chatbot + gamification to FAB menu
+      const fabMenu=document.getElementById('fab-menu');
+      if(fabMenu){
+        const extras=[
+          {page:'sharing',icon:'👨‍👩‍👧',label:'Familie'},
+          {page:'chatbot',icon:'🤖',label:'KI-Tipps'},
+          {page:'gamification',icon:'🏆',label:'Achievements'},
+        ];
+        extras.forEach(e=>{
+          const item=document.createElement('button');
+          item.className='fab-item';
+          item.dataset.page=e.page;
+          item.innerHTML=`<span class="fab-icon">${e.icon}</span><span class="fab-label">${e.label}</span>`;
+          item.addEventListener('click',()=>{ showPage(e.page); closeFab(); });
+          fabMenu.appendChild(item);
+        });
+      }
+    }
+  }
+
+  // Override showPage to handle new pages
+  const _origShowPage=window.showPage;
+  window.showPage=function(id){
+    if(id==='chatbot'){
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      const p=document.getElementById('page-chatbot');
+      if(p){p.style.display='flex';p.classList.add('active');}
+      document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
+      closeFab();
+      return;
+    }
+    if(id==='sharing'){
+      renderSharingPage();
+    }
+    if(id==='gamification'){
+      renderGamification();
+    }
+    // Hide chatbot page
+    const cp=document.getElementById('page-chatbot');
+    if(cp){cp.style.display='none';cp.classList.remove('active');}
+    if(_origShowPage) _origShowPage(id);
+  };
+
+  // Track item adds for gamification
+  const _origConfirm=window.confirmItem;
+  if(_origConfirm){
+    window.confirmItem=function(){
+      const result=_origConfirm();
+      trackStat('totalAdded');
+      addXP(5,'Produkt hinzugefügt');
+      return result;
+    };
+  }
+
+  renderGamification();
+  renderSharingPage();
+});
+</script>
