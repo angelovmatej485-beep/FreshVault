@@ -626,8 +626,11 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
   <!-- FAB MEHR-MENÜ -->
   <div class="fab-wrap" id="fab-wrap" style="display:none">
     <div class="fab-menu" id="fab-menu">
+      <div class="fab-item" data-page="gamification"><span class="fab-item-label">Achievements</span><button class="fab-item-btn" style="background:var(--yellow-l)">🏆</button></div>
+      <div class="fab-item" data-page="sharing"><span class="fab-item-label">Familie</span><button class="fab-item-btn" style="background:var(--purple-l)">👨‍👩‍👧</button></div>
+      <div class="fab-item" data-page="chatbot"><span class="fab-item-label">KI-Tipps</span><button class="fab-item-btn" style="background:var(--blue-l)">🤖</button></div>
       <div class="fab-item" data-page="stats"><span class="fab-item-label">Statistiken</span><button class="fab-item-btn" style="background:var(--blue-l)">📊</button></div>
-      <div class="fab-item" data-page="recipes"><span class="fab-item-label">Rezepte</span><button class="fab-item-btn" style="background:var(--green-l)">🤖</button></div>
+      <div class="fab-item" data-page="recipes"><span class="fab-item-label">Rezepte</span><button class="fab-item-btn" style="background:var(--green-l)">🍽️</button></div>
       <div class="fab-item" data-page="alerts"><span class="fab-item-label">Warnungen</span><button class="fab-item-btn" style="background:var(--red-l)">🔔</button></div>
       <div class="fab-item" data-page="settings"><span class="fab-item-label">Einstellungen</span><button class="fab-item-btn" style="background:var(--g1)">⚙️</button></div>
     </div>
@@ -1417,15 +1420,17 @@ function switchTab(tab){
 // ── NAVIGATION ─────────────────────────────────
 function showPage(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById('page-'+id).classList.add('active');
+  const page = document.getElementById('page-'+id);
+  if(page) page.classList.add('active');
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
   const bn=document.getElementById('bn-'+id);
   if(bn) bn.classList.add('on');
-  // Schließe FAB wenn Seite gewechselt
   closeFab();
   if(id==='stats') renderStats();
   if(id==='recipes') renderRecipes();
   if(id==='shopping') renderShopping();
+  if(id==='sharing') renderSharingPage();
+  if(id==='gamification') renderGamification();
 }
 
 function toggleFab(){
@@ -2611,84 +2616,142 @@ document.addEventListener('DOMContentLoaded',()=>{
 });
 </script>
 <!-- ── GAMIFICATION PAGE ── -->
-<div class="page" id="page-gamification" style="overflow-y:auto">
+<div class="page" id="page-gamification">
   <div class="wrap">
     <div class="page-title">🏆 Achievements</div>
-    <div class="group-card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+
+    <!-- Level Card -->
+    <div style="background:linear-gradient(135deg,var(--green),#16a34a);border-radius:var(--r);padding:20px;margin-bottom:12px;box-shadow:0 4px 16px rgba(45,106,79,.3)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
         <div>
-          <div style="font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.5px">Dein Level</div>
-          <div style="font-size:22px;font-weight:800;margin-top:2px" id="xp-level-name">🌱 Frischling</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px">Dein Level</div>
+          <div style="font-size:22px;font-weight:800;color:white;letter-spacing:-.5px" id="xp-level-name">🌱 Frischling</div>
         </div>
-        <span class="level-badge" id="xp-level-badge">Level 1</span>
+        <div style="background:rgba(255,255,255,.2);border-radius:12px;padding:8px 14px;text-align:center">
+          <div style="font-size:20px;font-weight:800;color:white" id="xp-level-badge">1</div>
+          <div style="font-size:10px;color:rgba(255,255,255,.8);font-weight:600">LEVEL</div>
+        </div>
       </div>
-      <div style="font-size:12px;color:var(--muted);margin-bottom:4px"><span id="xp-current">0</span> / <span id="xp-next">100</span> XP</div>
-      <div class="xp-bar-wrap"><div class="xp-bar" id="xp-bar" style="width:0%"></div></div>
-      <div style="font-size:12px;color:var(--muted);margin-top:8px" id="xp-total-saved">Du hast bisher <strong id="xp-products-saved">0</strong> Produkte vor dem Ablauf gerettet! 🎉</div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.8);margin-bottom:6px">
+        <span><span id="xp-current">0</span> XP</span>
+        <span>Nächstes Level: <span id="xp-next">100</span> XP</span>
+      </div>
+      <div style="background:rgba(255,255,255,.25);border-radius:999px;height:8px;overflow:hidden">
+        <div id="xp-bar" style="height:100%;background:white;border-radius:999px;transition:width .6s ease;width:0%"></div>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:rgba(255,255,255,.85)">🌿 <span id="xp-products-saved">0</span> Produkte vor dem Ablauf gerettet!</div>
     </div>
 
-    <div style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--text)">Deine Badges</div>
+    <!-- Stats Row -->
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px" id="gami-stats-row">
+      <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:12px;text-align:center;box-shadow:var(--shadow)">
+        <div style="font-size:22px;font-weight:800;color:var(--green)" id="gami-xp-total">0</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">XP total</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:12px;text-align:center;box-shadow:var(--shadow)">
+        <div style="font-size:22px;font-weight:800;color:var(--yellow)" id="gami-badges-earned">0</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Badges</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:12px;text-align:center;box-shadow:var(--shadow)">
+        <div style="font-size:22px;font-weight:800;color:var(--blue)" id="gami-days">0</div>
+        <div style="font-size:10px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;margin-top:2px">Tage dabei</div>
+      </div>
+    </div>
+
+    <!-- Badges -->
+    <div class="list-header">
+      <div class="list-title">Deine Badges</div>
+      <span id="gami-badge-count" style="font-size:12px;color:var(--muted);font-weight:500"></span>
+    </div>
     <div class="badge-grid" id="badge-grid"></div>
   </div>
 </div>
 
 <!-- ── SHARING PAGE ── -->
-<div class="page" id="page-sharing" style="overflow-y:auto">
+<div class="page" id="page-sharing">
   <div class="wrap">
     <div class="page-title">👨‍👩‍👧 Familien-Sharing</div>
+
     <div id="sharing-no-group">
-      <div class="group-card" style="text-align:center">
-        <div style="font-size:40px;margin-bottom:12px">🏠</div>
+      <!-- Info Banner -->
+      <div style="background:var(--blue-l);border:1px solid var(--blue);border-radius:var(--r);padding:14px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start">
+        <span style="font-size:20px">💡</span>
+        <div style="font-size:13px;color:var(--blue);line-height:1.6">Teile deinen Kühlschrank mit deiner Familie. Alle sehen dieselben Produkte, können hinzufügen und Warnungen erhalten.</div>
+      </div>
+      <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);text-align:center;margin-bottom:10px">
+        <div style="font-size:48px;margin-bottom:12px">🏠</div>
         <div style="font-size:16px;font-weight:700;margin-bottom:6px">Noch keine Gruppe</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Erstelle eine Familiengruppe oder tritt einer bei</div>
-        <button onclick="createGroup()" style="width:100%;background:var(--green);color:white;border:none;border-radius:var(--r);padding:13px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px">➕ Neue Gruppe erstellen</button>
-        <button onclick="document.getElementById('join-group-overlay').classList.add('open')" style="width:100%;background:var(--g1);color:var(--text);border:1px solid var(--g2);border-radius:var(--r);padding:13px;font-size:14px;font-weight:600;font-family:inherit;cursor:pointer">🔑 Gruppe beitreten</button>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Erstelle eine Gruppe oder tritt einer bestehenden bei</div>
+        <button onclick="createGroup()" class="btn-confirm" style="margin-bottom:8px">➕ Neue Gruppe erstellen</button>
+        <button onclick="document.getElementById('join-group-overlay').classList.add('open')" style="width:100%;background:var(--g1);color:var(--text);border:1px solid var(--g2);border-radius:var(--r);padding:14px;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer">🔑 Gruppe beitreten</button>
       </div>
     </div>
+
     <div id="sharing-has-group" style="display:none">
-      <div class="group-card">
+      <!-- Group Header Card -->
+      <div style="background:linear-gradient(135deg,var(--purple),#7c3aed);border-radius:var(--r);padding:20px;margin-bottom:12px;box-shadow:0 4px 16px rgba(107,33,168,.25)">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-          <div style="font-size:16px;font-weight:700" id="group-name-display">Meine Familie</div>
-          <span style="font-size:11px;background:var(--green-l);color:var(--green);border-radius:999px;padding:3px 10px;font-weight:600" id="group-role-badge">Admin</span>
+          <div style="font-size:18px;font-weight:800;color:white" id="group-name-display">Meine Familie</div>
+          <span style="background:rgba(255,255,255,.2);color:white;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700" id="group-role-badge">Admin</span>
         </div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Gruppencode – tippe zum Kopieren:</div>
-        <div class="group-code" id="group-code-display" onclick="copyGroupCode()">ABC123</div>
-        <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:12px">📋 Tippen zum Kopieren · Teile den Code mit deiner Familie</div>
-        <button onclick="showQR()" style="width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:10px;padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:8px">📱 QR-Code anzeigen</button>
-        <button onclick="leaveGroup()" style="width:100%;background:var(--red-l);color:var(--red);border:1px solid var(--red);border-radius:10px;padding:11px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🚪 Gruppe verlassen</button>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:14px">Tippe auf den Code um ihn zu kopieren</div>
+        <div id="group-code-display" onclick="copyGroupCode()" style="font-size:28px;font-weight:900;letter-spacing:8px;color:white;text-align:center;background:rgba(255,255,255,.15);border-radius:10px;padding:14px;cursor:pointer;border:1.5px dashed rgba(255,255,255,.4)">ABC123</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
+          <button onclick="showQR()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;color:white;cursor:pointer">📱 QR-Code</button>
+          <button onclick="leaveGroup()" style="background:rgba(220,38,38,.3);border:1px solid rgba(220,38,38,.5);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;color:white;cursor:pointer">🚪 Verlassen</button>
+        </div>
       </div>
-      <div class="group-card">
-        <div style="font-size:14px;font-weight:700;margin-bottom:10px">👥 Mitglieder</div>
+
+      <!-- Members -->
+      <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px">
+        <div class="list-title" style="margin-bottom:12px">👥 Mitglieder</div>
         <div id="group-members-list"></div>
       </div>
-      <div class="group-card" style="background:var(--green-l);border-color:var(--green)">
-        <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:4px">ℹ️ Wie Sharing funktioniert</div>
-        <div style="font-size:12px;color:var(--green)">Alle Gruppenmitglieder sehen denselben Kühlschrank. Produkte die ein Mitglied hinzufügt, sehen alle. Der Admin kann Mitglieder entfernen.</div>
+
+      <!-- How it works -->
+      <div style="background:var(--green-l);border:1px solid var(--green);border-radius:var(--r);padding:14px;display:flex;gap:10px">
+        <span style="font-size:18px">ℹ️</span>
+        <div style="font-size:12px;color:var(--green);line-height:1.6">Alle Mitglieder sehen denselben Kühlschrank. Hinzugefügte Produkte sind für alle sichtbar. Der Admin kann Mitglieder entfernen.</div>
       </div>
     </div>
   </div>
 </div>
 
 <!-- ── KI CHATBOT PAGE ── -->
-<div class="page" id="page-chatbot" style="flex-direction:column;overflow:hidden">
-  <div class="wrap" style="padding-bottom:0;flex-shrink:0">
-    <div class="page-title" style="margin-bottom:4px">🤖 FreshVault KI</div>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Frag mich alles über Lebensmittel, Haltbarkeit & Küchentipps!</div>
+<div class="page" id="page-chatbot" style="display:flex;flex-direction:column;overflow:hidden">
+  <!-- Header -->
+  <div style="background:var(--white);border-bottom:1px solid var(--g2);padding:14px 16px;flex-shrink:0">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--blue),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">🤖</div>
+      <div>
+        <div style="font-size:15px;font-weight:700;letter-spacing:-.3px">FreshVault KI</div>
+        <div style="font-size:11px;color:var(--muted)">Küchen-Assistent · immer online</div>
+      </div>
+      <button onclick="clearChat()" style="margin-left:auto;background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:6px 10px;font-size:11px;font-weight:600;font-family:inherit;color:var(--muted);cursor:pointer">Löschen</button>
+    </div>
   </div>
-  <div class="chat-suggestions" id="chat-suggestions">
+
+  <!-- Suggestions -->
+  <div style="display:flex;gap:6px;padding:10px 14px;overflow-x:auto;flex-shrink:0;border-bottom:1px solid var(--g1);-webkit-overflow-scrolling:touch">
     <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Wie lange hält Milch?</button>
-    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Was kann ich mit Tomaten machen?</button>
-    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Tipps gegen Food Waste?</button>
+    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Was kann ich kochen?</button>
     <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Was läuft bald ab?</button>
+    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Food Waste Tipps</button>
+    <button class="chat-sug-btn" onclick="sendChatSuggestion(this)">Kühlzonen erklären</button>
   </div>
-  <div class="chat-wrap" style="height:calc(100vh - 240px)">
-    <div class="chat-msgs" id="chat-msgs">
-      <div class="chat-msg bot">👋 Hallo! Ich bin dein FreshVault KI-Assistent. Ich helfe dir dabei, Lebensmittel länger frisch zu halten, Food Waste zu reduzieren und gebe dir Küchentipps. Was möchtest du wissen?</div>
+
+  <!-- Messages -->
+  <div class="chat-msgs" id="chat-msgs" style="flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px">
+    <div class="chat-msg bot" style="display:flex;gap:8px;align-items:flex-start;max-width:100%">
+      <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--blue),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
+      <div style="background:var(--g1);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:14px;line-height:1.5;color:var(--text)">👋 Hallo! Ich bin dein FreshVault KI-Assistent. Ich kenne deinen Kühlschrankinhalt und helfe dir mit Rezepten, Haltbarkeitstipps und Food-Waste-Tipps. Was möchtest du wissen?</div>
     </div>
-    <div class="chat-input-wrap">
-      <textarea class="chat-input" id="chat-input" placeholder="Frag mich etwas..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
-      <button class="chat-send" onclick="sendChat()">➤</button>
-    </div>
+  </div>
+
+  <!-- Input -->
+  <div style="background:var(--white);border-top:1px solid var(--g2);padding:10px 14px max(14px,env(safe-area-inset-bottom));flex-shrink:0;display:flex;gap:8px;align-items:flex-end">
+    <textarea class="chat-input" id="chat-input" placeholder="Frag mich etwas…" rows="1" style="flex:1;background:var(--g1);border:1px solid var(--g2);border-radius:12px;padding:10px 14px;font-size:14px;font-family:inherit;color:var(--text);outline:none;resize:none;max-height:100px;line-height:1.4" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+    <button class="chat-send" onclick="sendChat()" style="background:var(--green);border:none;border-radius:12px;color:white;width:44px;height:44px;cursor:pointer;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center">➤</button>
   </div>
 </div>
 
@@ -2804,18 +2867,18 @@ function renderGamification(){
   const pct = Math.min(100,Math.round((xp-lvl.min)/(nextXp-lvl.min)*100));
   const lvlIdx = LEVELS.indexOf(lvl)+1;
 
-  const nameEl=document.getElementById('xp-level-name');
-  const badgeEl=document.getElementById('xp-level-badge');
-  const curEl=document.getElementById('xp-current');
-  const nxtEl=document.getElementById('xp-next');
-  const barEl=document.getElementById('xp-bar');
-  const savedEl=document.getElementById('xp-products-saved');
-  if(nameEl) nameEl.textContent=lvl.name;
-  if(badgeEl) badgeEl.textContent=`Level ${lvlIdx}`;
-  if(curEl) curEl.textContent=xp;
-  if(nxtEl) nxtEl.textContent=nextXp;
-  if(barEl) barEl.style.width=pct+'%';
-  if(savedEl) savedEl.textContent=s.saved||0;
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.textContent=val;};
+  set('xp-level-name', lvl.name);
+  set('xp-level-badge', lvlIdx);
+  set('xp-current', xp);
+  set('xp-next', nextXp);
+  set('xp-products-saved', s.saved||0);
+  set('gami-xp-total', xp);
+  set('gami-badges-earned', earned.length+'/'+BADGES.length);
+  set('gami-days', s.daysUsed||0);
+  set('gami-badge-count', earned.length+' / '+BADGES.length+' freigeschaltet');
+  const bar=document.getElementById('xp-bar');
+  if(bar) bar.style.width=pct+'%';
 
   const grid=document.getElementById('badge-grid');
   if(!grid)return;
@@ -3019,8 +3082,9 @@ async function sendChat(){
   const msg=input.value.trim();
   if(!msg) return;
   input.value='';
+  input.style.height='';
   addChatMsg(msg,'user');
-  await getBotResponse(msg);
+  getBotResponse(msg);
 }
 
 function sendChatSuggestion(btn){
@@ -3028,52 +3092,96 @@ function sendChatSuggestion(btn){
   sendChat();
 }
 
+function clearChat(){
+  chatHistory=[];
+  const msgs=document.getElementById('chat-msgs');
+  msgs.innerHTML=`<div style="display:flex;gap:8px;align-items:flex-start;max-width:100%">
+    <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--blue),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
+    <div style="background:var(--g1);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:14px;line-height:1.5;color:var(--text)">👋 Hallo! Ich bin wieder da. Was kann ich für dich tun?</div>
+  </div>`;
+}
+
 function addChatMsg(text,role){
   const msgs=document.getElementById('chat-msgs');
-  const div=document.createElement('div');
-  div.className=`chat-msg ${role}`;
-  div.textContent=text;
-  msgs.appendChild(div);
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;gap:8px;align-items:flex-start;animation:fadeUp .2s ease';
+  if(role==='user'){
+    wrap.style.justifyContent='flex-end';
+    const bubble=document.createElement('div');
+    bubble.style.cssText='background:var(--green);color:white;border-radius:14px 14px 4px 14px;padding:10px 14px;font-size:14px;line-height:1.5;max-width:80%';
+    bubble.textContent=text;
+    wrap.appendChild(bubble);
+  } else {
+    const avatar=document.createElement('div');
+    avatar.style.cssText='width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--blue),#3b82f6);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0';
+    avatar.textContent='🤖';
+    const bubble=document.createElement('div');
+    bubble.style.cssText=`background:var(--g1);border-radius:14px 14px 14px 4px;padding:10px 14px;font-size:14px;line-height:1.5;color:${text==='tippt…'?'var(--muted)':'var(--text)'};font-style:${text==='tippt…'?'italic':'normal'};max-width:80%`;
+    bubble.textContent=text;
+    wrap.appendChild(avatar);
+    wrap.appendChild(bubble);
+    wrap._bubble=bubble;
+  }
+  msgs.appendChild(wrap);
   msgs.scrollTop=msgs.scrollHeight;
-  return div;
+  return wrap;
 }
 
 async function getBotResponse(userMsg){
-  const loadDiv=addChatMsg('...tippt','bot loading');
+  const loadWrap=addChatMsg('tippt…','bot');
+  const loadBubble=loadWrap._bubble||loadWrap.querySelector('div:last-child');
   trackStat('chatMsgs');
 
-  // Build context with current fridge items
   const items=myItems();
+  const expiring=items.filter(i=>dl(i.expiry)<=3&&dl(i.expiry)>=0);
+  const expired=items.filter(i=>dl(i.expiry)<0);
   const itemList=items.length>0
-    ? items.slice(0,15).map(i=>`${i.name} (${i.cat||''}, läuft ab: ${i.expiry})`).join(', ')
-    : 'Keine Produkte im Kühlschrank';
+    ? items.slice(0,20).map(i=>`${i.name} (${i.cat?.replace(/^\S+\s/,'')||''}, MHD: ${fmt(i.expiry)}, noch ${dl(i.expiry)}d)`).join('\n')
+    : 'Keine Produkte eingetragen';
 
   chatHistory.push({role:'user',content:userMsg});
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':'',
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-callouts':'true'
+      },
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
-        max_tokens:400,
-        system:`Du bist FreshVault, ein freundlicher KI-Assistent für Lebensmittel und Küche. Du gibst kurze, praktische Tipps auf Deutsch. Halte Antworten unter 120 Wörter. Sei freundlich und benutze manchmal Emojis.
+        max_tokens:500,
+        system:`Du bist FreshVault KI, ein freundlicher Kühlschrank-Assistent. Antworte immer auf Deutsch, kurz und praktisch (max. 120 Wörter). Nutze gelegentlich Emojis. Sei persönlich und hilfreich.
 
-Aktueller Kühlschrankinhalt des Nutzers: ${itemList}
+Aktueller Kühlschrankinhalt:
+${itemList}
 
-Themen: Haltbarkeit von Lebensmitteln, Aufbewahrungstipps, Rezeptideen, Food Waste Tipps, Kühlzonen-Empfehlungen.`,
-        messages:chatHistory.slice(-6)
+${expiring.length>0?`⚠️ Bald ablaufend (≤3 Tage): ${expiring.map(i=>i.name+'('+dl(i.expiry)+'d)').join(', ')}`:''}
+${expired.length>0?`❌ Abgelaufen: ${expired.map(i=>i.name).join(', ')}`:''}
+
+Hilf bei: Haltbarkeit, Aufbewahrung, Rezepten mit vorhandenen Zutaten, Food-Waste-Tipps, Kühlzonen.`,
+        messages:chatHistory.slice(-8)
       })
     });
     const data=await res.json();
+    if(data.error){throw new Error(data.error.message);}
     const reply=data.content?.[0]?.text||'Entschuldigung, ich konnte keine Antwort generieren.';
     chatHistory.push({role:'assistant',content:reply});
-    loadDiv.className='chat-msg bot';
-    loadDiv.textContent=reply;
+    if(loadBubble){
+      loadBubble.textContent=reply;
+      loadBubble.style.fontStyle='normal';
+      loadBubble.style.color='var(--text)';
+    }
     addXP(2,'KI-Tipp erhalten');
   }catch(e){
-    loadDiv.className='chat-msg bot';
-    loadDiv.textContent='❌ KI nicht erreichbar. Bitte prüfe deine Verbindung.';
+    if(loadBubble){
+      loadBubble.textContent='❌ KI nicht erreichbar. Bitte prüfe deine Verbindung oder lade die Seite neu.';
+      loadBubble.style.fontStyle='normal';
+      loadBubble.style.color='var(--red)';
+    }
+    console.error('Chat error:',e);
   }
   document.getElementById('chat-msgs').scrollTop=9999;
 }
@@ -3082,52 +3190,6 @@ Themen: Haltbarkeit von Lebensmitteln, Aufbewahrungstipps, Rezeptideen, Food Was
 // 🔗 NAV INTEGRATION
 // ══════════════════════════════════════════
 document.addEventListener('DOMContentLoaded',()=>{
-  // Add nav buttons for new pages
-  const bnav=document.querySelector('.bottom-nav');
-  if(bnav){
-    // Replace "mehr" with dedicated buttons
-    const moreBtn=document.getElementById('bn-more');
-    if(moreBtn){
-      // Add sharing + chatbot + gamification to FAB menu
-      const fabMenu=document.getElementById('fab-menu');
-      if(fabMenu){
-        const extras=[
-          {page:'sharing',icon:'👨‍👩‍👧',label:'Familie'},
-          {page:'chatbot',icon:'🤖',label:'KI-Tipps'},
-          {page:'gamification',icon:'🏆',label:'Achievements'},
-        ];
-        extras.forEach(e=>{
-          const item=document.createElement('button');
-          item.className='fab-item';
-          item.dataset.page=e.page;
-          item.innerHTML=`<span class="fab-icon">${e.icon}</span><span class="fab-label">${e.label}</span>`;
-          item.addEventListener('click',()=>{ showPage(e.page); closeFab(); });
-          fabMenu.appendChild(item);
-        });
-      }
-    }
-  }
-
-  // Override showPage to handle new pages
-  const _origShowPage=window.showPage;
-  window.showPage=function(id){
-    if(id==='chatbot'){
-      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-      const p=document.getElementById('page-chatbot');
-      if(p){p.classList.add('active');}
-      document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
-      closeFab();
-      return;
-    }
-    if(id==='sharing'){
-      renderSharingPage();
-    }
-    if(id==='gamification'){
-      renderGamification();
-    }
-    if(_origShowPage) _origShowPage(id);
-  };
-
   // Track item adds for gamification
   const _origConfirm=window.confirmItem;
   if(_origConfirm){
