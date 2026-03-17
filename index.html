@@ -1,4 +1,4 @@
-<<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -585,6 +585,21 @@ nav{
         <div class="setting-row">
           <div><div class="setting-label">Angemeldet als</div><div class="setting-sub" id="settings-email">–</div></div>
           <button class="logout-btn" id="settings-logout" style="display:block">Abmelden</button>
+        </div>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div><div class="setting-label">👤 Anzeigename</div><div class="setting-sub">Wird in der Gruppe angezeigt</div></div>
+          <div style="display:flex;gap:8px;width:100%">
+            <input id="display-name-input" type="text" placeholder="Dein Name…" style="flex:1;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);outline:none">
+            <button onclick="saveDisplayName()" style="background:var(--green);color:white;border:none;border-radius:var(--rs);padding:10px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Speichern</button>
+          </div>
+        </div>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:8px">
+          <div><div class="setting-label">🤖 Anthropic API-Key</div><div class="setting-sub">Für die KI-Funktion – <a href="https://console.anthropic.com" target="_blank" style="color:var(--blue)">console.anthropic.com</a></div></div>
+          <div style="display:flex;gap:8px;width:100%">
+            <input id="api-key-input" type="password" placeholder="sk-ant-…" style="flex:1;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:10px 12px;font-size:14px;font-family:inherit;color:var(--text);outline:none">
+            <button onclick="saveApiKey()" style="background:var(--green);color:white;border:none;border-radius:var(--rs);padding:10px 16px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">Speichern</button>
+          </div>
+          <div id="api-key-status" style="font-size:12px;color:var(--muted)"></div>
         </div>
       </div>
       <div class="settings-section">
@@ -1597,8 +1612,8 @@ function showApp(user, isNewUser=false){
   document.getElementById('app-screen').classList.add('visible');
   document.querySelector('.bottom-nav').classList.add('visible');
   document.getElementById('fab-wrap').classList.add('visible');
-  document.getElementById('user-email').textContent=user.email;
-  document.getElementById('settings-email').textContent=user.email;
+  document.getElementById('user-email').textContent = getDisplayName()||user.email;
+  document.getElementById('settings-email').textContent = user.email;
   renderAll();
   checkNotifPermission();
   checkOnboarding(isNewUser);
@@ -2159,7 +2174,45 @@ window.addMissingToShop = (missing) => {
 };
 
 // ── SETTINGS ───────────────────────────────────
+function getDisplayName(){
+  return currentUser ? (localStorage.getItem('fv_name_'+currentUser.uid)||currentUser.email.split('@')[0]) : '';
+}
+
+function saveDisplayName(){
+  const val = document.getElementById('display-name-input').value.trim();
+  if(!val) return;
+  localStorage.setItem('fv_name_'+currentUser.uid, val);
+  // Update nav pill
+  document.getElementById('user-email').textContent = val;
+  showToast('✓ Name gespeichert');
+}
+
+function saveApiKey(){
+  const val = document.getElementById('api-key-input').value.trim();
+  if(!val) return;
+  localStorage.setItem('fv_api_key', val);
+  document.getElementById('api-key-input').value='';
+  document.getElementById('api-key-status').textContent='✓ API-Key gespeichert';
+  document.getElementById('api-key-status').style.color='var(--green)';
+  setTimeout(()=>{ const el=document.getElementById('api-key-status'); if(el) el.textContent=''; },3000);
+}
+
+function showToast(msg, color='var(--green)'){
+  const t=document.createElement('div');
+  t.style.cssText=`position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:${color};color:white;padding:8px 18px;border-radius:999px;font-size:13px;font-weight:700;z-index:9999;pointer-events:none;white-space:nowrap`;
+  t.textContent=msg;
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(),2200);
+}
+
 function renderSettings(){
+  // Load saved values into inputs
+  const nameInput = document.getElementById('display-name-input');
+  const apiStatus = document.getElementById('api-key-status');
+  if(nameInput) nameInput.value = getDisplayName();
+  if(apiStatus) apiStatus.textContent = localStorage.getItem('fv_api_key') ? '✓ API-Key hinterlegt' : 'Kein API-Key gespeichert';
+  if(apiStatus) apiStatus.style.color = localStorage.getItem('fv_api_key') ? 'var(--green)' : 'var(--muted)';
+
   // Basis-Temperatur Slider
   document.getElementById('zone-settings').innerHTML=`
     <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px">
@@ -2181,7 +2234,6 @@ function renderSettings(){
       💡 Kälte sinkt nach unten – daher ist die unterste Schublade am kältesten und ideal für Fleisch & Fisch.
     </div>`;
   renderZoneTemps();
-  // Dark Mode Toggle Zustand wiederherstellen
   const isDark=localStorage.getItem('fv_dark')==='1';
   const toggle=document.getElementById('toggle-dark');
   if(toggle) toggle.checked=isDark;
@@ -3145,6 +3197,37 @@ function leaveGroup(){
   renderAll();
 }
 
+function drawQR(text){
+  const canvas=document.getElementById('qr-canvas');
+  if(!canvas) return;
+  const size=180; const ctx=canvas.getContext('2d');
+  canvas.width=size; canvas.height=size;
+  const isDark=document.body.classList.contains('dark');
+  ctx.fillStyle=isDark?'#1a1a1a':'#fff';
+  ctx.fillRect(0,0,size,size);
+  ctx.fillStyle=isDark?'#3a8a65':'#2d6a4f';
+  const cell=size/10;
+  const shortText=text.slice(0,6);
+  for(let i=0;i<shortText.length;i++){
+    const v=shortText.charCodeAt(i);
+    for(let r=0;r<10;r++) for(let c=0;c<10;c++){
+      if(((v*r+c*i)%3)===0) ctx.fillRect(c*cell,r*cell,cell,cell);
+    }
+  }
+  [[0,0],[0,7],[7,0]].forEach(([r,c])=>{
+    ctx.fillStyle=isDark?'#3a8a65':'#2d6a4f';
+    ctx.fillRect(c*cell,r*cell,3*cell,3*cell);
+    ctx.fillStyle=isDark?'#1a1a1a':'#fff';
+    ctx.fillRect(c*cell+cell/2,r*cell+cell/2,2*cell,2*cell);
+    ctx.fillStyle=isDark?'#3a8a65':'#2d6a4f';
+    ctx.fillRect(c*cell+cell,r*cell+cell,cell,cell);
+  });
+  ctx.fillStyle=isDark?'#f0f0f0':'#0e0e0e';
+  ctx.font=`bold ${Math.round(cell*.85)}px Sora,sans-serif`;
+  ctx.textAlign='center';
+  ctx.fillText(shortText,size/2,size-cell*.3);
+}
+
 function showQR(){
   const shareCode = getShareableCode();
   document.getElementById('qr-code-text').textContent = myGroup()?.code||'';
@@ -3167,11 +3250,12 @@ function renderSharingPage(){
   const list = document.getElementById('group-members-list');
   list.innerHTML = (g.members||[]).map(m=>{
     const isMe = m.uid === currentUser.uid;
-    const initials = m.email.slice(0,2).toUpperCase();
+    const displayName = localStorage.getItem('fv_name_'+m.uid) || m.email.split('@')[0];
+    const initials = displayName.slice(0,2).toUpperCase();
     return `<div class="group-member">
       <div class="member-avatar">${initials}</div>
       <div class="member-info">
-        <div class="member-name">${m.email}${isMe?' (Du)':''}</div>
+        <div class="member-name">${displayName}${isMe?' (Du)':''}</div>
         <div class="member-role">${m.role} · ${new Date(m.joined).toLocaleDateString('de-DE')}</div>
       </div>
       ${isAdmin&&!isMe?`<button onclick="kickMember('${g.code}','${m.uid}')" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit">Entfernen</button>`:''}
@@ -3274,50 +3358,61 @@ async function getBotResponse(userMsg){
     ? items.slice(0,20).map(i=>`${i.name} (${i.cat?.replace(/^\S+\s/,'')||''}, MHD: ${fmt(i.expiry)}, noch ${dl(i.expiry)}d)`).join('\n')
     : 'Keine Produkte eingetragen';
 
+  const systemPrompt=`Du bist FreshVault KI, ein freundlicher Kühlschrank-Assistent. Antworte immer auf Deutsch, kurz und praktisch (max. 120 Wörter). Nutze gelegentlich Emojis. Sei persönlich und hilfreich.
+
+Aktueller Kühlschrankinhalt:
+${itemList}
+${expiring.length>0?`\n⚠️ Bald ablaufend (≤3 Tage): ${expiring.map(i=>i.name+'('+dl(i.expiry)+'d)').join(', ')}`:''}
+${expired.length>0?`\n❌ Abgelaufen: ${expired.map(i=>i.name).join(', ')}`:''}
+
+Hilf bei: Haltbarkeit, Aufbewahrung, Rezepten, Food-Waste-Tipps, Kühlzonen.`;
+
   chatHistory.push({role:'user',content:userMsg});
+
+  // Get stored API key or ask user
+  let apiKey = localStorage.getItem('fv_api_key')||'';
+  if(!apiKey){
+    apiKey = prompt('Bitte gib deinen Anthropic API-Key ein (wird nur lokal gespeichert):');
+    if(!apiKey){
+      chatHistory.pop();
+      if(loadBubble){ loadBubble.textContent='❌ Kein API-Key. Bitte in den Einstellungen hinterlegen.'; loadBubble.style.color='var(--red)'; loadBubble.style.fontStyle='normal'; }
+      return;
+    }
+    localStorage.setItem('fv_api_key', apiKey.trim());
+  }
 
   try{
     const res=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
-        'x-api-key':'',
+        'x-api-key': apiKey.trim(),
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-callouts':'true'
       },
       body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
+        model:'claude-haiku-4-5-20251001',
         max_tokens:500,
-        system:`Du bist FreshVault KI, ein freundlicher Kühlschrank-Assistent. Antworte immer auf Deutsch, kurz und praktisch (max. 120 Wörter). Nutze gelegentlich Emojis. Sei persönlich und hilfreich.
-
-Aktueller Kühlschrankinhalt:
-${itemList}
-
-${expiring.length>0?`⚠️ Bald ablaufend (≤3 Tage): ${expiring.map(i=>i.name+'('+dl(i.expiry)+'d)').join(', ')}`:''}
-${expired.length>0?`❌ Abgelaufen: ${expired.map(i=>i.name).join(', ')}`:''}
-
-Hilf bei: Haltbarkeit, Aufbewahrung, Rezepten mit vorhandenen Zutaten, Food-Waste-Tipps, Kühlzonen.`,
+        system: systemPrompt,
         messages:chatHistory.slice(-8)
       })
     });
     const data=await res.json();
-    if(data.error){throw new Error(data.error.message);}
-    const reply=data.content?.[0]?.text||'Entschuldigung, ich konnte keine Antwort generieren.';
-    chatHistory.push({role:'assistant',content:reply});
-    if(loadBubble){
-      loadBubble.textContent=reply;
-      loadBubble.style.fontStyle='normal';
-      loadBubble.style.color='var(--text)';
+    if(data.error){
+      // Invalid key – clear it so user can re-enter
+      if(data.error.type==='authentication_error') localStorage.removeItem('fv_api_key');
+      throw new Error(data.error.message);
     }
+    const reply=data.content?.[0]?.text||'Entschuldigung, keine Antwort erhalten.';
+    chatHistory.push({role:'assistant',content:reply});
+    if(loadBubble){ loadBubble.textContent=reply; loadBubble.style.fontStyle='normal'; loadBubble.style.color='var(--text)'; }
     addXP(2,'KI-Tipp erhalten');
   }catch(e){
-    if(loadBubble){
-      loadBubble.textContent='❌ KI nicht erreichbar. Bitte prüfe deine Verbindung oder lade die Seite neu.';
-      loadBubble.style.fontStyle='normal';
-      loadBubble.style.color='var(--red)';
-    }
+    if(loadBubble){ loadBubble.textContent=`❌ Fehler: ${e.message||'KI nicht erreichbar.'}. Tippe nochmal um es zu versuchen.`; loadBubble.style.fontStyle='normal'; loadBubble.style.color='var(--red)'; }
     console.error('Chat error:',e);
   }
+  document.getElementById('chat-msgs').scrollTop=9999;
+}
   document.getElementById('chat-msgs').scrollTop=9999;
 }
 
