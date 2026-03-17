@@ -267,6 +267,42 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
 .pwa-title{font-weight:700;font-size:14px;margin-bottom:3px}
 .pwa-desc{font-size:12px;color:var(--muted);line-height:1.6}
 .pwa-visual{margin-top:8px;background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text);display:inline-block}
+/* PORTION BUTTONS */
+.portion-btn{width:32px;height:32px;border-radius:8px;border:1px solid var(--g2);background:var(--g1);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;color:var(--text);transition:all .15s}
+.portion-btn.on{background:var(--green);color:white;border-color:var(--green)}
+/* RECIPE CARD IMPROVED */
+.recipe-card{background:var(--white);border:1px solid var(--g2);border-radius:var(--r);box-shadow:var(--shadow);margin-bottom:10px;overflow:hidden}
+.recipe-header{padding:14px 16px;cursor:pointer;display:flex;align-items:center;gap:12px}
+.recipe-header:active{background:var(--g1)}
+.recipe-urgency{width:4px;flex-shrink:0;border-radius:2px;align-self:stretch}
+.recipe-body{flex:1;min-width:0}
+.recipe-title{font-weight:700;font-size:15px;margin-bottom:4px}
+.recipe-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px}
+.recipe-tag{font-size:11px;font-weight:600;padding:2px 8px;border-radius:999px}
+.recipe-chevron{font-size:18px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.recipe-chevron.open{transform:rotate(180deg)}
+.recipe-detail{display:none;padding:0 16px 14px;border-top:1px solid var(--g1)}
+.recipe-detail.open{display:block}
+.recipe-missing{background:var(--orange-l);border-radius:8px;padding:8px 12px;margin:10px 0;font-size:12px;color:var(--orange)}
+/* ONBOARDING TUTORIAL */
+#onboarding{position:fixed;inset:0;z-index:500;display:none;flex-direction:column}
+#onboarding.active{display:flex}
+.ob-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(3px)}
+.ob-card{position:absolute;background:var(--white);border-radius:22px;padding:24px 20px;max-width:340px;width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.3);animation:obPop .3s cubic-bezier(.34,1.56,.64,1)}
+@keyframes obPop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+.ob-highlight{position:absolute;border:3px solid #4ade80;border-radius:14px;box-shadow:0 0 0 4px rgba(74,222,128,.35);pointer-events:none;transition:all .35s cubic-bezier(.34,1.2,.64,1);animation:obPulse 1.8s ease infinite}
+@keyframes obPulse{0%,100%{box-shadow:0 0 0 4px rgba(74,222,128,.35)}50%{box-shadow:0 0 0 10px rgba(74,222,128,.12)}}
+.ob-step-num{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
+.ob-emoji{font-size:40px;margin-bottom:10px;display:block;text-align:center}
+.ob-title{font-size:19px;font-weight:800;letter-spacing:-.4px;margin-bottom:8px}
+.ob-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:18px}
+.ob-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ob-dots{display:flex;gap:5px;align-items:center}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--g2);transition:all .25s}
+.ob-dot.on{width:20px;border-radius:3px;background:var(--green)}
+.ob-btn{background:var(--green);color:white;border:none;border-radius:10px;padding:11px 22px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
+.ob-skip{background:none;border:none;color:var(--muted);font-size:13px;font-family:inherit;cursor:pointer;padding:4px;text-decoration:underline}
+
 #pwa-banner{display:none;background:var(--green);color:white;padding:12px 16px;font-size:13px;align-items:center;gap:10px;position:sticky;top:54px;z-index:99}
 #pwa-banner button{background:white;color:var(--green);border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
 
@@ -289,6 +325,23 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
   <div class="splash-title">FreshVault</div>
   <div class="splash-slogan">Keep it Fresh</div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
+</div>
+
+<!-- ONBOARDING TUTORIAL -->
+<div id="onboarding">
+  <div class="ob-backdrop" onclick="obSkip()"></div>
+  <div class="ob-highlight" id="ob-highlight"></div>
+  <div class="ob-card" id="ob-card">
+    <div class="ob-step-num" id="ob-step-num">Schritt 1 von 8</div>
+    <div class="ob-emoji" id="ob-emoji">👋</div>
+    <div class="ob-title" id="ob-title">Willkommen bei FreshVault!</div>
+    <div class="ob-desc" id="ob-desc">Dein smarter Kühlschrank-Manager. Lass uns kurz zeigen wie alles funktioniert.</div>
+    <div class="ob-nav">
+      <button class="ob-skip" onclick="obSkip()">Überspringen</button>
+      <div class="ob-dots" id="ob-dots"></div>
+      <button class="ob-btn" id="ob-next" onclick="obNext()">Weiter →</button>
+    </div>
+  </div>
 </div>
 
 <!-- AUTH -->
@@ -414,8 +467,43 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
   <!-- REZEPTE -->
   <div class="page" id="page-recipes">
     <div class="wrap">
-      <div class="page-title">🤖 Rezeptvorschläge</div>
-      <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Basierend auf deinen aktuellen Zutaten</div>
+      <div class="page-title">🍽️ Rezeptvorschläge</div>
+      <!-- Filter Bar -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+        <select id="recipe-filter-kcal" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
+          <option value="all">🔥 Alle Kalorien</option>
+          <option value="low">unter 300 kcal</option>
+          <option value="mid">300–500 kcal</option>
+          <option value="high">über 500 kcal</option>
+        </select>
+        <select id="recipe-filter-time" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
+          <option value="all">⏱ Alle Zeiten</option>
+          <option value="fast">unter 15 Min</option>
+          <option value="mid">15–30 Min</option>
+          <option value="long">über 30 Min</option>
+        </select>
+        <select id="recipe-filter-diff" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
+          <option value="all">📊 Alle Level</option>
+          <option value="Einfach">Einfach</option>
+          <option value="Mittel">Mittel</option>
+          <option value="Schwer">Schwer</option>
+        </select>
+        <select id="recipe-sort" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
+          <option value="match">Beste Übereinstimmung</option>
+          <option value="kcal">Wenigste Kalorien</option>
+          <option value="time">Schnellste Zeit</option>
+          <option value="urgent">Bald ablaufend zuerst</option>
+        </select>
+      </div>
+      <!-- Portions Selector -->
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:10px 14px">
+        <span style="font-size:13px;font-weight:600">👥 Portionen:</span>
+        <button class="portion-btn on" data-p="1">1</button>
+        <button class="portion-btn" data-p="2">2</button>
+        <button class="portion-btn" data-p="4">4</button>
+        <button class="portion-btn" data-p="6">6</button>
+        <span style="font-size:12px;color:var(--muted);margin-left:4px">Pers.</span>
+      </div>
       <div id="recipes-list"></div>
     </div>
   </div>
@@ -468,6 +556,10 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
         </div>
         <div class="setting-row" style="cursor:pointer" id="btn-suggestions">
           <div><div class="setting-label">🛒 Einkaufsvorschläge</div><div class="setting-sub">Was sollte ich nachkaufen?</div></div>
+          <span style="font-size:18px;color:var(--muted)">›</span>
+        </div>
+        <div class="setting-row" style="cursor:pointer" id="btn-restart-tutorial" onclick="localStorage.removeItem('fv_onboarding_done');obStart()">
+          <div><div class="setting-label">🎓 Tutorial erneut starten</div><div class="setting-sub">Alle Features nochmal erklärt bekommen</div></div>
           <span style="font-size:18px;color:var(--muted)">›</span>
         </div>
       </div>
@@ -753,18 +845,35 @@ const deleteItemFromStorage = id => saveItems(getItems().filter(i=>i.id!==id));
 
 // ── ZONES ──────────────────────────────────────
 const ZONES = {
-  kalt:    {name:"Kaltzone",          icon:"❄️",  color:"cold",    temp:-2, humid:70, desc:"Fleisch & Fisch"},
-  frisch:  {name:"Frischzone",        icon:"🌿",  color:"fresh",   temp:4,  humid:85, desc:"Gemüse & Obst"},
-  trocken: {name:"Trockenzone",       icon:"🌾",  color:"dry",     temp:6,  humid:55, desc:"Käse & Wurst"},
-  feucht:  {name:"Feuchtigkeitszone", icon:"💧", color:"crisper", temp:3,  humid:95, desc:"Kräuter & Salat"},
+  kalt:    {name:"Kaltzone",          icon:"❄️",  color:"cold",    offset:-2, humid:70, desc:"Fleisch & Fisch – unterste Schublade"},
+  frisch:  {name:"Frischzone",        icon:"🌿",  color:"fresh",   offset:0,  humid:85, desc:"Gemüse & Obst – mittleres Fach"},
+  trocken: {name:"Trockenzone",       icon:"🌾",  color:"dry",     offset:3,  humid:55, desc:"Käse & Wurst – oberes Fach / Tür"},
+  feucht:  {name:"Feuchtigkeitszone", icon:"💧", color:"crisper", offset:-1, humid:95, desc:"Kräuter & Salat – Gemüseschublade"},
 };
+// Basis-Temperatur (vom Nutzer einstellbar), Zonen-Temps berechnen sich automatisch
+let BASE_TEMP = parseFloat(localStorage.getItem('fv_base_temp')||'4');
+function zoneTemp(zone){ return BASE_TEMP + ZONES[zone].offset; }
 
-// ── PREISE (geschätzt) ─────────────────────────
+// ── PREISE (realistisch, Supermarkt-Durchschnitt) ──
 const PRICES = {
-  '🥬 Gemüse':0.8,'🍎 Obst':1.2,'🥛 Milchprodukte':1.5,
-  '🥩 Fleisch':4.5,'🧀 Käse':2.5,'🥤 Getränke':1.2,
-  '🍦 Eis':2.0,'🧴 Soßen':1.8,'🍳 Sonstiges':2.0
+  '🥬 Gemüse':  {'default':1.49, 'Tomaten':1.29,'Karotten':0.99,'Paprika rot':0.79,'Brokkoli':1.49,'Gurke':0.79,'Salat':1.19,'Zwiebeln gelb':0.89,'Kartoffeln festkochend':2.49,'Spargel weiß':3.99,'Champignons weiß':1.79,'Basilikum':1.49,'Spinat frisch':1.99},
+  '🍎 Obst':    {'default':1.99, 'Äpfel Gala':1.79,'Bananen':1.29,'Erdbeeren':2.49,'Heidelbeeren':2.99,'Himbeeren':2.99,'Orangen':1.99,'Trauben weiß':2.49,'Avocado':1.49,'Mango':1.99,'Kiwi grün':0.49},
+  '🥛 Milchprodukte': {'default':1.49, 'Vollmilch 3,5%':1.19,'Butter mild gesäuert':1.89,'Naturjoghurt 3,5%':0.89,'Griechischer Joghurt 10%':1.49,'Sahne 30%':0.99,'Schmand':0.79,'Skyr natur':1.29,'Hafermilch':1.59,'Quark mager':0.89},
+  '🥩 Fleisch': {'default':5.99, 'Hähnchenbrust':5.49,'Schweineschnitzel':4.99,'Hackfleisch gemischt':3.99,'Rindergulasch':6.99,'Lachsfilet':5.99,'Putenbrustfilet':5.49,'Schweinefilet':7.99},
+  '🧀 Käse':    {'default':2.49, 'Gouda Scheiben':1.99,'Mozzarella':1.29,'Emmentaler':2.49,'Parmesan gerieben':2.99,'Camembert':1.79,'Frischkäse natur':1.49,'Feta':2.29},
+  '🥤 Getränke':{'default':1.29, 'Orangensaft':1.79,'Cola':0.99,'Red Bull':1.49,'Bier':0.89,'Weißwein':4.99,'Mineralwasser':0.59,'Smoothie':2.49},
+  '🍦 Eis':     {'default':2.49, 'Magnum Classic':1.99,"Ben & Jerrys":5.49,'Häagen-Dazs Vanille':4.99,'Cornetto':1.49,'Vanilleeis':2.99},
+  '🧴 Soßen':   {'default':1.99, 'Ketchup':1.49,'Mayonnaise':1.79,'Senf mittelscharf':0.99,'Süßer Senf':1.29,'Sriracha':2.49,'Sojasauce':1.99,'BBQ Sauce':2.29},
+  '🍳 Sonstiges':{'default':2.49,'Eier':2.99,'Tofu':1.99,'Pizza Margherita':2.49,'Lasagne':3.49,'Hummus':1.99},
 };
+function getPrice(name, cat){
+  const catPrices = PRICES[cat];
+  if(!catPrices) return 1.99;
+  for(const [key,val] of Object.entries(catPrices)){
+    if(key!=='default' && name.toLowerCase().includes(key.toLowerCase())) return val;
+  }
+  return catPrices['default']||1.99;
+}
 
 // ── FOOD LIST ──────────────────────────────────
 const FOOD_LIST = [
@@ -952,7 +1061,7 @@ const FOOD_LIST = [
   {name:"Magnum Mandel",cat:"🍦 Eis",zone:"kalt"},{name:"Magnum White",cat:"🍦 Eis",zone:"kalt"},
   {name:"Cornetto",cat:"🍦 Eis",zone:"kalt"},{name:"Solero",cat:"🍦 Eis",zone:"kalt"},
   {name:"Calippo",cat:"🍦 Eis",zone:"kalt"},{name:"Twister",cat:"🍦 Eis",zone:"kalt"},
-  {name:"Häagen-Dazs Vanille",cat:"🍦 Eis",zone:"kalt"},{name:"Ben & Jerry's",cat:"🍦 Eis",zone:"kalt"},
+  {name:"Häagen-Dazs Vanille",cat:"🍦 Eis",zone:"kalt"},{name:"Ben und Jerrys",cat:"🍦 Eis",zone:"kalt"},
   {name:"Eis am Stiel",cat:"🍦 Eis",zone:"kalt"},{name:"Wassereis",cat:"🍦 Eis",zone:"kalt"},
   {name:"Frozen Yogurt",cat:"🍦 Eis",zone:"kalt"},{name:"Sorbet Zitrone",cat:"🍦 Eis",zone:"kalt"},
   {name:"Sorbet Himbeere",cat:"🍦 Eis",zone:"kalt"},{name:"Eiscreme Becher",cat:"🍦 Eis",zone:"kalt"},
@@ -973,22 +1082,86 @@ const FOOD_LIST = [
   {name:"Tomatenmark",cat:"🧴 Soßen",zone:"kalt"},{name:"Currypaste",cat:"🧴 Soßen",zone:"kalt"},
 ];
 
-// ── REZEPTE ────────────────────────────────────
+// ── REZEPTE mit vollständigen Nährwerten ───────
 const RECIPES = [
-  {title:"Caprese Salat",ing:["Tomaten","Mozzarella","Basilikum"],steps:"1. Tomaten und Mozzarella in Scheiben schneiden.\n2. Abwechselnd auflegen.\n3. Mit Basilikum, Olivenöl und Salz servieren."},
-  {title:"Rührei mit Schinken",ing:["Eier","Schinken gekocht","Butter"],steps:"1. Eier verquirlen und würzen.\n2. Butter in Pfanne erhitzen.\n3. Eier und Schinken zugeben, rühren bis fertig."},
-  {title:"Joghurt mit Früchten",ing:["Naturjoghurt 3,5%","Erdbeeren","Heidelbeeren"],steps:"1. Joghurt in Schüssel geben.\n2. Früchte waschen und halbieren.\n3. Über den Joghurt geben und servieren."},
-  {title:"Hähnchen-Pfanne",ing:["Hähnchenbrust","Paprika rot","Zwiebeln gelb"],steps:"1. Hähnchen in Streifen schneiden.\n2. Paprika und Zwiebeln würfeln.\n3. Alles zusammen in Öl anbraten."},
-  {title:"Tomaten-Mozzarella Toast",ing:["Tomaten","Mozzarella","Basilikum"],steps:"1. Brot toasten.\n2. Tomaten und Mozzarella drauflegen.\n3. Mit Basilikum garnieren."},
-  {title:"Gulasch",ing:["Rindergulasch","Zwiebeln gelb","Tomatenmark"],steps:"1. Fleisch und Zwiebeln anbraten.\n2. Tomatenmark zugeben.\n3. Mit Wasser aufgießen und 90 Min schmoren."},
-  {title:"Lachs mit Zitrone",ing:["Lachsfilet","Zitronen","Butter"],steps:"1. Lachs mit Salz und Pfeffer würzen.\n2. In Butter braten, 4 Min pro Seite.\n3. Mit Zitronensaft beträufeln."},
-  {title:"Blattsalat",ing:["Eisbergsalat","Kirschtomaten","Caesar Dressing"],steps:"1. Salat waschen und zupfen.\n2. Tomaten halbieren.\n3. Mit Dressing vermengen und servieren."},
-  {title:"Käsebrot",ing:["Gouda Scheiben","Butter"],steps:"1. Brot mit Butter bestreichen.\n2. Käse drauflegen.\n3. Optional: kurz überbacken."},
-  {title:"Smoothie",ing:["Bananen","Erdbeeren","Naturjoghurt 3,5%"],steps:"1. Alle Zutaten in den Mixer geben.\n2. 30 Sekunden pürieren.\n3. In Glas füllen und genießen."},
-  {title:"Spiegelei",ing:["Eier","Butter"],steps:"1. Butter in Pfanne erhitzen.\n2. Ei aufschlagen und reingeben.\n3. Bei mittlerer Hitze braten bis Eiweiß fest ist."},
-  {title:"Bratwurst mit Senf",ing:["Bratwurst","Senf mittelscharf"],steps:"1. Bratwurst in Pfanne oder Grill garen.\n2. Mit Senf servieren."},
-  {title:"Avocado Toast",ing:["Avocado","Zitronen"],steps:"1. Avocado halbieren und entkernen.\n2. Fleisch mit Gabel zerdrücken.\n3. Mit Zitrone würzen und auf Toast geben."},
-  {title:"Gemüsesuppe",ing:["Karotten","Sellerie","Zwiebeln gelb"],steps:"1. Alles klein schneiden.\n2. In Topf mit Wasser und Brühe kochen.\n3. 30 Min köcheln, würzen."},
+  {title:"Caprese Salat",kcal:320,protein:18,carbs:8,fat:24,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Tomaten","Mozzarella","Basilikum"],
+   steps:"1. Tomaten und Mozzarella in Scheiben schneiden.\n2. Abwechselnd auf einem Teller anrichten.\n3. Mit frischem Basilikum, Olivenöl und Salz servieren."},
+  {title:"Rührei mit Schinken",kcal:480,protein:32,carbs:4,fat:36,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Eier","Schinken gekocht","Butter"],
+   steps:"1. Eier verquirlen, salzen und pfeffern.\n2. Butter in Pfanne bei mittlerer Hitze erhitzen.\n3. Eier zugeben, Schinken würfeln und unterheben.\n4. Unter Rühren stocken lassen."},
+  {title:"Joghurt mit Früchten",kcal:210,protein:10,carbs:32,fat:4,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Naturjoghurt 3,5%","Erdbeeren","Heidelbeeren"],
+   steps:"1. Joghurt in eine Schüssel geben.\n2. Früchte waschen, Erdbeeren halbieren.\n3. Früchte über den Joghurt geben.\n4. Optional: Honig oder Granola drüber."},
+  {title:"Hähnchen-Pfanne",kcal:520,protein:48,carbs:12,fat:28,time:"25 Min",timeMin:25,diff:"Mittel",
+   ing:["Hähnchenbrust","Paprika rot","Zwiebeln gelb"],
+   steps:"1. Hähnchenbrust in Streifen schneiden.\n2. Paprika und Zwiebeln würfeln.\n3. Öl in Pfanne erhitzen, Hähnchen anbraten (5 Min).\n4. Gemüse zugeben, 10 Min mitbraten.\n5. Mit Salz, Pfeffer und Paprika würzen."},
+  {title:"Tomaten-Mozzarella Toast",kcal:390,protein:20,carbs:38,fat:18,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Tomaten","Mozzarella","Basilikum"],
+   steps:"1. Brot toasten bis goldbraun.\n2. Tomaten in Scheiben schneiden.\n3. Mozzarella drauflegen, kurz überbacken.\n4. Mit Basilikum und etwas Olivenöl garnieren."},
+  {title:"Gulasch",kcal:680,protein:52,carbs:18,fat:42,time:"2 Std",timeMin:120,diff:"Mittel",
+   ing:["Rindergulasch","Zwiebeln gelb","Tomatenmark"],
+   steps:"1. Fleisch in Würfel schneiden, Zwiebeln fein hacken.\n2. Öl erhitzen, Zwiebeln glasig dünsten.\n3. Fleisch anbraten bis gebräunt.\n4. Tomatenmark zugeben und kurz rösten.\n5. Mit Brühe aufgießen, 90 Min köcheln lassen.\n6. Mit Salz, Pfeffer und Paprika abschmecken."},
+  {title:"Lachs mit Zitrone",kcal:410,protein:44,carbs:2,fat:24,time:"15 Min",timeMin:15,diff:"Einfach",
+   ing:["Lachsfilet","Zitronen","Butter"],
+   steps:"1. Lachs mit Salz und Pfeffer würzen.\n2. Butter in Pfanne schmelzen.\n3. Lachs 4 Min pro Seite braten.\n4. Mit Zitronensaft beträufeln und servieren."},
+  {title:"Blattsalat",kcal:180,protein:4,carbs:12,fat:12,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Eisbergsalat","Kirschtomaten","Caesar Dressing"],
+   steps:"1. Salat waschen, in mundgerechte Stücke zupfen.\n2. Kirschtomaten halbieren.\n3. Alles in eine Schüssel geben.\n4. Mit Caesar Dressing vermengen und servieren."},
+  {title:"Käsebrot",kcal:350,protein:16,carbs:32,fat:18,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Gouda Scheiben","Butter"],
+   steps:"1. Brot mit Butter bestreichen.\n2. Käsescheiben auflegen.\n3. Optional: im Toaster oder Ofen kurz überbacken."},
+  {title:"Smoothie",kcal:280,protein:8,carbs:52,fat:4,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Bananen","Erdbeeren","Naturjoghurt 3,5%"],
+   steps:"1. Banane schälen und in Stücke schneiden.\n2. Alle Zutaten in den Mixer geben.\n3. 30–60 Sek. pürieren bis cremig.\n4. In Glas füllen, sofort servieren."},
+  {title:"Spiegelei",kcal:220,protein:14,carbs:1,fat:18,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Eier","Butter"],
+   steps:"1. Butter in Pfanne bei mittlerer Hitze schmelzen.\n2. Ei vorsichtig aufschlagen und reingeben.\n3. Salzen und pfeffern.\n4. Braten bis das Eiweiß fest ist, Eigelb nach Wunsch."},
+  {title:"Bratwurst mit Senf",kcal:560,protein:24,carbs:4,fat:48,time:"15 Min",timeMin:15,diff:"Einfach",
+   ing:["Bratwurst grob","Senf mittelscharf"],
+   steps:"1. Bratwurst in Pfanne ohne zusätzliches Fett garen.\n2. Bei mittlerer Hitze ca. 8–10 Min wenden.\n3. Bis außen knusprig und durch.\n4. Mit Senf servieren."},
+  {title:"Avocado Toast",kcal:340,protein:8,carbs:30,fat:22,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Avocado","Zitronen"],
+   steps:"1. Avocado halbieren, Kern entfernen.\n2. Fruchtfleisch mit Gabel zerdrücken.\n3. Mit Zitronensaft, Salz und Pfeffer würzen.\n4. Auf getoastetem Brot verteilen."},
+  {title:"Gemüsesuppe",kcal:190,protein:6,carbs:28,fat:4,time:"40 Min",timeMin:40,diff:"Einfach",
+   ing:["Karotten","Sellerie","Zwiebeln gelb"],
+   steps:"1. Gemüse schälen und klein schneiden.\n2. Zwiebeln in Öl glasig dünsten.\n3. Restliches Gemüse zugeben, kurz anrösten.\n4. Mit Gemüsebrühe aufgießen, 25 Min köcheln.\n5. Mit Salz, Pfeffer und Kräutern abschmecken."},
+  {title:"Pfannkuchen",kcal:420,protein:14,carbs:58,fat:16,time:"20 Min",timeMin:20,diff:"Einfach",
+   ing:["Eier","Vollmilch 3,5%","Butter"],
+   steps:"1. Eier, Milch und Mehl zu glattem Teig rühren.\n2. Butter in Pfanne erhitzen.\n3. Teig portionsweise eingießen.\n4. Bei mittlerer Hitze 2 Min pro Seite backen.\n5. Mit Zucker und Zimt oder Früchten servieren."},
+  {title:"Tzatziki mit Gemüse",kcal:160,protein:8,carbs:12,fat:8,time:"15 Min",timeMin:15,diff:"Einfach",
+   ing:["Griechischer Joghurt 10%","Gurke","Knoblauch"],
+   steps:"1. Gurke raspeln, ausdrücken.\n2. Knoblauch fein hacken.\n3. Mit Joghurt, Olivenöl und Dill vermischen.\n4. 30 Min kühlen lassen.\n5. Mit frischem Gemüse als Dip servieren."},
+  {title:"Paprika-Frischkäse Wrap",kcal:380,protein:14,carbs:42,fat:18,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Frischkäse natur","Paprika rot","Rucola"],
+   steps:"1. Tortilla mit Frischkäse bestreichen.\n2. Paprika in Streifen schneiden.\n3. Rucola waschen.\n4. Alles auflegen, fest einrollen.\n5. Schräg aufschneiden und servieren."},
+  {title:"Hähnchensalat",kcal:310,protein:36,carbs:8,fat:14,time:"20 Min",timeMin:20,diff:"Einfach",
+   ing:["Hähnchenbrust","Eisbergsalat","Kirschtomaten"],
+   steps:"1. Hähnchen in Öl anbraten, in Streifen schneiden.\n2. Salat waschen und zupfen.\n3. Tomaten halbieren.\n4. Alles mischen, mit Dressing servieren."},
+  {title:"Rührkuchen Grundrezept",kcal:380,protein:6,carbs:54,fat:16,time:"50 Min",timeMin:50,diff:"Mittel",
+   ing:["Eier","Butter","Vollmilch 3,5%"],
+   steps:"1. Butter und Zucker cremig schlagen.\n2. Eier einzeln unterrühren.\n3. Mehl und Backpulver abwechselnd mit Milch einrühren.\n4. In Form füllen, bei 175°C 35 Min backen."},
+  {title:"Steak mit Butter",kcal:620,protein:54,carbs:1,fat:44,time:"15 Min",timeMin:15,diff:"Mittel",
+   ing:["Rindersteak","Butter"],
+   steps:"1. Steak 30 Min vor dem Braten aus dem Kühlschrank nehmen.\n2. Pfanne sehr heiß erhitzen.\n3. Steak ohne Öl 3 Min pro Seite scharf anbraten.\n4. Butter und Kräuter zugeben, übergießen.\n5. 5 Min ruhen lassen, dann servieren."},
+  {title:"Nudeln mit Tomatensauce",kcal:490,protein:16,carbs:82,fat:10,time:"20 Min",timeMin:20,diff:"Einfach",
+   ing:["Tomatensauce","Parmesan gerieben"],
+   steps:"1. Nudeln nach Packungsanweisung al dente kochen.\n2. Tomatensauce in Topf erhitzen.\n3. Knoblauch und Kräuter zugeben.\n4. Nudeln abgießen, mit Sauce vermengen.\n5. Mit Parmesan servieren."},
+  {title:"Käse-Omelette",kcal:440,protein:28,carbs:4,fat:34,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Eier","Gouda Scheiben","Butter"],
+   steps:"1. Eier verquirlen, salzen.\n2. Butter in Pfanne schmelzen.\n3. Eiermasse eingießen, stocken lassen.\n4. Käse auf eine Hälfte legen.\n5. Omelette zuklappen und servieren."},
+  {title:"Avocado-Lachs Bowl",kcal:510,protein:38,carbs:14,fat:34,time:"15 Min",timeMin:15,diff:"Einfach",
+   ing:["Lachsfilet","Avocado","Zitronen"],
+   steps:"1. Lachs in der Pfanne braten, in Stücke teilen.\n2. Avocado würfeln.\n3. Auf Reis oder Salat anrichten.\n4. Mit Zitrone, Sojasauce und Sesam servieren."},
+  {title:"Beerenmüsli",kcal:290,protein:12,carbs:48,fat:6,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Naturjoghurt 3,5%","Heidelbeeren","Himbeeren"],
+   steps:"1. Joghurt in Schüssel geben.\n2. Beeren waschen.\n3. Über Joghurt schichten.\n4. Mit Haferflocken und Honig toppen."},
+  {title:"Feta-Tomaten Pfanne",kcal:360,protein:16,carbs:14,fat:28,time:"15 Min",timeMin:15,diff:"Einfach",
+   ing:["Feta","Tomaten","Knoblauch"],
+   steps:"1. Knoblauch und Tomaten in Pfanne mit Öl anbraten.\n2. Feta in Würfel schneiden, zugeben.\n3. Mit Kräutern und Pfeffer würzen.\n4. 5 Min bei mittlerer Hitze garen.\n5. Mit Brot servieren."},
+  {title:"Schinken-Käse Sandwich",kcal:420,protein:26,carbs:36,fat:18,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Schinken gekocht","Gouda Scheiben","Butter"],
+   steps:"1. Brot mit Butter bestreichen.\n2. Schinken und Käse auflegen.\n3. Optional: in Pfanne von beiden Seiten goldbraun toasten.\n4. Halbieren und servieren."},
 ];
 
 // ── HELPERS ────────────────────────────────────
@@ -1009,7 +1182,145 @@ function friendlyErr(code){
   })[code]||code;
 }
 
-function showApp(user){
+// ── ONBOARDING ─────────────────────────────────
+const OB_STEPS = [
+  {
+    emoji:'👋', title:'Willkommen bei FreshVault!',
+    desc:'Dein smarter Kühlschrank-Manager. Behalte den Überblick über deine Lebensmittel, spare Geld und reduziere Verschwendung. Wir zeigen dir kurz wie alles funktioniert!',
+    target:null, pos:'center'
+  },
+  {
+    emoji:'🏠', title:'Das Dashboard',
+    desc:'Hier siehst du auf einen Blick: wie viele Produkte du hast, was bald abläuft, deinen Warenwert – und deine 4 Kühlzonen mit Temperatur.',
+    target:'page-dashboard', pos:'center'
+  },
+  {
+    emoji:'➕', title:'Produkt hinzufügen',
+    desc:'Tippe auf "+" um neue Produkte einzutragen. Du kannst einzeln tippen, mehrere mit Komma trennen – oder einfach per Sprache ansagen!',
+    target:'bn-add', pos:'top'
+  },
+  {
+    emoji:'❄️', title:'Die 4 Kühlzonen',
+    desc:'FreshVault teilt deinen Kühlschrank in 4 Bereiche: Kaltzone (Fleisch), Frischzone (Gemüse), Trockenzone (Käse/Tür) und Feuchtigkeitszone (Kräuter). Die App weist Produkte automatisch zu!',
+    target:'fridge-visual', pos:'top'
+  },
+  {
+    emoji:'🛒', title:'Einkaufsliste & Vorschläge',
+    desc:'Abgelaufene Produkte landen automatisch auf deiner Einkaufsliste. Unter Einstellungen findest du auch smarte Einkaufsvorschläge – was fehlt, was läuft bald ab.',
+    target:'bn-shopping', pos:'top'
+  },
+  {
+    emoji:'🍽️', title:'Rezeptvorschläge',
+    desc:'FreshVault schlägt dir Rezepte vor die du mit deinen aktuellen Zutaten kochen kannst – mit Kalorien, Nährwerten und Schritt-für-Schritt Anleitung. Fehlende Zutaten direkt zur Liste!',
+    target:'bn-more', pos:'top'
+  },
+  {
+    emoji:'📊', title:'Statistiken & Wochenbericht',
+    desc:'Unter "Mehr" → Statistiken siehst du deinen Frische-Score, Warenwert und Kategorienverteilung. Der Wochenbericht zeigt dir was diese Woche neu kam und was ablief.',
+    target:'bn-more', pos:'top'
+  },
+  {
+    emoji:'⚙️', title:'Einstellungen & Dark Mode',
+    desc:'Unter "Mehr" → Einstellungen kannst du die Kühlschranktemperatur anpassen (Zonen berechnen sich automatisch!), Dark Mode aktivieren und die App auf deinem Homescreen installieren.',
+    target:'bn-more', pos:'top'
+  },
+  {
+    emoji:'🚀', title:'Los geht\'s!',
+    desc:'Du kennst jetzt alle Features. Füge dein erstes Produkt hinzu und leg los! Tipp: Probiere die Spracheingabe – einfach auf das Mikrofon tippen und Produkte ansagen.',
+    target:null, pos:'center'
+  },
+];
+
+let obStep = 0;
+
+function obStart(){
+  obStep = 0;
+  document.getElementById('onboarding').classList.add('active');
+  obRender();
+}
+
+function obRender(){
+  const step = OB_STEPS[obStep];
+  const total = OB_STEPS.length;
+
+  // Card content
+  document.getElementById('ob-step-num').textContent = `Schritt ${obStep+1} von ${total}`;
+  document.getElementById('ob-emoji').textContent = step.emoji;
+  document.getElementById('ob-title').textContent = step.title;
+  document.getElementById('ob-desc').textContent = step.desc;
+  document.getElementById('ob-next').textContent = obStep === total-1 ? '🚀 Starten!' : 'Weiter →';
+
+  // Dots
+  const dots = document.getElementById('ob-dots');
+  dots.innerHTML = OB_STEPS.map((_,i) =>
+    `<div class="ob-dot ${i===obStep?'on':''}"></div>`
+  ).join('');
+
+  // Position card + highlight
+  const card = document.getElementById('ob-card');
+  const hl = document.getElementById('ob-highlight');
+
+  if(!step.target || step.pos==='center'){
+    // Center card
+    card.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%)';
+    hl.style.opacity = '0';
+    return;
+  }
+
+  // Find target element
+  const targetEl = document.getElementById(step.target) || document.querySelector('.'+step.target);
+  if(!targetEl){ card.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%)'; hl.style.opacity='0'; return; }
+
+  const r = targetEl.getBoundingClientRect();
+  const pad = 8;
+
+  // Highlight
+  hl.style.cssText = `opacity:1;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`;
+
+  // Card position: above or below target
+  const cardH = 260;
+  const vp = window.innerHeight;
+  const cardW = Math.min(340, window.innerWidth - 32);
+  let cardTop, cardLeft;
+
+  if(step.pos==='top'){
+    // Try above target, else below
+    cardTop = r.top - cardH - 20;
+    if(cardTop < 60) cardTop = r.bottom + 20;
+  } else {
+    cardTop = r.bottom + 20;
+    if(cardTop + cardH > vp - 20) cardTop = r.top - cardH - 20;
+  }
+  cardLeft = Math.max(16, Math.min(r.left + r.width/2 - cardW/2, window.innerWidth - cardW - 16));
+  cardTop = Math.max(60, Math.min(cardTop, vp - cardH - 20));
+
+  card.style.cssText = `left:${cardLeft}px;top:${cardTop}px;transform:none;width:${cardW}px`;
+}
+
+function obNext(){
+  if(obStep >= OB_STEPS.length - 1){ obFinish(); return; }
+  obStep++;
+  // Re-animate card
+  const card = document.getElementById('ob-card');
+  card.style.animation = 'none';
+  requestAnimationFrame(()=>{ card.style.animation = 'obPop .25s cubic-bezier(.34,1.56,.64,1)'; });
+  obRender();
+}
+
+function obSkip(){ obFinish(); }
+
+function obFinish(){
+  document.getElementById('onboarding').classList.remove('active');
+  localStorage.setItem('fv_onboarding_done', '1');
+}
+
+function checkOnboarding(isNewUser){
+  if(isNewUser && !localStorage.getItem('fv_onboarding_done')){
+    setTimeout(obStart, 600); // kurz warten bis App sichtbar
+  }
+}
+
+function showApp(user, isNewUser=false){
   currentUser=user;
   localStorage.setItem('fv_session',JSON.stringify(user));
   document.getElementById('auth-screen').style.display='none';
@@ -1020,6 +1331,7 @@ function showApp(user){
   document.getElementById('settings-email').textContent=user.email;
   renderAll();
   checkNotifPermission();
+  checkOnboarding(isNewUser);
 }
 
 function doLogout(){
@@ -1042,14 +1354,14 @@ function doAuth(){
     const u=users[email];
     if(!u){errEl.textContent=friendlyErr('auth/user-not-found');return;}
     if(u.pass!==pass){errEl.textContent=friendlyErr('auth/wrong-password');return;}
-    showApp({uid:u.uid,email});
+    showApp({uid:u.uid,email}, false);
   } else {
     if(pass.length<6){errEl.textContent=friendlyErr('auth/weak-password');return;}
     if(users[email]){errEl.textContent=friendlyErr('auth/email-already-in-use');return;}
     const uid=genId();
     users[email]={uid,pass};
     saveUsers(users);
-    showApp({uid,email});
+    showApp({uid,email}, true); // true = neuer User → Onboarding
   }
 }
 
@@ -1115,7 +1427,7 @@ function renderAll(){
 function renderKPIs(items){
   const exp=items.filter(i=>dl(i.expiry)<=0).length;
   const warn=items.filter(i=>{const d=dl(i.expiry);return d>0&&d<=3;}).length;
-  const wert=items.reduce((s,i)=>s+(PRICES[i.cat]||2),0);
+  const wert=items.reduce((s,i)=>s+getPrice(i.name,i.cat),0);
   document.getElementById('kpi-total').textContent=items.length;
   document.getElementById('kpi-warn').textContent=warn;
   document.getElementById('kpi-exp').textContent=exp;
@@ -1129,16 +1441,26 @@ function renderFridge(items){
   const el=document.getElementById('fridge-visual');
   const byZone={kalt:[],frisch:[],trocken:[],feucht:[]};
   items.forEach(i=>{if(byZone[i.zone]) byZone[i.zone].push(i);});
-  el.innerHTML=Object.entries(ZONES).map(([key,z])=>`
+  el.innerHTML=Object.entries(ZONES).map(([key,z])=>{
+    const temp=zoneTemp(key);
+    const tempColor=temp<=2?'#60a5fa':temp<=4?'#4ade80':temp<=6?'#fbbf24':'#fb923c';
+    return `
     <div class="fridge-shelf">
-      <div class="fridge-label">${z.icon} ${z.name} <span style="color:var(--muted);font-weight:400">${z.desc}</span></div>
+      <div class="fridge-label" style="justify-content:space-between">
+        <span>${z.icon} ${z.name} <span style="color:var(--muted);font-weight:400;font-size:10px">${z.desc}</span></span>
+        <span style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+          <span style="font-size:12px;font-weight:700;color:${tempColor};background:rgba(0,0,0,.06);border-radius:6px;padding:2px 7px">🌡️ ${temp}°C</span>
+          <span style="font-size:11px;color:var(--muted)">💧 ${z.humid}%</span>
+        </span>
+      </div>
       <div class="fridge-items">
         ${byZone[key].length ? byZone[key].map(i=>{
           const d=dl(i.expiry),s=state(d);
           return `<span class="fridge-item ${s}" title="${fmt(i.expiry)}">${getEmoji(i.name)} ${i.name}</span>`;
         }).join('') : '<span style="font-size:11px;color:var(--muted)">Leer</span>'}
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 // ── ITEMS ──────────────────────────────────────
@@ -1272,7 +1594,7 @@ function renderItems(targetId, items, filter){
     const emoji=getEmoji(item.name);
     const catName=item.cat.replace(/^\S+\s/,'');
     const zone=ZONES[item.zone];
-    const price=(PRICES[item.cat]||2).toFixed(2);
+    const price=getPrice(item.name,item.cat).toFixed(2);
     return `<div class="card ${s}">
       <div class="card-emoji">${emoji}</div>
       <div class="card-body">
@@ -1309,7 +1631,7 @@ function renderStats(){
   const total=items.length;
   const exp=items.filter(i=>dl(i.expiry)<=0).length;
   const fresh=items.filter(i=>dl(i.expiry)>3).length;
-  const wert=items.reduce((s,i)=>s+(PRICES[i.cat]||2),0);
+  const wert=items.reduce((s,i)=>s+getPrice(i.name,i.cat),0);
   const freshPct=total?Math.round(fresh/total*100):0;
   const el=document.getElementById('stats-grid');
   el.innerHTML=`
@@ -1414,43 +1736,199 @@ function addManualShop(){
 }
 
 // ── REZEPTE ────────────────────────────────────
-function renderRecipes(){
-  const items=myItems();
-  const names=items.map(i=>i.name.toLowerCase());
-  // Rezepte nach Matching sortieren
-  const scored=RECIPES.map(r=>{
-    const matched=r.ing.filter(ing=>names.some(n=>n.includes(ing.toLowerCase())||ing.toLowerCase().includes(n)));
-    return {...r,matched,score:matched.length};
-  }).filter(r=>r.score>0).sort((a,b)=>b.score-a.score);
+// ── REZEPTE ────────────────────────────────────
+let recipePortions = 1;
 
-  const el=document.getElementById('recipes-list');
+function renderRecipes(){
+  const items = myItems();
+  const names = items.map(i=>i.name.toLowerCase());
+
+  // Scoring: welche Zutaten matchen
+  let scored = RECIPES.map(r=>{
+    const matched = r.ing.filter(ing =>
+      names.some(n => n.includes(ing.toLowerCase()) || ing.toLowerCase().includes(n.split(' ')[0]))
+    );
+    const missing = r.ing.filter(ing => !matched.includes(ing));
+    // Urgency: haben gematchte Zutaten ein baldiges Ablaufdatum?
+    const urgentMatched = items.filter(item =>
+      matched.some(m => item.name.toLowerCase().includes(m.toLowerCase()) || m.toLowerCase().includes(item.name.toLowerCase()))
+      && dl(item.expiry) <= 3 && dl(item.expiry) >= 0
+    );
+    const urgency = urgentMatched.length > 0 ? Math.min(...urgentMatched.map(i=>dl(i.expiry))) : 99;
+    return {...r, matched, missing, score:matched.length, urgency};
+  }).filter(r => r.score > 0);
+
+  // Filter anwenden
+  const kcalFilter = document.getElementById('recipe-filter-kcal')?.value || 'all';
+  const timeFilter = document.getElementById('recipe-filter-time')?.value || 'all';
+  const diffFilter = document.getElementById('recipe-filter-diff')?.value || 'all';
+  const sortBy    = document.getElementById('recipe-sort')?.value || 'match';
+
+  if(kcalFilter==='low')  scored = scored.filter(r=>r.kcal*recipePortions < 300);
+  if(kcalFilter==='mid')  scored = scored.filter(r=>r.kcal*recipePortions >= 300 && r.kcal*recipePortions <= 500);
+  if(kcalFilter==='high') scored = scored.filter(r=>r.kcal*recipePortions > 500);
+  if(timeFilter==='fast') scored = scored.filter(r=>r.timeMin < 15);
+  if(timeFilter==='mid')  scored = scored.filter(r=>r.timeMin >= 15 && r.timeMin <= 30);
+  if(timeFilter==='long') scored = scored.filter(r=>r.timeMin > 30);
+  if(diffFilter!=='all')  scored = scored.filter(r=>r.diff===diffFilter);
+
+  // Sortierung
+  if(sortBy==='match')   scored.sort((a,b)=> b.score/b.ing.length - a.score/a.ing.length || a.missing.length - b.missing.length);
+  if(sortBy==='kcal')    scored.sort((a,b)=> a.kcal - b.kcal);
+  if(sortBy==='time')    scored.sort((a,b)=> a.timeMin - b.timeMin);
+  if(sortBy==='urgent')  scored.sort((a,b)=> a.urgency - b.urgency || b.score/b.ing.length - a.score/a.ing.length);
+
+  const el = document.getElementById('recipes-list');
   if(!scored.length){
-    el.innerHTML='<div class="empty">😕 Keine passenden Rezepte – füge mehr Produkte hinzu!</div>';return;
+    el.innerHTML='<div class="empty">😕 Keine Rezepte gefunden – Filter ändern oder mehr Produkte hinzufügen!</div>';
+    return;
   }
-  el.innerHTML=scored.map(r=>`
-    <div class="recipe-card">
-      <div class="recipe-match">✓ ${r.score}/${r.ing.length} Zutaten vorhanden</div>
-      <div class="recipe-title">🍽️ ${r.title}</div>
-      <div class="recipe-ing"><strong>Zutaten:</strong> ${r.ing.map(i=>r.matched.includes(i)?`<span style="color:var(--green);font-weight:600">${i}</span>`:i).join(', ')}</div>
-      <div class="recipe-steps">${r.steps.split('\n').join('<br>')}</div>
-    </div>`).join('');
+
+  // Rezept-Badge: "Fast fertig" wenn nur 1 fehlt
+  el.innerHTML = scored.map((r,idx)=>{
+    const pct = Math.round(r.score/r.ing.length*100);
+    const urgentColor = r.urgency<=1?'var(--red)':r.urgency<=3?'var(--orange)':'var(--green)';
+    const scaledKcal = Math.round(r.kcal * recipePortions);
+    const scaledProt = Math.round((r.protein||0) * recipePortions);
+    const scaledCarb = Math.round((r.carbs||0) * recipePortions);
+    const scaledFat  = Math.round((r.fat||0) * recipePortions);
+
+    return `<div class="recipe-card">
+      <div class="recipe-header" onclick="toggleRecipe(${idx})">
+        <div class="recipe-urgency" style="background:${r.urgency<99?urgentColor:'var(--g2)'}"></div>
+        <div class="recipe-body">
+          <div class="recipe-tags">
+            ${r.missing.length===0 ? '<span class="recipe-tag" style="background:var(--green-l);color:var(--green)">✅ Alle Zutaten</span>' : ''}
+            ${r.missing.length===1 ? '<span class="recipe-tag" style="background:var(--yellow-l);color:var(--yellow)">⚡ Fast fertig</span>' : ''}
+            ${r.urgency<=3 && r.urgency>=0 ? `<span class="recipe-tag" style="background:var(--red-l);color:var(--red)">🔥 Bald ablaufend!</span>` : ''}
+            <span class="recipe-tag" style="background:var(--g1);color:var(--g4)">${r.score}/${r.ing.length} Zutaten</span>
+            <span class="recipe-tag" style="background:var(--orange-l);color:var(--orange)">🔥 ${scaledKcal} kcal</span>
+            <span class="recipe-tag" style="background:var(--g1);color:var(--g4)">⏱ ${r.time}</span>
+            <span class="recipe-tag" style="background:var(--blue-l);color:var(--blue)">${r.diff}</span>
+          </div>
+          <div class="recipe-title">${r.title}</div>
+          <div style="background:var(--g1);border-radius:6px;height:5px;margin-top:8px;overflow:hidden">
+            <div style="width:${pct}%;height:100%;background:${pct>=100?'var(--green)':pct>=66?'var(--yellow)':'var(--orange)'};border-radius:6px;transition:width .4s"></div>
+          </div>
+        </div>
+        <div class="recipe-chevron" id="chevron-${idx}">›</div>
+      </div>
+      <div class="recipe-detail" id="detail-${idx}">
+        <!-- Nährwerte -->
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0">
+          <div style="background:var(--orange-l);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--orange)">${scaledKcal}</div>
+            <div style="font-size:10px;color:var(--muted)">kcal</div>
+          </div>
+          <div style="background:var(--blue-l);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--blue)">${scaledProt}g</div>
+            <div style="font-size:10px;color:var(--muted)">Protein</div>
+          </div>
+          <div style="background:var(--yellow-l);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--yellow)">${scaledCarb}g</div>
+            <div style="font-size:10px;color:var(--muted)">Kohlenhydrate</div>
+          </div>
+          <div style="background:var(--purple-l);border-radius:8px;padding:8px;text-align:center">
+            <div style="font-size:16px;font-weight:800;color:var(--purple)">${scaledFat}g</div>
+            <div style="font-size:10px;color:var(--muted)">Fett</div>
+          </div>
+        </div>
+        <!-- Zutaten -->
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Zutaten (${recipePortions} Pers.)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
+          ${r.ing.map(i=>{
+            const has=r.matched.includes(i);
+            return `<span style="font-size:12px;padding:4px 10px;border-radius:999px;font-weight:600;background:${has?'var(--green-l)':'var(--orange-l)'};color:${has?'var(--green)':'var(--orange)'}">${has?'✓':'+'}  ${i}</span>`;
+          }).join('')}
+        </div>
+        <!-- Fehlende Zutaten -->
+        ${r.missing.length ? `<div class="recipe-missing">
+          <div style="font-weight:700;margin-bottom:6px">🛒 Fehlt noch: ${r.missing.join(', ')}</div>
+          <button onclick="addMissingToShop(${JSON.stringify(r.missing).replace(/"/g,'&quot;')})" style="background:var(--orange);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">Alle zur Einkaufsliste</button>
+        </div>` : ''}
+        <!-- Zubereitung -->
+        <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Zubereitung</div>
+        <div class="recipe-steps">${r.steps.split('\n').map(s=>`<div style="display:flex;gap:8px;margin-bottom:8px"><span style="font-size:14px;flex-shrink:0">${s.match(/^\d+\./)?'':'▸'}</span><span style="font-size:13px;line-height:1.6">${s}</span></div>`).join('')}</div>
+      </div>
+    </div>`;
+  }).join('');
 }
+
+window.toggleRecipe = (idx) => {
+  const detail = document.getElementById(`detail-${idx}`);
+  const chevron = document.getElementById(`chevron-${idx}`);
+  const isOpen = detail.classList.contains('open');
+  // Alle schließen
+  document.querySelectorAll('.recipe-detail').forEach(d=>d.classList.remove('open'));
+  document.querySelectorAll('.recipe-chevron').forEach(c=>{c.classList.remove('open');c.textContent='›';});
+  if(!isOpen){
+    detail.classList.add('open');
+    chevron.classList.add('open');
+    chevron.textContent='‹';
+  }
+};
+
+window.addMissingToShop = (missing) => {
+  const shop = getShop();
+  let added = 0;
+  missing.forEach(name => {
+    if(!shop.find(s=>s.name===name&&!s.done)){
+      shop.push({id:genId(),name,auto:false,done:false});
+      added++;
+    }
+  });
+  saveShop(shop);
+  // Feedback
+  const btn = event.target;
+  btn.textContent=`✓ ${added} hinzugefügt`;
+  btn.style.background='var(--green)';
+  setTimeout(()=>{btn.textContent='Alle zur Einkaufsliste';btn.style.background='var(--orange)';},2000);
+};
 
 // ── SETTINGS ───────────────────────────────────
 function renderSettings(){
-  document.getElementById('zone-settings').innerHTML=Object.entries(ZONES).map(([key,z])=>`
-    <div class="setting-row">
-      <div><div class="setting-label">${z.icon} ${z.name}</div><div class="setting-sub">${z.desc}</div></div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="range" class="temp-slider" min="-5" max="10" value="${z.temp}"
-          oninput="ZONES['${key}'].temp=parseFloat(this.value);this.nextElementSibling.textContent=parseFloat(this.value).toFixed(0)+'°C'">
-        <div class="zone-temp-val">${z.temp}°C</div>
+  // Basis-Temperatur Slider
+  document.getElementById('zone-settings').innerHTML=`
+    <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+      <div style="width:100%">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div class="setting-label">🌡️ Kühlschrank-Temperatur</div>
+          <div style="font-size:17px;font-weight:800;color:var(--blue)" id="base-temp-val">${BASE_TEMP}°C</div>
+        </div>
+        <div class="setting-sub" style="margin-bottom:10px">EU-Empfehlung: 4°C – Die Zonen-Temperaturen berechnen sich automatisch</div>
+        <input type="range" class="temp-slider" style="width:100%" min="0" max="8" step="0.5" value="${BASE_TEMP}"
+          oninput="BASE_TEMP=parseFloat(this.value);localStorage.setItem('fv_base_temp',BASE_TEMP);document.getElementById('base-temp-val').textContent=BASE_TEMP+'°C';renderZoneTemps()">
       </div>
-    </div>`).join('');
+    </div>
+    <div style="background:var(--g1);border-radius:var(--r);padding:12px;margin-top:4px">
+      <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Berechnete Zonen-Temperaturen</div>
+      <div id="zone-temp-display"></div>
+    </div>
+    <div style="background:var(--blue-l);border-radius:10px;padding:10px 12px;margin-top:8px;font-size:12px;color:var(--blue)">
+      💡 Kälte sinkt nach unten – daher ist die unterste Schublade am kältesten und ideal für Fleisch & Fisch.
+    </div>`;
+  renderZoneTemps();
   // Dark Mode Toggle Zustand wiederherstellen
   const isDark=localStorage.getItem('fv_dark')==='1';
   const toggle=document.getElementById('toggle-dark');
   if(toggle) toggle.checked=isDark;
+}
+
+function renderZoneTemps(){
+  const el=document.getElementById('zone-temp-display');
+  if(!el) return;
+  el.innerHTML=Object.entries(ZONES).map(([key,z])=>{
+    const t=zoneTemp(key);
+    const color=t<=2?'var(--blue)':t<=4?'var(--green)':t<=6?'var(--yellow)':'var(--orange)';
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--g2)">
+      <div>
+        <span style="font-size:14px;margin-right:6px">${z.icon}</span>
+        <span style="font-weight:600;font-size:13px">${z.name}</span>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">${z.desc}</div>
+      </div>
+      <div style="font-size:18px;font-weight:800;color:${color}">${t>0?'+':''}${t}°C</div>
+    </div>`;
+  }).join('');
 }
 
 // ── DARK MODE ──────────────────────────────────
@@ -1476,7 +1954,7 @@ function renderWeeklyReport(){
   // Bald ablaufend (3 Tage)
   const soonExp = items.filter(i => { const d=dl(i.expiry); return d>0&&d<=3; });
   // Warenwert
-  const totalWert = items.reduce((s,i)=>s+(PRICES[i.cat]||2),0);
+  const totalWert = items.reduce((s,i)=>s+getPrice(i.name,i.cat),0);
   // Frischequote
   const fresh = items.filter(i=>dl(i.expiry)>3).length;
   const freshPct = items.length ? Math.round(fresh/items.length*100) : 0;
@@ -2045,6 +2523,19 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('btn-close-suggest').addEventListener('click',()=>document.getElementById('suggest-overlay').classList.remove('open'));
   document.getElementById('suggest-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('suggest-overlay'))document.getElementById('suggest-overlay').classList.remove('open');});
 
+  // Rezept Filter & Portionen
+  ['recipe-filter-kcal','recipe-filter-time','recipe-filter-diff','recipe-sort'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.addEventListener('change',renderRecipes);
+  });
+  document.querySelectorAll('.portion-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.portion-btn').forEach(b=>b.classList.remove('on'));
+      btn.classList.add('on');
+      recipePortions=parseInt(btn.dataset.p);
+      renderRecipes();
+    });
+  });
   // Notifs
   document.getElementById('toggle-notif').addEventListener('change',e=>{if(e.target.checked)requestNotifs();});
 
@@ -2073,6 +2564,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     const saved=localStorage.getItem('fv_session');
     if(saved){const u=JSON.parse(saved);if(u&&u.uid&&u.email)showApp(u);}
   }catch(e){}
+
+  // Onboarding resize
+  window.addEventListener('resize',()=>{
+    if(document.getElementById('onboarding').classList.contains('active')) obRender();
+  });
 });
 </script>
 </body>
