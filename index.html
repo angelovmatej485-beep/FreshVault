@@ -869,17 +869,33 @@ const saveShop  = a  => localStorage.setItem(DB_SHOP, JSON.stringify(a));
 const genId     = () => Math.random().toString(36).slice(2)+Date.now().toString(36);
 const myItems   = () => currentUser ? getItems().filter(i=>i.uid===currentUser.uid) : [];
 
+// ── PER-USER STATS (scoped to currentUser.uid) ──
+function getStats(){
+  if(!currentUser) return {};
+  try{ return JSON.parse(localStorage.getItem('fv_stats_'+currentUser.uid)||'{}'); }catch{return {};}
+}
+function saveStats(s){
+  if(!currentUser) return;
+  localStorage.setItem('fv_stats_'+currentUser.uid, JSON.stringify(s));
+}
+
 const addItemToStorage = item => {
   const arr = getItems();
-  arr.push({...item, id:genId(), uid:currentUser.uid, createdAt:Date.now()});
+  const newItem = {...item, id:genId(), uid:currentUser.uid, createdAt:Date.now()};
+  arr.push(newItem);
   saveItems(arr);
+  logGroupEvent('add', {name:item.name});
 };
 const updateItemInStorage = (id, data) => {
   const arr = getItems();
   const i = arr.findIndex(x=>x.id===id);
   if(i!==-1){ Object.assign(arr[i],data); saveItems(arr); }
 };
-const deleteItemFromStorage = id => saveItems(getItems().filter(i=>i.id!==id));
+const deleteItemFromStorage = id => {
+  const item = getItems().find(i=>i.id===id);
+  saveItems(getItems().filter(i=>i.id!==id));
+  if(item) logGroupEvent('del', {name:item.name});
+};
 
 // ── ZONES ──────────────────────────────────────
 const ZONES = {
@@ -1224,52 +1240,54 @@ function friendlyErr(code){
 const OB_STEPS = [
   {
     emoji:'👋', title:'Willkommen bei FreshVault!',
-    desc:'Dein smarter Kühlschrank-Manager. Behalte den Überblick über deine Lebensmittel, spare Geld und reduziere Food Waste. Wir zeigen dir in 8 Schritten wie alles funktioniert!',
-    target:null, pos:'center'
+    desc:'Dein smarter Kühlschrank-Manager. Behalte den Überblick über deine Lebensmittel, spare Geld und reduziere Food Waste. Wir zeigen dir in wenigen Schritten wie alles funktioniert!',
+    target:null, pos:'center', action:null
   },
   {
     emoji:'🏠', title:'Das Dashboard',
-    desc:'Deine Übersicht: Wie viele Produkte, was bald abläuft, dein Warenwert – und deine 4 Kühlzonen mit aktueller Temperatur auf einen Blick.',
-    target:'kpi-total', pos:'below'
+    desc:'Hier siehst du auf einen Blick: wie viele Produkte du hast, was bald abläuft und deinen Warenwert. Darunter deine 4 Kühlzonen mit aktueller Temperatur.',
+    target:'page-dashboard', pos:'center', action:null
   },
   {
     emoji:'➕', title:'Produkt hinzufügen',
-    desc:'Tippe auf "+" um Produkte einzutragen. Einzeln, mehrere mit Komma trennen – oder direkt per Sprache ansagen! Die App erkennt Kategorie und Zone automatisch.',
-    target:'bn-add', pos:'above'
+    desc:'Tippe jetzt auf den "+" Button um dein erstes Produkt einzutragen. Du kannst mehrere auf einmal mit Komma trennen oder per Sprache ansagen!',
+    target:'bn-add', pos:'above', action:'addProduct'
   },
   {
     emoji:'🛒', title:'Einkaufsliste',
-    desc:'Abgelaufene Produkte landen automatisch auf deiner Liste. Du kannst auch manuell Sachen hinzufügen und abhaken wenn du einkaufen warst.',
-    target:'bn-shopping', pos:'above'
+    desc:'Abgelaufene Produkte landen automatisch auf deiner Einkaufsliste. Du kannst auch manuell Sachen hinzufügen und abhaken wenn du einkaufen warst.',
+    target:'bn-shopping', pos:'above', action:null
   },
   {
-    emoji:'🤖', title:'KI-Assistent',
-    desc:'Dein persönlicher Küchen-KI! Stell Fragen zu Haltbarkeit, Rezeptideen oder Food-Waste-Tipps – die KI kennt deinen aktuellen Kühlschrankinhalt.',
-    target:'bn-chatbot', pos:'above'
+    emoji:'➕', title:'Schnellmenü',
+    desc:'Das grüne Plus öffnet ein Menü mit KI-Tipps, Familien-Sharing, Achievements, Rezepten, Statistiken, Warnungen und Einstellungen.',
+    target:'fab-btn', pos:'above', action:null
   },
   {
-    emoji:'👨‍👩‍👧', title:'Familien-Sharing',
-    desc:'Teile deinen Kühlschrank mit der ganzen Familie. Erstelle eine Gruppe, gib den Code weiter – alle sehen und verwalten denselben Inhalt.',
-    target:'bn-sharing', pos:'above'
-  },
-  {
-    emoji:'🏆', title:'Achievements',
-    desc:'Sammle XP, steige in Levels auf und verdiene Badges. Je mehr du Food Waste vermeidest und die App nutzt, desto mehr schaltest du frei!',
-    target:'bn-gamification', pos:'above'
-  },
-  {
-    emoji:'➕', title:'Schnellmenü (➕)',
-    desc:'Über das grüne Plus erreichst du Statistiken, Rezeptvorschläge, Warnungen und Einstellungen – immer griffbereit.',
-    target:'fab-btn', pos:'above'
-  },
-  {
-    emoji:'🚀', title:'Alles klar – los geht\'s!',
-    desc:'Du kennst jetzt alle Features. Füge dein erstes Produkt hinzu und starte durch! Tipp: Probiere die Spracheingabe beim "+" – einfach Produkte ansagen.',
-    target:null, pos:'center'
+    emoji:'🚀', title:'Tutorial abgeschlossen! 🎉',
+    desc:'Sehr gut! Du hast dein erstes Produkt hinzugefügt und kennst jetzt alle wichtigen Features. Du hast das Tutorial-Meister Badge verdient!',
+    target:null, pos:'center', action:null
   },
 ];
 
 let obStep = 0;
+let obWaitingForProduct = false;
+
+function obStart(){
+  obStep = 0;
+  obWaitingForProduct = false;
+  document.getElementById('onboarding').classList.add('active');
+  obRender();
+}
+
+// Called when user adds a product during tutorial
+function obProductAdded(){
+  if(!obWaitingForProduct) return;
+  obWaitingForProduct = false;
+  document.getElementById('onboarding').classList.add('active');
+  obStep++;
+  obRender();
+}
 
 function obStart(){
   obStep = 0;
@@ -1285,7 +1303,11 @@ function obRender(){
   document.getElementById('ob-emoji').textContent = step.emoji;
   document.getElementById('ob-title').textContent = step.title;
   document.getElementById('ob-desc').textContent = step.desc;
-  document.getElementById('ob-next').textContent = obStep === total-1 ? '🚀 Starten!' : 'Weiter →';
+
+  // Button label
+  let btnLabel = obStep === total-1 ? '🚀 Fertig!' : 'Weiter →';
+  if(step.action === 'addProduct') btnLabel = '➕ Produkt hinzufügen';
+  document.getElementById('ob-next').textContent = btnLabel;
 
   const dots = document.getElementById('ob-dots');
   dots.innerHTML = OB_STEPS.map((_,i) =>
@@ -1295,7 +1317,6 @@ function obRender(){
   const card = document.getElementById('ob-card');
   const hl   = document.getElementById('ob-highlight');
 
-  // No target → center screen
   if(!step.target){
     card.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%)';
     hl.style.opacity = '0';
@@ -1309,46 +1330,58 @@ function obRender(){
     return;
   }
 
-  // getBoundingClientRect is always viewport-relative — works for both fixed + scrolled elements
   const r   = targetEl.getBoundingClientRect();
   const pad = 6;
   const vp  = window.innerHeight;
   const vw  = window.innerWidth;
 
-  // Highlight (position:fixed so it stays on top of everything)
+  // Highlight sits around target
   hl.style.cssText = `opacity:1;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`;
 
-  // Card sizing
   const cardW = Math.min(320, vw - 32);
   const cardH = 240;
+  const gap   = 16; // min gap between card edge and target edge
 
-  const spaceAbove = r.top - pad - 12;
-  const spaceBelow = vp - r.bottom - pad - 12;
+  const spaceAbove = r.top - pad - gap;
+  const spaceBelow = vp - r.bottom - pad - gap;
 
   let cardTop;
   if(step.pos === 'above'){
-    // Prefer above — if not enough room, go below
-    cardTop = spaceAbove >= cardH ? r.top - pad - cardH - 12 : r.bottom + pad + 12;
+    // Prefer above the element
+    if(spaceAbove >= cardH){
+      cardTop = r.top - pad - gap - cardH;
+    } else {
+      // Not enough room above → go below
+      cardTop = r.bottom + pad + gap;
+    }
   } else if(step.pos === 'below'){
-    // Prefer below — if not enough room, go above
-    cardTop = spaceBelow >= cardH ? r.bottom + pad + 12 : r.top - pad - cardH - 12;
+    if(spaceBelow >= cardH){
+      cardTop = r.bottom + pad + gap;
+    } else {
+      cardTop = r.top - pad - gap - cardH;
+    }
   } else {
-    // Auto: pick side with more space
+    // Auto: pick side with most space
     cardTop = spaceAbove >= spaceBelow
-      ? r.top - pad - cardH - 12
-      : r.bottom + pad + 12;
+      ? r.top - pad - gap - cardH
+      : r.bottom + pad + gap;
   }
 
-  // Hard clamp — never overlap element, never go off screen
-  const elementTop    = r.top - pad - 12;
-  const elementBottom = r.bottom + pad + 12;
-  // If card would overlap element top, push above
-  if(cardTop + cardH > elementTop && cardTop < elementBottom){
-    cardTop = elementBottom;
-  }
+  // Hard clamp to screen, but NEVER overlap the target element
   cardTop = Math.max(56, Math.min(cardTop, vp - cardH - 8));
 
-  // Horizontal: center on element, clamp to screen edges
+  // If card still overlaps target after clamp, push it away
+  const cardBottom = cardTop + cardH;
+  if(cardBottom > r.top - pad && cardTop < r.bottom + pad){
+    // Overlap detected → place on the side with more room
+    if(spaceAbove >= spaceBelow){
+      cardTop = r.top - pad - gap - cardH;
+    } else {
+      cardTop = r.bottom + pad + gap;
+    }
+    cardTop = Math.max(56, Math.min(cardTop, vp - cardH - 8));
+  }
+
   let cardLeft = r.left + r.width/2 - cardW/2;
   cardLeft = Math.max(16, Math.min(cardLeft, vw - cardW - 16));
 
@@ -1356,20 +1389,32 @@ function obRender(){
 }
 
 function obNext(){
+  const step = OB_STEPS[obStep];
+  // Mandatory product step
+  if(step.action === 'addProduct'){
+    // Hide tutorial card, open modal, wait for product
+    document.getElementById('onboarding').classList.remove('active');
+    obWaitingForProduct = true;
+    openModal();
+    return;
+  }
   if(obStep >= OB_STEPS.length - 1){ obFinish(); return; }
   obStep++;
-  // Re-animate card
   const card = document.getElementById('ob-card');
   card.style.animation = 'none';
   requestAnimationFrame(()=>{ card.style.animation = 'obPop .25s cubic-bezier(.34,1.56,.64,1)'; });
   obRender();
 }
 
-function obSkip(){ obFinish(); }
+function obSkip(){
+  obWaitingForProduct = false;
+  obFinish();
+}
 
 function obFinish(){
   document.getElementById('onboarding').classList.remove('active');
   localStorage.setItem('fv_onboarding_done', '1');
+  trackStat('tutorialDone', true);
 }
 
 function checkOnboarding(isNewUser){
@@ -1392,6 +1437,8 @@ function showApp(user, isNewUser=false){
   renderAll();
   checkNotifPermission();
   checkOnboarding(isNewUser);
+  checkGroupRecapOnLogin();
+  localStorage.setItem('fv_last_seen_'+user.uid, Date.now().toString());
 }
 
 function doLogout(){
@@ -2211,7 +2258,6 @@ function closeModal(){
 }
 
 function confirmItem(){
-  // Wenn Multi-Feld Text hat aber noch nicht geparst wurde, jetzt parsen
   const multiText=document.getElementById('f-multi').value.trim();
   if(multiText && multiProducts.length===0){
     multiProducts=parseProducts(multiText);
@@ -2220,9 +2266,10 @@ function confirmItem(){
     const defaultDate=off(4);
     multiProducts.forEach(p=>addItemToStorage({name:p.name,cat:p.cat,zone:p.zone,expiry:defaultDate}));
     multiProducts=[];
-    closeModal(); renderAll(); return;
+    closeModal(); renderAll();
+    if(obWaitingForProduct) obProductAdded();
+    return;
   }
-  // Einzelprodukt
   const name=document.getElementById('f-name').value.trim();
   const cat=document.getElementById('f-cat').value;
   const zone=document.getElementById('f-zone').value;
@@ -2232,6 +2279,7 @@ function confirmItem(){
   if(editingId) updateItemInStorage(editingId,{name,cat,zone,expiry});
   else addItemToStorage({name,cat,zone,expiry});
   closeModal(); renderAll();
+  if(obWaitingForProduct) obProductAdded();
 }
 
 // ── MULTI PRODUKT ──────────────────────────────
@@ -2800,18 +2848,19 @@ document.addEventListener('DOMContentLoaded',()=>{
 // 🏆 GAMIFICATION
 // ══════════════════════════════════════════
 const BADGES = [
-  {id:'first_add',   icon:'🥚', name:'Erster Schritt',  desc:'1. Produkt hinzugefügt',  xp:10,  check:s=>s.totalAdded>=1},
-  {id:'saver5',      icon:'🌱', name:'Frische-Held',    desc:'5 Produkte gerettet',     xp:25,  check:s=>s.saved>=5},
-  {id:'saver20',     icon:'🌿', name:'Food-Warrior',    desc:'20 Produkte gerettet',    xp:75,  check:s=>s.saved>=20},
-  {id:'saver50',     icon:'🌳', name:'Zero Waste Pro',  desc:'50 Produkte gerettet',    xp:200, check:s=>s.saved>=50},
-  {id:'week1',       icon:'📅', name:'Treuer Nutzer',   desc:'7 Tage dabei',            xp:30,  check:s=>s.daysUsed>=7},
-  {id:'month1',      icon:'🏅', name:'Stammgast',       desc:'30 Tage dabei',           xp:100, check:s=>s.daysUsed>=30},
-  {id:'family',      icon:'👨‍👩‍👧', name:'Familien-Chef',  desc:'Gruppe erstellt',         xp:50,  check:s=>s.createdGroup},
-  {id:'chat1',       icon:'🤖', name:'KI-Freund',       desc:'Mit KI gechattet',        xp:15,  check:s=>s.chatMsgs>=1},
-  {id:'allzones',    icon:'❄️', name:'Zonen-Meister',   desc:'Alle 4 Zonen befüllt',    xp:40,  check:s=>s.zonesUsed>=4},
-  {id:'recipes',     icon:'🍳', name:'Chefkoch',        desc:'5 Rezepte angesehen',     xp:20,  check:s=>s.recipesViewed>=5},
-  {id:'barcode',     icon:'📦', name:'Scanner',         desc:'Barcode gescannt',        xp:20,  check:s=>s.barcodeScanned},
-  {id:'nofoodwaste', icon:'🏆', name:'Food Waste Hero', desc:'1 Woche nix abgelaufen',  xp:150, check:s=>s.perfectWeeks>=1},
+  {id:'first_add',   icon:'🥚', name:'Erster Schritt',    desc:'1. Produkt hinzugefügt',  xp:10,  check:s=>s.totalAdded>=1},
+  {id:'tutorial',    icon:'🎓', name:'Tutorial-Meister',  desc:'Tutorial abgeschlossen',  xp:30,  check:s=>s.tutorialDone},
+  {id:'saver5',      icon:'🌱', name:'Frische-Held',      desc:'5 Produkte gerettet',     xp:25,  check:s=>s.saved>=5},
+  {id:'saver20',     icon:'🌿', name:'Food-Warrior',      desc:'20 Produkte gerettet',    xp:75,  check:s=>s.saved>=20},
+  {id:'saver50',     icon:'🌳', name:'Zero Waste Pro',    desc:'50 Produkte gerettet',    xp:200, check:s=>s.saved>=50},
+  {id:'week1',       icon:'📅', name:'Treuer Nutzer',     desc:'7 Tage dabei',            xp:30,  check:s=>s.daysUsed>=7},
+  {id:'month1',      icon:'🏅', name:'Stammgast',         desc:'30 Tage dabei',           xp:100, check:s=>s.daysUsed>=30},
+  {id:'family',      icon:'👨‍👩‍👧', name:'Familien-Chef',   desc:'Gruppe erstellt',         xp:50,  check:s=>s.createdGroup},
+  {id:'chat1',       icon:'🤖', name:'KI-Freund',         desc:'Mit KI gechattet',        xp:15,  check:s=>s.chatMsgs>=1},
+  {id:'allzones',    icon:'❄️', name:'Zonen-Meister',    desc:'Alle 4 Zonen befüllt',    xp:40,  check:s=>s.zonesUsed>=4},
+  {id:'recipes',     icon:'🍳', name:'Chefkoch',          desc:'5 Rezepte angesehen',     xp:20,  check:s=>s.recipesViewed>=5},
+  {id:'barcode',     icon:'📦', name:'Scanner',           desc:'Barcode gescannt',        xp:20,  check:s=>s.barcodeScanned},
+  {id:'nofoodwaste', icon:'🏆', name:'Food Waste Hero',   desc:'1 Woche nix abgelaufen',  xp:150, check:s=>s.perfectWeeks>=1},
 ];
 
 const LEVELS = [
@@ -2820,11 +2869,6 @@ const LEVELS = [
   {name:'🍃 Food-Guru', min:500},   {name:'🌳 Zero Waste Pro', min:800},
   {name:'🏆 FreshVault Legend', min:1200},
 ];
-
-function getStats(){
-  try{ return JSON.parse(localStorage.getItem('fv_stats')||'{}'); }catch{return {};}
-}
-function saveStats(s){ localStorage.setItem('fv_stats',JSON.stringify(s)); }
 
 function addXP(amount, reason=''){
   const s = getStats();
@@ -2836,12 +2880,12 @@ function addXP(amount, reason=''){
 
 function trackStat(key, val=1){
   const s = getStats();
-  if(key==='saved'||key==='totalAdded'||key==='chatMsgs'||key==='recipesViewed'||key==='zonesUsed'||key==='daysUsed'||key==='perfectWeeks'){
+  if(['saved','totalAdded','chatMsgs','recipesViewed','zonesUsed','daysUsed','perfectWeeks'].includes(key)){
     s[key] = (s[key]||0) + val;
   } else {
     s[key] = val;
   }
-  // Check new badges
+  // Check new badges – each badge XP awarded exactly once
   const earned = s.earnedBadges||[];
   BADGES.forEach(b=>{
     if(!earned.includes(b.id) && b.check(s)){
@@ -2942,18 +2986,22 @@ function genGroupCode(){
 }
 
 function createGroup(){
-  if(!currentUser){return;}
-  const code=genGroupCode();
-  const groups=getGroups();
-  groups[code]={
+  if(!currentUser) return;
+  if(myGroup()){ alert('Du bist bereits in einer Gruppe.'); return; }
+  const code = genGroupCode();
+  const groups = getGroups();
+  groups[code] = {
     name: currentUser.email.split('@')[0]+"'s Familie",
     adminUid: currentUser.uid,
-    members:[{uid:currentUser.uid,email:currentUser.email,role:'Admin',joined:Date.now()}],
-    created:Date.now()
+    members: [{uid:currentUser.uid, email:currentUser.email, role:'Admin', joined:Date.now()}],
+    created: Date.now(),
+    log: []
   };
   saveGroups(groups);
-  trackStat('createdGroup',true);
-  addXP(50,'Gruppe erstellt');
+  trackStat('createdGroup', true);
+  // Show group UI immediately
+  document.getElementById('sharing-no-group').style.display = 'none';
+  document.getElementById('sharing-has-group').style.display = 'block';
   renderSharingPage();
 }
 
@@ -2967,11 +3015,67 @@ function joinGroup(){
   const existing=myGroup();
   if(existing){errEl.textContent='Du bist bereits in einer Gruppe.';return;}
   groups[code].members.push({uid:currentUser.uid,email:currentUser.email,role:'Mitglied',joined:Date.now()});
+  if(!groups[code].log) groups[code].log=[];
+  groups[code].log.push({type:'join',uid:currentUser.uid,email:currentUser.email,ts:Date.now()});
   saveGroups(groups);
   document.getElementById('join-group-overlay').classList.remove('open');
-  addXP(20,'Gruppe beigetreten');
+  trackStat('joinedGroup',true);
+  document.getElementById('sharing-no-group').style.display='none';
+  document.getElementById('sharing-has-group').style.display='block';
   renderSharingPage();
   renderAll();
+  // Show recap for new member
+  showGroupRecap(groups[code]);
+}
+
+function logGroupEvent(type, data={}){
+  const g = myGroup();
+  if(!g) return;
+  const groups = getGroups();
+  if(!groups[g.code]) return;
+  if(!groups[g.code].log) groups[g.code].log=[];
+  groups[g.code].log.push({type, ...data, uid:currentUser.uid, email:currentUser.email, ts:Date.now()});
+  // Keep only last 50 events
+  if(groups[g.code].log.length>50) groups[g.code].log=groups[g.code].log.slice(-50);
+  saveGroups(groups);
+}
+
+function showGroupRecap(group){
+  const lastSeen = parseInt(localStorage.getItem('fv_last_seen_'+currentUser.uid)||'0');
+  const now = Date.now();
+  const hoursSince = (now - lastSeen) / 3600000;
+  // Only show recap if away for more than 12 hours and in a group
+  if(hoursSince < 12 || !lastSeen) return;
+  const log = (group.log||[]).filter(e=>e.ts > lastSeen && e.uid !== currentUser.uid);
+  if(!log.length) return;
+
+  const el = document.createElement('div');
+  el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:600;display:flex;align-items:flex-end;justify-content:center';
+  const days = Math.floor(hoursSince/24);
+  const timeStr = days>=1 ? `${days} Tag${days>1?'en':''}` : `${Math.round(hoursSince)} Stunden`;
+  const eventLines = log.slice(-8).map(e=>{
+    if(e.type==='add') return `➕ <b>${e.email.split('@')[0]}</b> hat „${e.name||'Produkt'}" hinzugefügt`;
+    if(e.type==='del') return `🗑 <b>${e.email.split('@')[0]}</b> hat „${e.name||'Produkt'}" gelöscht`;
+    if(e.type==='join') return `👋 <b>${e.email.split('@')[0]}</b> ist der Gruppe beigetreten`;
+    return '';
+  }).filter(Boolean).join('<br>');
+
+  el.innerHTML=`<div style="background:var(--white);border-radius:22px 22px 0 0;padding:24px 20px max(28px,env(safe-area-inset-bottom));width:100%;max-width:520px">
+    <div style="width:40px;height:4px;background:var(--g2);border-radius:99px;margin:0 auto 18px"></div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:4px">👨‍👩‍👧 Was du verpasst hast</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Du warst ${timeStr} nicht in der App</div>
+    <div style="background:var(--g1);border-radius:12px;padding:14px;font-size:13px;line-height:2;color:var(--text)">${eventLines||'Nichts Neues in dieser Zeit 🥳'}</div>
+    <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;margin-top:16px;background:var(--green);color:white;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Alles klar!</button>
+  </div>`;
+  document.body.appendChild(el);
+}
+
+function checkGroupRecapOnLogin(){
+  const g = myGroup();
+  if(!g) return;
+  const groups = getGroups();
+  if(groups[g.code]) setTimeout(()=>showGroupRecap(groups[g.code]), 800);
+  localStorage.setItem('fv_last_seen_'+currentUser.uid, Date.now().toString());
 }
 
 function leaveGroup(){
