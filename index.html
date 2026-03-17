@@ -78,22 +78,48 @@ body.dark .splash{background:linear-gradient(160deg,#0a1f16 0%,#1a3d2d 50%,#0a15
 .chat-send{background:var(--green);border:none;border-radius:10px;color:white;width:40px;height:40px;cursor:pointer;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
 .chat-suggestions{display:flex;flex-wrap:wrap;gap:6px;padding:0 12px 8px}
 .chat-sug-btn{background:var(--green-l);border:1px solid var(--green);color:var(--green);border-radius:999px;padding:5px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap}
-body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height:100vh;overflow:hidden;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height:100dvh;height:100vh;overflow:hidden;-webkit-tap-highlight-color:transparent;position:fixed;width:100%;top:0;left:0}
+html{height:100dvh;height:100vh}
 
 /* SPLASH SCREEN */
 #splash{position:fixed;inset:0;background:linear-gradient(160deg,#1a4a35 0%,#2d6a4f 50%,#1a3a2a 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity .5s ease,visibility .5s ease}
 #splash.hidden{opacity:0;visibility:hidden;pointer-events:none}
-.splash-logo{width:90px;height:90px;margin-bottom:20px;animation:splashPop .5s cubic-bezier(.34,1.56,.64,1) .2s both}
-.splash-title{font-size:32px;font-weight:800;color:white;letter-spacing:-1px;margin-bottom:6px;animation:splashFadeUp .5s ease .4s both}
-.splash-slogan{font-size:15px;color:rgba(255,255,255,.65);font-weight:400;letter-spacing:2px;text-transform:uppercase;animation:splashFadeUp .5s ease .55s both}
-.splash-bar-wrap{width:160px;height:3px;background:rgba(255,255,255,.15);border-radius:99px;margin-top:48px;overflow:hidden;animation:splashFadeUp .4s ease .7s both}
+.splash-logo{width:80px;height:80px;margin-bottom:18px;animation:splashPop .5s cubic-bezier(.34,1.56,.64,1) .2s both}
+.splash-title{font-size:28px;font-weight:800;color:white;letter-spacing:-1px;margin-bottom:6px;animation:splashFadeUp .5s ease .4s both}
+.splash-slogan{font-size:13px;color:rgba(255,255,255,.65);font-weight:400;letter-spacing:2px;text-transform:uppercase;animation:splashFadeUp .5s ease .55s both}
+.splash-bar-wrap{width:140px;height:3px;background:rgba(255,255,255,.15);border-radius:99px;margin-top:40px;overflow:hidden;animation:splashFadeUp .4s ease .7s both}
 .splash-bar{height:100%;background:rgba(255,255,255,.8);border-radius:99px;width:0%;animation:splashLoad 1.2s ease .8s forwards}
 @keyframes splashPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
 @keyframes splashFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes splashLoad{0%{width:0%}60%{width:75%}100%{width:100%}}
-#app-screen{height:100vh;display:none;flex-direction:column;overflow:hidden}
-.page{display:none;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior-y:none}
-.page.active{display:block;flex:1;min-height:0}
+
+/* APP SHELL */
+#app-screen{
+  position:fixed;inset:0;
+  display:none;
+  flex-direction:column;
+  overflow:hidden;
+  height:100dvh;
+  height:100vh;
+}
+#app-screen.visible{display:flex}
+
+/* PAGES – fill remaining space, scroll only when content overflows */
+.page{
+  display:none;
+  overflow-y:auto;
+  overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:none;
+}
+.page.active{
+  display:flex;
+  flex-direction:column;
+  flex:1;
+  min-height:0;
+}
+/* Override for normal scrollable pages – use block layout inside flex shell */
+.page.active > .wrap{flex:none}
 #page-chatbot.active{display:flex;flex-direction:column;overflow:hidden}
 
 /* AUTH */
@@ -113,8 +139,19 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height
 .auth-error{font-size:12px;color:var(--red);margin-bottom:10px;min-height:16px;font-weight:500}
 .auth-btn{width:100%;background:var(--black);color:white;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px}
 
-/* APP */
-nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;padding-top:env(safe-area-inset-top);height:calc(54px + env(safe-area-inset-top));z-index:100}
+/* APP TOPBAR */
+nav{
+  background:var(--white);
+  border-bottom:1px solid var(--g2);
+  flex-shrink:0;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  padding-top:env(safe-area-inset-top);
+  height:calc(50px + env(safe-area-inset-top));
+  z-index:100;
+}
 .nav-logo img{height:30px;width:auto}
 .nav-right{display:flex;align-items:center;gap:8px}
 .user-pill{font-size:11px;color:var(--muted);background:var(--g1);border:1px solid var(--g2);border-radius:999px;padding:4px 10px;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -123,8 +160,8 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
 .notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--red);border:1.5px solid var(--white);display:none}
 
 /* PAGES */
-.wrap{max-width:860px;margin:0 auto;padding:16px 14px 20px}
-.page-title{font-size:18px;font-weight:700;letter-spacing:-.4px;margin-bottom:14px}
+.wrap{max-width:600px;margin:0 auto;padding:14px 14px 24px}
+.page-title{font-size:17px;font-weight:700;letter-spacing:-.4px;margin-bottom:12px}
 
 /* KPIS */
 .top-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
@@ -279,22 +316,22 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
 .ac-item-meta{font-size:11px;color:var(--muted)}
 
 /* BOTTOM NAV */
-.bottom-nav{display:none;flex-shrink:0;background:var(--white);border-top:1px solid var(--g2);padding:4px 0 max(8px,env(safe-area-inset-bottom))}
-.bnav-inner{display:flex;max-width:600px;margin:0 auto;justify-content:space-around}
-.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;background:none;border:none;font-family:inherit;font-size:9px;color:var(--muted);cursor:pointer;padding:5px 0;font-weight:500;transition:color .15s;max-width:80px}
+.bottom-nav{display:none;flex-shrink:0;background:var(--white);border-top:1px solid var(--g2);padding:4px 0 max(12px,env(safe-area-inset-bottom));z-index:100}
+.bnav-inner{display:flex;margin:0 auto;justify-content:space-around}
+.bnav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;font-family:inherit;font-size:10px;color:var(--muted);cursor:pointer;padding:4px 0;font-weight:500;transition:color .15s;min-height:48px;justify-content:center}
 .bnav-btn.on{color:var(--green);font-weight:700}
-.bnav-icon{font-size:20px;line-height:1}
+.bnav-icon{font-size:22px;line-height:1}
 
 /* FAB MENU */
-.fab-wrap{position:fixed;bottom:max(76px,calc(70px + env(safe-area-inset-bottom)));right:18px;z-index:200}
-.fab-btn{width:52px;height:52px;border-radius:50%;background:var(--green);border:none;color:white;font-size:24px;cursor:pointer;box-shadow:0 4px 16px rgba(45,106,79,.4);display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s;font-family:inherit}
+.fab-wrap{position:fixed;bottom:max(78px,calc(72px + env(safe-area-inset-bottom)));right:16px;z-index:200}
+.fab-btn{width:54px;height:54px;border-radius:50%;background:var(--green);border:none;color:white;font-size:26px;cursor:pointer;box-shadow:0 4px 16px rgba(45,106,79,.4);display:flex;align-items:center;justify-content:center;transition:transform .2s,background .2s;font-family:inherit}
 .fab-btn.open{background:var(--black);transform:rotate(45deg)}
-.fab-menu{position:absolute;bottom:64px;right:0;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .2s,transform .2s}
+.fab-menu{position:absolute;bottom:66px;right:0;display:flex;flex-direction:column;gap:8px;align-items:flex-end;pointer-events:none;opacity:0;transform:translateY(10px);transition:opacity .2s,transform .2s}
 .fab-menu.open{pointer-events:all;opacity:1;transform:translateY(0)}
-.fab-item{display:flex;align-items:center;gap:10px;cursor:pointer;animation:none}
-.fab-item-btn{width:44px;height:44px;border-radius:50%;border:none;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.15);transition:transform .15s}
-.fab-item-btn:active{transform:scale(.92)}
-.fab-item-label{background:var(--black);color:white;font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.2)}
+.fab-item{display:flex;align-items:center;gap:10px;cursor:pointer}
+.fab-item-btn{width:48px;height:48px;border-radius:50%;border:none;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 10px rgba(0,0,0,.15);transition:transform .15s}
+.fab-item-btn:active{transform:scale(.9)}
+.fab-item-label{background:var(--black);color:white;font-size:12px;font-weight:600;padding:6px 12px;border-radius:8px;white-space:nowrap;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 
 /* PWA TUTORIAL STEPS */
 .pwa-step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
@@ -1428,8 +1465,7 @@ function showApp(user, isNewUser=false){
   localStorage.setItem('fv_session',JSON.stringify(user));
   document.getElementById('auth-screen').style.display='none';
   const app=document.getElementById('app-screen');
-  app.style.display='flex';
-  app.style.flexDirection='column';
+  app.classList.add('visible');
   document.querySelector('.bottom-nav').style.display='block';
   document.getElementById('fab-wrap').style.display='block';
   document.getElementById('user-email').textContent=user.email;
@@ -1445,7 +1481,7 @@ function doLogout(){
   currentUser=null;
   localStorage.removeItem('fv_session');
   document.getElementById('auth-screen').style.display='flex';
-  document.getElementById('app-screen').style.display='none';
+  document.getElementById('app-screen').classList.remove('visible');
   document.querySelector('.bottom-nav').style.display='none';
   document.getElementById('fab-wrap').style.display='none';
 }
