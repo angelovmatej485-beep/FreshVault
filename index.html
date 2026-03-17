@@ -243,7 +243,13 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
 .fab-item-btn:active{transform:scale(.92)}
 .fab-item-label{background:var(--black);color:white;font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.2)}
 
-/* PWA install banner */
+/* PWA TUTORIAL STEPS */
+.pwa-step{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start}
+.pwa-num{width:28px;height:28px;border-radius:50%;background:var(--green);color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+.pwa-content{flex:1}
+.pwa-title{font-weight:700;font-size:14px;margin-bottom:3px}
+.pwa-desc{font-size:12px;color:var(--muted);line-height:1.6}
+.pwa-visual{margin-top:8px;background:var(--g1);border:1px solid var(--g2);border-radius:8px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--text);display:inline-block}
 #pwa-banner{display:none;background:var(--green);color:white;padding:12px 16px;font-size:13px;align-items:center;gap:10px;position:sticky;top:54px;z-index:99}
 #pwa-banner button{background:white;color:var(--green);border:none;border-radius:7px;padding:6px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap}
 
@@ -432,9 +438,12 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
       </div>
       <div class="settings-section">
         <div class="settings-title">App</div>
-        <div class="setting-row">
-          <div><div class="setting-label">FreshVault als App installieren</div><div class="setting-sub">Direkt vom Homescreen öffnen</div></div>
-          <button id="pwa-settings-btn" style="background:var(--green);color:white;border:none;border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">Installieren</button>
+        <div class="setting-row" style="flex-direction:column;align-items:flex-start;gap:10px">
+          <div><div class="setting-label">FreshVault als App installieren</div><div class="setting-sub">Zum Homescreen hinzufügen – wie eine echte App</div></div>
+          <div style="display:flex;gap:8px;width:100%">
+            <button id="pwa-settings-btn" style="flex:1;background:var(--green);color:white;border:none;border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">⬇️ Automatisch installieren</button>
+            <button id="pwa-tutorial-btn" style="flex:1;background:var(--blue-l);color:var(--blue);border:1px solid var(--blue);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">📖 Anleitung</button>
+          </div>
         </div>
         <div class="setting-row"><div><div class="setting-label">FreshVault Core v1</div><div class="setting-sub">Firmware 2.1.4</div></div><span style="font-size:12px;color:var(--green);font-weight:600">● Online</span></div>
       </div>
@@ -544,6 +553,102 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
     </div>
     <div class="field"><label>Produktname</label><input id="shop-name-input" type="text" placeholder="z.B. Milch, Brot…"></div>
     <button class="btn-confirm" id="btn-confirm-shop">Zur Liste hinzufügen</button>
+  </div>
+</div>
+
+<!-- PWA TUTORIAL MODAL -->
+<div class="overlay" id="pwa-overlay">
+  <div class="sheet" id="pwa-sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <div class="sheet-title">📱 Als App installieren</div>
+      <button class="sheet-close" id="btn-close-pwa">✕</button>
+    </div>
+    <!-- Device Tabs -->
+    <div style="display:flex;gap:6px;margin-bottom:16px">
+      <button class="auth-tab on" id="tab-android" style="font-size:13px">🤖 Android / Samsung</button>
+      <button class="auth-tab" id="tab-ios" style="font-size:13px">🍎 iPhone</button>
+    </div>
+
+    <!-- ANDROID STEPS -->
+    <div id="pwa-android">
+      <div style="background:var(--green-l);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--green);font-weight:600">
+        ✅ Funktioniert mit Chrome, Samsung Internet & Edge
+      </div>
+      <div class="pwa-step">
+        <div class="pwa-num">1</div>
+        <div class="pwa-content">
+          <div class="pwa-title">Chrome öffnen</div>
+          <div class="pwa-desc">Öffne diese Seite in <strong>Google Chrome</strong> oder <strong>Samsung Internet</strong> auf deinem Handy.</div>
+        </div>
+      </div>
+      <div class="pwa-step">
+        <div class="pwa-num">2</div>
+        <div class="pwa-content">
+          <div class="pwa-title">Menü öffnen</div>
+          <div class="pwa-desc">Tippe auf die <strong>drei Punkte ⋮</strong> oben rechts in der Browser-Leiste.</div>
+          <div class="pwa-visual">⋮</div>
+        </div>
+      </div>
+      <div class="pwa-step">
+        <div class="pwa-num">3</div>
+        <div class="pwa-content">
+          <div class="pwa-title">„Zum Startbildschirm hinzufügen"</div>
+          <div class="pwa-desc">Scrolle im Menü nach unten und tippe auf <strong>„Zum Startbildschirm hinzufügen"</strong> oder <strong>„App installieren"</strong>.</div>
+          <div class="pwa-visual">📲 Zum Startbildschirm hinzufügen</div>
+        </div>
+      </div>
+      <div class="pwa-step">
+        <div class="pwa-num">4</div>
+        <div class="pwa-content">
+          <div class="pwa-title">Bestätigen</div>
+          <div class="pwa-desc">Tippe auf <strong>„Hinzufügen"</strong> – fertig! FreshVault erscheint jetzt auf deinem Homescreen. 🎉</div>
+        </div>
+      </div>
+      <div style="background:var(--blue-l);border-radius:10px;padding:12px 14px;margin-top:4px;font-size:12px;color:var(--blue)">
+        💡 <strong>Tipp:</strong> Erscheint oben automatisch ein Banner „App installieren"? Einfach darauf tippen – das ist der schnellste Weg!
+      </div>
+    </div>
+
+    <!-- IOS STEPS -->
+    <div id="pwa-ios" style="display:none">
+      <div style="background:var(--green-l);border-radius:10px;padding:12px 14px;margin-bottom:14px;font-size:13px;color:var(--green);font-weight:600">
+        ✅ Funktioniert mit Safari (iOS 16.4+)
+      </div>
+      <div class="pwa-step">
+        <div class="pwa-num">1</div>
+        <div class="pwa-content">
+          <div class="pwa-title">Safari öffnen</div>
+          <div class="pwa-desc">Öffne diese Seite unbedingt in <strong>Safari</strong> – andere Browser wie Chrome funktionieren bei iPhone leider nicht.</div>
+        </div>
+      </div>
+      <div class="pwa-step">
+        <div class="pwa-num">2</div>
+        <div class="pwa-content">
+          <div class="pwa-title">Teilen-Symbol tippen</div>
+          <div class="pwa-desc">Tippe auf das <strong>Teilen-Symbol</strong> unten in der Mitte der Safari-Leiste.</div>
+          <div class="pwa-visual" style="font-size:22px">⬆️</div>
+        </div>
+      </div>
+      <div class="pwa-step">
+        <div class="pwa-num">3</div>
+        <div class="pwa-content">
+          <div class="pwa-title">„Zum Home-Bildschirm"</div>
+          <div class="pwa-desc">Scrolle im Teilen-Menü nach unten und tippe auf <strong>„Zum Home-Bildschirm"</strong>.</div>
+          <div class="pwa-visual">＋ Zum Home-Bildschirm</div>
+        </div>
+      </div>
+      <div class="pwa-step">
+        <div class="pwa-num">4</div>
+        <div class="pwa-content">
+          <div class="pwa-title">Hinzufügen</div>
+          <div class="pwa-desc">Oben rechts auf <strong>„Hinzufügen"</strong> tippen – FreshVault ist jetzt auf deinem Homescreen! 🎉</div>
+        </div>
+      </div>
+      <div style="background:var(--orange-l);border-radius:10px;padding:12px 14px;margin-top:4px;font-size:12px;color:var(--orange)">
+        ⚠️ Funktioniert nur in <strong>Safari</strong>. In Chrome oder Firefox auf iPhone ist diese Option nicht verfügbar.
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1690,6 +1795,22 @@ document.addEventListener('DOMContentLoaded',()=>{
   // PWA
   document.getElementById('pwa-install-btn').addEventListener('click',installPWA);
   document.getElementById('pwa-settings-btn').addEventListener('click',installPWA);
+  document.getElementById('pwa-tutorial-btn').addEventListener('click',()=>document.getElementById('pwa-overlay').classList.add('open'));
+  document.getElementById('btn-close-pwa').addEventListener('click',()=>document.getElementById('pwa-overlay').classList.remove('open'));
+  document.getElementById('pwa-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('pwa-overlay'))document.getElementById('pwa-overlay').classList.remove('open');});
+  // Tutorial Tabs
+  document.getElementById('tab-android').addEventListener('click',()=>{
+    document.getElementById('tab-android').classList.add('on');
+    document.getElementById('tab-ios').classList.remove('on');
+    document.getElementById('pwa-android').style.display='block';
+    document.getElementById('pwa-ios').style.display='none';
+  });
+  document.getElementById('tab-ios').addEventListener('click',()=>{
+    document.getElementById('tab-ios').classList.add('on');
+    document.getElementById('tab-android').classList.remove('on');
+    document.getElementById('pwa-ios').style.display='block';
+    document.getElementById('pwa-android').style.display='none';
+  });
 
   // Session restore
   try{
