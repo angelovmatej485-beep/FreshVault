@@ -25,6 +25,23 @@
   --r:14px;--rs:8px;
   --shadow:0 1px 3px rgba(0,0,0,.06),0 4px 12px rgba(0,0,0,.04);
 }
+body.dark{
+  --bg:#0f0f0f;--white:#1a1a1a;--black:#f0f0f0;
+  --g1:#242424;--g2:#2e2e2e;--g3:#555;--g4:#888;
+  --text:#f0f0f0;--muted:#666;
+  --green:#3a8a65;--green-l:#1a2e24;
+  --blue:#3b82f6;--blue-l:#1a2035;
+  --red:#e05252;--red-l:#2a1818;
+  --orange:#e07030;--orange-l:#2a1e10;
+  --yellow:#c09830;--yellow-l:#25200a;
+  --purple:#a855f7;--purple-l:#2a1a3a;
+  --shadow:0 1px 3px rgba(0,0,0,.3),0 4px 12px rgba(0,0,0,.2);
+}
+body.dark nav,body.dark .bottom-nav{background:var(--white);border-color:var(--g2)}
+body.dark .sheet{background:var(--white)}
+body.dark .autocomplete-dropdown{background:var(--white);border-color:var(--g2)}
+body.dark input,body.dark select{color:var(--text);background:var(--g1);border-color:var(--g2)}
+body.dark .splash{background:linear-gradient(160deg,#0a1f16 0%,#1a3d2d 50%,#0a1510 100%)}
 body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height:100vh;overflow:hidden;-webkit-tap-highlight-color:transparent}
 
 /* SPLASH SCREEN */
@@ -425,6 +442,13 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
         </div>
       </div>
       <div class="settings-section">
+        <div class="settings-title">Darstellung</div>
+        <div class="setting-row">
+          <div><div class="setting-label">🌙 Dark Mode</div><div class="setting-sub">Dunkles Design aktivieren</div></div>
+          <label class="toggle"><input type="checkbox" id="toggle-dark"><span class="toggle-slider"></span></label>
+        </div>
+      </div>
+      <div class="settings-section">
         <div class="settings-title">Kühlzonen – Zieltemperatur</div>
         <div id="zone-settings"></div>
       </div>
@@ -435,6 +459,17 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
           <label class="toggle"><input type="checkbox" id="toggle-notif"><span class="toggle-slider"></span></label>
         </div>
         <div class="setting-row"><div><div class="setting-label">Temperatur-Alarm</div><div class="setting-sub">Bei Abweichung > 2°C</div></div><label class="toggle"><input type="checkbox" checked><span class="toggle-slider"></span></label></div>
+      </div>
+      <div class="settings-section">
+        <div class="settings-title">Berichte & Vorschläge</div>
+        <div class="setting-row" style="cursor:pointer" id="btn-weekly-report">
+          <div><div class="setting-label">📊 Wochenbericht anzeigen</div><div class="setting-sub">Zusammenfassung der letzten 7 Tage</div></div>
+          <span style="font-size:18px;color:var(--muted)">›</span>
+        </div>
+        <div class="setting-row" style="cursor:pointer" id="btn-suggestions">
+          <div><div class="setting-label">🛒 Einkaufsvorschläge</div><div class="setting-sub">Was sollte ich nachkaufen?</div></div>
+          <span style="font-size:18px;color:var(--muted)">›</span>
+        </div>
       </div>
       <div class="settings-section">
         <div class="settings-title">App</div>
@@ -553,6 +588,31 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
     </div>
     <div class="field"><label>Produktname</label><input id="shop-name-input" type="text" placeholder="z.B. Milch, Brot…"></div>
     <button class="btn-confirm" id="btn-confirm-shop">Zur Liste hinzufügen</button>
+  </div>
+</div>
+
+<!-- WOCHENBERICHT MODAL -->
+<div class="overlay" id="report-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <div class="sheet-title">📊 Wochenbericht</div>
+      <button class="sheet-close" id="btn-close-report">✕</button>
+    </div>
+    <div id="report-content"></div>
+  </div>
+</div>
+
+<!-- EINKAUFSVORSCHLÄGE MODAL -->
+<div class="overlay" id="suggest-overlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <div class="sheet-title">🛒 Einkaufsvorschläge</div>
+      <button class="sheet-close" id="btn-close-suggest">✕</button>
+    </div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:14px">Basierend auf deinem Bestand – was könnte fehlen oder bald ausgehen?</div>
+    <div id="suggest-content"></div>
   </div>
 </div>
 
@@ -1387,7 +1447,184 @@ function renderSettings(){
         <div class="zone-temp-val">${z.temp}°C</div>
       </div>
     </div>`).join('');
+  // Dark Mode Toggle Zustand wiederherstellen
+  const isDark=localStorage.getItem('fv_dark')==='1';
+  const toggle=document.getElementById('toggle-dark');
+  if(toggle) toggle.checked=isDark;
 }
+
+// ── DARK MODE ──────────────────────────────────
+function toggleDarkMode(on){
+  document.body.classList.toggle('dark', on);
+  localStorage.setItem('fv_dark', on?'1':'0');
+}
+
+function initDarkMode(){
+  if(localStorage.getItem('fv_dark')==='1') document.body.classList.add('dark');
+}
+
+// ── WOCHENBERICHT ──────────────────────────────
+function renderWeeklyReport(){
+  const items = myItems();
+  const now = new Date();
+  const weekAgo = new Date(now - 7*24*60*60*1000);
+
+  // Produkte die diese Woche hinzugefügt wurden
+  const addedThisWeek = items.filter(i => i.createdAt && new Date(i.createdAt) >= weekAgo);
+  // Abgelaufene Produkte
+  const expired = items.filter(i => dl(i.expiry) <= 0);
+  // Bald ablaufend (3 Tage)
+  const soonExp = items.filter(i => { const d=dl(i.expiry); return d>0&&d<=3; });
+  // Warenwert
+  const totalWert = items.reduce((s,i)=>s+(PRICES[i.cat]||2),0);
+  // Frischequote
+  const fresh = items.filter(i=>dl(i.expiry)>3).length;
+  const freshPct = items.length ? Math.round(fresh/items.length*100) : 0;
+  // Kategorien-Top
+  const catCount={};
+  items.forEach(i=>catCount[i.cat]=(catCount[i.cat]||0)+1);
+  const topCat = Object.entries(catCount).sort((a,b)=>b[1]-a[1])[0];
+
+  const el = document.getElementById('report-content');
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:var(--green-l);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:26px;font-weight:800;color:var(--green)">${items.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Produkte gesamt</div>
+      </div>
+      <div style="background:var(--blue-l);border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:26px;font-weight:800;color:var(--blue)">${addedThisWeek.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Diese Woche neu</div>
+      </div>
+      <div style="background:${expired.length>0?'var(--red-l)':'var(--green-l)'};border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:26px;font-weight:800;color:${expired.length>0?'var(--red)':'var(--green)'}">${expired.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Abgelaufen</div>
+      </div>
+      <div style="background:${soonExp.length>0?'var(--orange-l)':'var(--green-l)'};border-radius:12px;padding:14px;text-align:center">
+        <div style="font-size:26px;font-weight:800;color:${soonExp.length>0?'var(--orange)':'var(--green)'}">${soonExp.length}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Läuft bald ab</div>
+      </div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">📈 Frische-Score</div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:32px;font-weight:800;color:${freshPct>70?'var(--green)':freshPct>40?'var(--yellow)':'var(--red)'}">${freshPct}%</div>
+        <div style="flex:1">
+          <div style="background:var(--g1);border-radius:999px;height:10px;overflow:hidden">
+            <div style="width:${freshPct}%;height:100%;border-radius:999px;background:${freshPct>70?'var(--green)':freshPct>40?'var(--yellow)':'var(--red)'};transition:width .6s"></div>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">${freshPct>70?'🟢 Sehr gut – dein Kühlschrank ist frisch!':freshPct>40?'🟡 Okay – einige Produkte bald aufbrauchen':'🔴 Achtung – viele Produkte laufen ab'}</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">💰 Warenwert</div>
+      <div style="font-size:28px;font-weight:800;color:var(--green)">${totalWert.toFixed(2)}€</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:4px">Ø ${items.length?(totalWert/items.length).toFixed(2):0}€ pro Produkt</div>
+      ${expired.length>0?`<div style="font-size:12px;color:var(--red);margin-top:6px;font-weight:600">⚠️ ~${(expired.length*(totalWert/Math.max(items.length,1))).toFixed(2)}€ durch abgelaufene Produkte gefährdet</div>`:''}
+    </div>
+
+    ${topCat ? `<div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px;margin-bottom:10px">
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px">🏆 Meiste Kategorie</div>
+      <div style="font-size:16px;font-weight:600">${topCat[0]} <span style="color:var(--muted);font-size:13px">(${topCat[1]} Produkte)</span></div>
+    </div>` : ''}
+
+    ${soonExp.length>0 ? `<div style="background:var(--orange-l);border:1px solid var(--orange);border-radius:var(--r);padding:14px">
+      <div style="font-size:13px;font-weight:700;color:var(--orange);margin-bottom:8px">⚡ Bald aufbrauchen</div>
+      ${soonExp.map(i=>`<div style="display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px solid rgba(0,0,0,.05)"><span>${getEmoji(i.name)} ${i.name}</span><span style="font-weight:600;color:var(--orange)">${dl(i.expiry)===0?'Heute':dl(i.expiry)+'d'}</span></div>`).join('')}
+    </div>` : '<div style="background:var(--green-l);border-radius:var(--r);padding:14px;font-size:13px;color:var(--green);font-weight:600">✅ Super! Keine Produkte laufen in den nächsten 3 Tagen ab.</div>'}
+  `;
+}
+
+// ── EINKAUFSVORSCHLÄGE ─────────────────────────
+function renderSuggestions(){
+  const items = myItems();
+  const cats = {};
+  items.forEach(i => { cats[i.cat] = (cats[i.cat]||0)+1; });
+
+  // Welche Kategorien fehlen komplett oder sind dünn besetzt?
+  const allCats = ['🥬 Gemüse','🍎 Obst','🥛 Milchprodukte','🥩 Fleisch','🧀 Käse','🥤 Getränke','🍳 Sonstiges'];
+  const suggestions = [];
+
+  // Abgelaufene → direkt kaufen
+  const expired = items.filter(i => dl(i.expiry) <= 0);
+  expired.forEach(i => suggestions.push({
+    prio:'hoch', emoji:getEmoji(i.name), name:i.name, cat:i.cat,
+    reason:'Abgelaufen – sofort ersetzen', color:'var(--red)', bg:'var(--red-l)'
+  }));
+
+  // Bald ablaufend & nur 1 Stück → nachkaufen
+  const soonLow = items.filter(i => { const d=dl(i.expiry); return d>0&&d<=2; });
+  soonLow.forEach(i => suggestions.push({
+    prio:'mittel', emoji:getEmoji(i.name), name:i.name, cat:i.cat,
+    reason:'Läuft in '+dl(i.expiry)+' Tag(en) ab', color:'var(--orange)', bg:'var(--orange-l)'
+  }));
+
+  // Kategorien die komplett fehlen
+  allCats.forEach(cat => {
+    if(!cats[cat]) suggestions.push({
+      prio:'niedrig', emoji:cat.split(' ')[0], name:cat.replace(/^\S+\s/,''), cat,
+      reason:'Kategorie komplett leer', color:'var(--blue)', bg:'var(--blue-l)'
+    });
+  });
+
+  // Beliebte Grundnahrungsmittel die fehlen
+  const basics = [
+    {name:'Vollmilch 3,5%',cat:'🥛 Milchprodukte'},
+    {name:'Eier',cat:'🍳 Sonstiges'},
+    {name:'Butter',cat:'🥛 Milchprodukte'},
+    {name:'Joghurt 3,5%',cat:'🥛 Milchprodukte'},
+    {name:'Tomaten',cat:'🥬 Gemüse'},
+    {name:'Karotten',cat:'🥬 Gemüse'},
+  ];
+  basics.forEach(b => {
+    const hasIt = items.some(i=>i.name.toLowerCase().includes(b.name.toLowerCase().split(' ')[0]));
+    if(!hasIt) suggestions.push({
+      prio:'niedrig', emoji:getEmoji(b.name), name:b.name, cat:b.cat,
+      reason:'Grundnahrungsmittel fehlt', color:'var(--muted)', bg:'var(--g1)'
+    });
+  });
+
+  const el = document.getElementById('suggest-content');
+  if(!suggestions.length){
+    el.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--muted)">✅ Dein Kühlschrank ist gut bestückt!</div>';
+    return;
+  }
+
+  const high = suggestions.filter(s=>s.prio==='hoch');
+  const mid  = suggestions.filter(s=>s.prio==='mittel');
+  const low  = suggestions.filter(s=>s.prio==='niedrig').slice(0,6);
+
+  const renderGroup = (title, list) => list.length ? `
+    <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:12px 0 6px">${title}</div>
+    ${list.map(s=>`
+      <div style="background:${s.bg};border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:10px;margin-bottom:6px">
+        <span style="font-size:22px">${s.emoji}</span>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px">${s.name}</div>
+          <div style="font-size:11px;color:${s.color};font-weight:500;margin-top:2px">${s.reason}</div>
+        </div>
+        <button onclick="addToShopList('${s.name}','${s.cat}')" style="background:var(--green);color:white;border:none;border-radius:7px;padding:6px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap">+ Liste</button>
+      </div>`).join('')}` : '';
+
+  el.innerHTML =
+    renderGroup('🔴 Dringend', high) +
+    renderGroup('🟠 Bald kaufen', mid) +
+    renderGroup('🔵 Empfohlen', low);
+}
+
+window.addToShopList=(name,cat)=>{
+  const shop=getShop();
+  if(shop.find(s=>s.name===name&&!s.done)){return;}
+  shop.push({id:genId(),name,cat,auto:false,done:false});
+  saveShop(shop);
+  // kurze Bestätigung
+  const btn=event.target;
+  btn.textContent='✓';btn.style.background='var(--blue)';
+  setTimeout(()=>{btn.textContent='+ Liste';btn.style.background='var(--green)';},1200);
+};
 
 // ── MODAL ──────────────────────────────────────
 function openModal(){
@@ -1788,6 +2025,25 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('btn-close-shop').addEventListener('click',()=>document.getElementById('shop-overlay').classList.remove('open'));
   document.getElementById('btn-confirm-shop').addEventListener('click',addManualShop);
   document.getElementById('btn-clear-shop').addEventListener('click',clearDoneShop);
+
+  // Dark Mode
+  document.getElementById('toggle-dark').addEventListener('change',e=>toggleDarkMode(e.target.checked));
+  initDarkMode();
+
+  // Wochenbericht & Vorschläge
+  document.getElementById('btn-weekly-report').addEventListener('click',()=>{
+    renderWeeklyReport();
+    document.getElementById('report-overlay').classList.add('open');
+  });
+  document.getElementById('btn-close-report').addEventListener('click',()=>document.getElementById('report-overlay').classList.remove('open'));
+  document.getElementById('report-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('report-overlay'))document.getElementById('report-overlay').classList.remove('open');});
+
+  document.getElementById('btn-suggestions').addEventListener('click',()=>{
+    renderSuggestions();
+    document.getElementById('suggest-overlay').classList.add('open');
+  });
+  document.getElementById('btn-close-suggest').addEventListener('click',()=>document.getElementById('suggest-overlay').classList.remove('open'));
+  document.getElementById('suggest-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('suggest-overlay'))document.getElementById('suggest-overlay').classList.remove('open');});
 
   // Notifs
   document.getElementById('toggle-notif').addEventListener('change',e=>{if(e.target.checked)requestNotifs();});
