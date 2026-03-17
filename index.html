@@ -91,7 +91,7 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height
 @keyframes splashPop{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
 @keyframes splashFadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
 @keyframes splashLoad{0%{width:0%}60%{width:75%}100%{width:100%}}
-#app-screen{height:100vh;display:flex;flex-direction:column;overflow:hidden}
+#app-screen{height:100vh;display:none;flex-direction:column;overflow:hidden}
 .page{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:none}
 .page.active{display:block}
 
@@ -113,7 +113,6 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height
 .auth-btn{width:100%;background:var(--black);color:white;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:8px}
 
 /* APP */
-#app-screen{display:none;height:100vh;flex-direction:column;overflow:hidden}
 nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;display:flex;align-items:center;justify-content:space-between;padding:0 16px;padding-top:env(safe-area-inset-top);height:calc(54px + env(safe-area-inset-top));z-index:100}
 .nav-logo img{height:30px;width:auto}
 .nav-right{display:flex;align-items:center;gap:8px}
@@ -1363,6 +1362,8 @@ function showApp(user, isNewUser=false){
   const app=document.getElementById('app-screen');
   app.style.display='flex';
   app.style.flexDirection='column';
+  document.querySelector('.bottom-nav').style.display='block';
+  document.getElementById('fab-wrap').style.display='block';
   document.getElementById('user-email').textContent=user.email;
   document.getElementById('settings-email').textContent=user.email;
   renderAll();
@@ -1375,6 +1376,8 @@ function doLogout(){
   localStorage.removeItem('fv_session');
   document.getElementById('auth-screen').style.display='flex';
   document.getElementById('app-screen').style.display='none';
+  document.querySelector('.bottom-nav').style.display='none';
+  document.getElementById('fab-wrap').style.display='none';
 }
 
 function doAuth(){
@@ -2667,7 +2670,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 
 <!-- ── KI CHATBOT PAGE ── -->
-<div class="page" id="page-chatbot" style="display:none;flex-direction:column;overflow:hidden">
+<div class="page" id="page-chatbot" style="flex-direction:column;overflow:hidden">
   <div class="wrap" style="padding-bottom:0;flex-shrink:0">
     <div class="page-title" style="margin-bottom:4px">🤖 FreshVault KI</div>
     <div style="font-size:12px;color:var(--muted);margin-bottom:8px">Frag mich alles über Lebensmittel, Haltbarkeit & Küchentipps!</div>
@@ -2989,20 +2992,20 @@ function kickMember(code,uid){
 // Override myItems to support group sharing
 const _origMyItems = window.myItems;
 window.myItems = function(){
+  if(!currentUser) return [];
   const g=myGroup();
-  if(!g||!currentUser) return _origMyItems?_origMyItems():(()=>{
-    try{const d=JSON.parse(localStorage.getItem('fv_items')||'{}');return d[currentUser?.uid]||[];}catch{return [];}
-  })();
-  // Collect items from all group members
-  let all=[];
-  (g.members||[]).forEach(m=>{
-    try{
-      const d=JSON.parse(localStorage.getItem('fv_items')||'{}');
-      const uItems=(d[m.uid]||[]).map(i=>({...i,_ownerEmail:m.email,_isOwn:m.uid===currentUser.uid}));
-      all=[...all,...uItems];
-    }catch{}
-  });
-  return all;
+  if(!g) return _origMyItems ? _origMyItems() : [];
+  // Collect items from all group members using the same Array format as getItems()
+  try{
+    const allItems = getItems();
+    const memberUids = (g.members||[]).map(m=>m.uid);
+    return allItems
+      .filter(i => memberUids.includes(i.uid))
+      .map(i => {
+        const member = (g.members||[]).find(m=>m.uid===i.uid);
+        return {...i, _ownerEmail:member?member.email:'', _isOwn:i.uid===currentUser.uid};
+      });
+  }catch{ return _origMyItems ? _origMyItems() : []; }
 };
 
 
@@ -3040,7 +3043,7 @@ async function getBotResponse(userMsg){
   trackStat('chatMsgs');
 
   // Build context with current fridge items
-  const items=window.myItems?myItems():[];
+  const items=myItems();
   const itemList=items.length>0
     ? items.slice(0,15).map(i=>`${i.name} (${i.cat||''}, läuft ab: ${i.expiry})`).join(', ')
     : 'Keine Produkte im Kühlschrank';
@@ -3111,7 +3114,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(id==='chatbot'){
       document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
       const p=document.getElementById('page-chatbot');
-      if(p){p.style.display='flex';p.classList.add('active');}
+      if(p){p.classList.add('active');}
       document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
       closeFab();
       return;
@@ -3122,9 +3125,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(id==='gamification'){
       renderGamification();
     }
-    // Hide chatbot page
-    const cp=document.getElementById('page-chatbot');
-    if(cp){cp.style.display='none';cp.classList.remove('active');}
     if(_origShowPage) _origShowPage(id);
   };
 
