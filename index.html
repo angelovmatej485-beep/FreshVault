@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="UTF-8">
@@ -688,7 +688,7 @@ nav{
       <div id="sharing-no-group">
         <div style="background:var(--blue-l);border:1px solid var(--blue);border-radius:var(--r);padding:14px;margin-bottom:14px;display:flex;gap:12px;align-items:flex-start">
           <span style="font-size:20px">💡</span>
-          <div style="font-size:13px;color:var(--blue);line-height:1.6">Teile deinen Kühlschrank mit deiner Familie. Alle sehen dieselben Produkte, können hinzufügen und Warnungen erhalten.</div>
+          <div style="font-size:13px;color:var(--blue);line-height:1.6">Erstelle eine Gruppe und teile den Code mit deiner Familie. Der Admin kopiert den <b>vollständigen Teilen-Code</b> – damit können auch andere Geräte beitreten.</div>
         </div>
         <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:20px;box-shadow:var(--shadow);text-align:center;margin-bottom:10px">
           <div style="font-size:48px;margin-bottom:12px">🏠</div>
@@ -704,12 +704,14 @@ nav{
             <div style="font-size:18px;font-weight:800;color:white" id="group-name-display">Meine Familie</div>
             <span style="background:rgba(255,255,255,.2);color:white;border-radius:999px;padding:4px 12px;font-size:11px;font-weight:700" id="group-role-badge">Admin</span>
           </div>
-          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:14px">Tippe auf den Code um ihn zu kopieren</div>
-          <div id="group-code-display" onclick="copyGroupCode()" style="font-size:28px;font-weight:900;letter-spacing:8px;color:white;text-align:center;background:rgba(255,255,255,.15);border-radius:10px;padding:14px;cursor:pointer;border:1.5px dashed rgba(255,255,255,.4)">ABC123</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">
-            <button onclick="showQR()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;color:white;cursor:pointer">📱 QR-Code</button>
-            <button onclick="leaveGroup()" style="background:rgba(220,38,38,.3);border:1px solid rgba(220,38,38,.5);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;color:white;cursor:pointer">🚪 Verlassen</button>
+          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-bottom:10px">Dein Gruppencode:</div>
+          <div id="group-code-display" style="font-size:28px;font-weight:900;letter-spacing:8px;color:white;text-align:center;background:rgba(255,255,255,.15);border-radius:10px;padding:14px;border:1.5px dashed rgba(255,255,255,.4)">ABC123</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.65);text-align:center;margin:8px 0 12px">Nutze "Teilen-Code kopieren" damit andere Geräte beitreten können</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <button onclick="copyGroupCode()" style="background:white;border:none;border-radius:10px;padding:10px;font-size:12px;font-weight:700;font-family:inherit;color:var(--purple);cursor:pointer">📋 Teilen-Code</button>
+            <button onclick="showQR()" style="background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:10px;font-size:12px;font-weight:600;font-family:inherit;color:white;cursor:pointer">📱 QR-Code</button>
           </div>
+          <button onclick="leaveGroup()" style="width:100%;margin-top:8px;background:rgba(220,38,38,.3);border:1px solid rgba(220,38,38,.5);border-radius:10px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;color:white;cursor:pointer">🚪 Gruppe verlassen</button>
         </div>
         <div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:16px;box-shadow:var(--shadow);margin-bottom:12px">
           <div class="list-title" style="margin-bottom:12px">👥 Mitglieder</div>
@@ -717,7 +719,7 @@ nav{
         </div>
         <div style="background:var(--green-l);border:1px solid var(--green);border-radius:var(--r);padding:14px;display:flex;gap:10px">
           <span style="font-size:18px">ℹ️</span>
-          <div style="font-size:12px;color:var(--green);line-height:1.6">Alle Mitglieder sehen denselben Kühlschrank. Hinzugefügte Produkte sind für alle sichtbar. Der Admin kann Mitglieder entfernen.</div>
+          <div style="font-size:12px;color:var(--green);line-height:1.6">Alle Mitglieder sehen denselben Kühlschrank. Der Admin kopiert den Teilen-Code – andere fügen ihn beim Beitreten ein.</div>
         </div>
       </div>
     </div>
@@ -2965,11 +2967,16 @@ function renderGamification(){
 
 // ══════════════════════════════════════════
 // 👨‍👩‍👧 FAMILIEN-SHARING
+// Gruppen werden lokal im localStorage gespeichert.
+// Der "Teilen"-Code enthält die Gruppendaten kodiert,
+// damit auch andere Geräte beitreten können.
 // ══════════════════════════════════════════
+
 function getGroups(){ try{return JSON.parse(localStorage.getItem('fv_groups')||'{}')}catch{return{}} }
 function saveGroups(g){ localStorage.setItem('fv_groups',JSON.stringify(g)) }
+
 function myGroup(){
-  if(!window.currentUser) return null;
+  if(!currentUser) return null;
   const groups=getGroups();
   for(const code in groups){
     const g=groups[code];
@@ -2980,51 +2987,105 @@ function myGroup(){
 
 function genGroupCode(){
   const chars='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let c='';for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
+  let c='';
+  for(let i=0;i<6;i++) c+=chars[Math.floor(Math.random()*chars.length)];
   return c;
 }
 
 function createGroup(){
-  if(!currentUser) return;
-  if(myGroup()){ alert('Du bist bereits in einer Gruppe.'); return; }
+  if(!currentUser){ alert('Bitte zuerst einloggen.'); return; }
+  if(myGroup()){ alert('Du bist bereits in einer Gruppe. Verlasse sie zuerst.'); return; }
   const code = genGroupCode();
   const groups = getGroups();
   groups[code] = {
     name: currentUser.email.split('@')[0]+"'s Familie",
     adminUid: currentUser.uid,
+    adminEmail: currentUser.email,
     members: [{uid:currentUser.uid, email:currentUser.email, role:'Admin', joined:Date.now()}],
     created: Date.now(),
     log: []
   };
   saveGroups(groups);
   trackStat('createdGroup', true);
-  // Show group UI immediately
-  document.getElementById('sharing-no-group').style.display = 'none';
-  document.getElementById('sharing-has-group').style.display = 'block';
   renderSharingPage();
 }
 
+function getShareableCode(){
+  const g = myGroup();
+  if(!g) return '';
+  const groups = getGroups();
+  const gd = groups[g.code];
+  if(!gd) return g.code;
+  try{
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify({
+      code: g.code, name: gd.name, adminUid: gd.adminUid,
+      adminEmail: gd.adminEmail||'', members:[], created: gd.created, log:[]
+    }))));
+    return g.code + ':' + encoded;
+  }catch(e){ return g.code; }
+}
+
 function joinGroup(){
-  const code=document.getElementById('join-code-input').value.trim().toUpperCase();
-  const errEl=document.getElementById('join-error');
-  errEl.textContent='';
-  if(!code||code.length!==6){errEl.textContent='Bitte 6-stelligen Code eingeben.';return;}
-  const groups=getGroups();
-  if(!groups[code]){errEl.textContent='Gruppe nicht gefunden.';return;}
-  const existing=myGroup();
-  if(existing){errEl.textContent='Du bist bereits in einer Gruppe.';return;}
-  groups[code].members.push({uid:currentUser.uid,email:currentUser.email,role:'Mitglied',joined:Date.now()});
-  if(!groups[code].log) groups[code].log=[];
-  groups[code].log.push({type:'join',uid:currentUser.uid,email:currentUser.email,ts:Date.now()});
-  saveGroups(groups);
+  const inputEl = document.getElementById('join-code-input');
+  const errEl = document.getElementById('join-error');
+  const raw = inputEl.value.trim().toUpperCase();
+  errEl.textContent = '';
+
+  if(!raw){ errEl.textContent = 'Bitte Code eingeben.'; return; }
+  if(!currentUser){ errEl.textContent = 'Bitte zuerst einloggen.'; return; }
+  if(myGroup()){ errEl.textContent = 'Du bist bereits in einer Gruppe.'; return; }
+
+  const groups = getGroups();
+  let code = raw;
+  let importedGroup = null;
+
+  // Check for shareable code with encoded data (CODE:base64)
+  if(raw.includes(':')){
+    const parts = raw.split(':');
+    code = parts[0];
+    try{
+      importedGroup = JSON.parse(decodeURIComponent(escape(atob(parts[1]))));
+    }catch(e){ errEl.textContent = 'Ungültiger Code.'; return; }
+  }
+
+  if(groups[code]){
+    // Group exists locally — just add this user
+    groups[code].members.push({uid:currentUser.uid, email:currentUser.email, role:'Mitglied', joined:Date.now()});
+    if(!groups[code].log) groups[code].log=[];
+    groups[code].log.push({type:'join', uid:currentUser.uid, email:currentUser.email, ts:Date.now()});
+    saveGroups(groups);
+  } else if(importedGroup && importedGroup.code === code){
+    // Import group from shared code (cross-device)
+    groups[code] = {...importedGroup, members:[...importedGroup.members, {uid:currentUser.uid, email:currentUser.email, role:'Mitglied', joined:Date.now()}], log:[{type:'join', uid:currentUser.uid, email:currentUser.email, ts:Date.now()}]};
+    saveGroups(groups);
+  } else {
+    errEl.textContent = 'Gruppe nicht gefunden. Nutze den kompletten Teilen-Code vom Admin.';
+    return;
+  }
+
   document.getElementById('join-group-overlay').classList.remove('open');
-  trackStat('joinedGroup',true);
-  document.getElementById('sharing-no-group').style.display='none';
-  document.getElementById('sharing-has-group').style.display='block';
+  inputEl.value = '';
+  trackStat('joinedGroup', true);
   renderSharingPage();
   renderAll();
-  // Show recap for new member
-  showGroupRecap(groups[code]);
+}
+
+function copyGroupCode(){
+  const shareCode = getShareableCode();
+  const displayEl = document.getElementById('group-code-display');
+  const short = myGroup()?.code||'';
+  const copy = (text) => {
+    if(navigator.clipboard){
+      navigator.clipboard.writeText(text).catch(()=>{});
+    } else {
+      const ta=document.createElement('textarea');
+      ta.value=text; document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); ta.remove();
+    }
+  };
+  copy(shareCode);
+  displayEl.textContent='✓ Kopiert!';
+  setTimeout(()=>displayEl.textContent=short, 1500);
 }
 
 function logGroupEvent(type, data={}){
@@ -3034,7 +3095,6 @@ function logGroupEvent(type, data={}){
   if(!groups[g.code]) return;
   if(!groups[g.code].log) groups[g.code].log=[];
   groups[g.code].log.push({type, ...data, uid:currentUser.uid, email:currentUser.email, ts:Date.now()});
-  // Keep only last 50 events
   if(groups[g.code].log.length>50) groups[g.code].log=groups[g.code].log.slice(-50);
   saveGroups(groups);
 }
@@ -3043,13 +3103,9 @@ function showGroupRecap(group){
   const lastSeen = parseInt(localStorage.getItem('fv_last_seen_'+currentUser.uid)||'0');
   const now = Date.now();
   const hoursSince = (now - lastSeen) / 3600000;
-  // Only show recap if away for more than 12 hours and in a group
   if(hoursSince < 12 || !lastSeen) return;
   const log = (group.log||[]).filter(e=>e.ts > lastSeen && e.uid !== currentUser.uid);
   if(!log.length) return;
-
-  const el = document.createElement('div');
-  el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:600;display:flex;align-items:flex-end;justify-content:center';
   const days = Math.floor(hoursSince/24);
   const timeStr = days>=1 ? `${days} Tag${days>1?'en':''}` : `${Math.round(hoursSince)} Stunden`;
   const eventLines = log.slice(-8).map(e=>{
@@ -3058,13 +3114,14 @@ function showGroupRecap(group){
     if(e.type==='join') return `👋 <b>${e.email.split('@')[0]}</b> ist der Gruppe beigetreten`;
     return '';
   }).filter(Boolean).join('<br>');
-
+  const el = document.createElement('div');
+  el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:600;display:flex;align-items:flex-end;justify-content:center';
   el.innerHTML=`<div style="background:var(--white);border-radius:22px 22px 0 0;padding:24px 20px max(28px,env(safe-area-inset-bottom));width:100%;max-width:520px">
     <div style="width:40px;height:4px;background:var(--g2);border-radius:99px;margin:0 auto 18px"></div>
     <div style="font-size:18px;font-weight:800;margin-bottom:4px">👨‍👩‍👧 Was du verpasst hast</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Du warst ${timeStr} nicht in der App</div>
-    <div style="background:var(--g1);border-radius:12px;padding:14px;font-size:13px;line-height:2;color:var(--text)">${eventLines||'Nichts Neues in dieser Zeit 🥳'}</div>
-    <button onclick="this.closest('div[style*=fixed]').remove()" style="width:100%;margin-top:16px;background:var(--green);color:white;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Alles klar!</button>
+    <div style="background:var(--g1);border-radius:12px;padding:14px;font-size:13px;line-height:2;color:var(--text)">${eventLines}</div>
+    <button onclick="this.closest('[style*=fixed]').remove()" style="width:100%;margin-top:16px;background:var(--green);color:white;border:none;border-radius:var(--r);padding:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer">Alles klar!</button>
   </div>`;
   document.body.appendChild(el);
 }
@@ -3073,8 +3130,7 @@ function checkGroupRecapOnLogin(){
   const g = myGroup();
   if(!g) return;
   const groups = getGroups();
-  if(groups[g.code]) setTimeout(()=>showGroupRecap(groups[g.code]), 800);
-  localStorage.setItem('fv_last_seen_'+currentUser.uid, Date.now().toString());
+  if(groups[g.code]) setTimeout(()=>showGroupRecap(groups[g.code]), 1000);
 }
 
 function leaveGroup(){
@@ -3082,80 +3138,41 @@ function leaveGroup(){
   const groups=getGroups();
   const g=myGroup();
   if(!g) return;
-  const code=g.code;
-  groups[code].members=groups[code].members.filter(m=>m.uid!==currentUser.uid);
-  if(groups[code].members.length===0) delete groups[code];
+  groups[g.code].members=groups[g.code].members.filter(m=>m.uid!==currentUser.uid);
+  if(groups[g.code].members.length===0) delete groups[g.code];
   saveGroups(groups);
   renderSharingPage();
   renderAll();
 }
 
-function copyGroupCode(){
-  const code=document.getElementById('group-code-display').textContent;
-  navigator.clipboard.writeText(code).then(()=>{
-    const el=document.getElementById('group-code-display');
-    el.textContent='✓ Kopiert!';
-    setTimeout(()=>el.textContent=code,1500);
-  }).catch(()=>{});
-}
-
 function showQR(){
-  const code=document.getElementById('group-code-display').textContent;
-  document.getElementById('qr-code-text').textContent=code;
-  drawQR(code);
+  const shareCode = getShareableCode();
+  document.getElementById('qr-code-text').textContent = myGroup()?.code||'';
+  drawQR(shareCode);
   document.getElementById('qr-overlay').classList.add('open');
 }
 
-function drawQR(text){
-  const canvas=document.getElementById('qr-canvas');
-  const size=180; const ctx=canvas.getContext('2d');
-  canvas.width=size; canvas.height=size;
-  // Simple QR-like visual (display-only, not real QR)
-  ctx.fillStyle=document.body.classList.contains('dark')?'#1a1a1a':'#fff';
-  ctx.fillRect(0,0,size,size);
-  ctx.fillStyle=document.body.classList.contains('dark')?'#3a8a65':'#2d6a4f';
-  const cell=size/10;
-  // Create a pattern from the code chars
-  for(let i=0;i<text.length;i++){
-    const v=text.charCodeAt(i);
-    for(let r=0;r<10;r++) for(let c=0;c<10;c++){
-      if(((v*r+c*i)%3)===0) ctx.fillRect(c*cell,r*cell,cell,cell);
-    }
-  }
-  // Corner markers
-  [[0,0],[0,7],[7,0]].forEach(([r,c])=>{
-    ctx.fillStyle=document.body.classList.contains('dark')?'#3a8a65':'#2d6a4f';
-    ctx.fillRect(c*cell,r*cell,3*cell,3*cell);
-    ctx.fillStyle=document.body.classList.contains('dark')?'#1a1a1a':'#fff';
-    ctx.fillRect(c*cell+cell/2,r*cell+cell/2,2*cell,2*cell);
-    ctx.fillStyle=document.body.classList.contains('dark')?'#3a8a65':'#2d6a4f';
-    ctx.fillRect(c*cell+cell,r*cell+cell,cell,cell);
-  });
-  // Code text
-  ctx.fillStyle=document.body.classList.contains('dark')?'#f0f0f0':'#0e0e0e';
-  ctx.font=`bold ${cell*.9}px Sora,sans-serif`;
-  ctx.textAlign='center';
-  ctx.fillText(text,size/2,size-cell*.3);
-}
-
 function renderSharingPage(){
-  const g=myGroup();
-  document.getElementById('sharing-no-group').style.display=g?'none':'block';
-  document.getElementById('sharing-has-group').style.display=g?'block':'none';
+  const g = myGroup();
+  const noGroup = document.getElementById('sharing-no-group');
+  const hasGroup = document.getElementById('sharing-has-group');
+  if(!noGroup||!hasGroup) return;
+  noGroup.style.display = g ? 'none' : 'block';
+  hasGroup.style.display = g ? 'block' : 'none';
   if(!g) return;
-  document.getElementById('group-name-display').textContent=g.name;
-  const isAdmin=g.adminUid===currentUser.uid;
-  document.getElementById('group-role-badge').textContent=isAdmin?'👑 Admin':'Mitglied';
-  document.getElementById('group-code-display').textContent=g.code;
-  const list=document.getElementById('group-members-list');
-  list.innerHTML=(g.members||[]).map(m=>{
-    const isMe=m.uid===currentUser.uid;
-    const initials=m.email.slice(0,2).toUpperCase();
+  document.getElementById('group-name-display').textContent = g.name;
+  const isAdmin = g.adminUid === currentUser.uid;
+  document.getElementById('group-role-badge').textContent = isAdmin ? '👑 Admin' : 'Mitglied';
+  document.getElementById('group-code-display').textContent = g.code;
+  const list = document.getElementById('group-members-list');
+  list.innerHTML = (g.members||[]).map(m=>{
+    const isMe = m.uid === currentUser.uid;
+    const initials = m.email.slice(0,2).toUpperCase();
     return `<div class="group-member">
       <div class="member-avatar">${initials}</div>
       <div class="member-info">
         <div class="member-name">${m.email}${isMe?' (Du)':''}</div>
-        <div class="member-role">${m.role} · Beigetreten ${new Date(m.joined).toLocaleDateString('de-DE')}</div>
+        <div class="member-role">${m.role} · ${new Date(m.joined).toLocaleDateString('de-DE')}</div>
       </div>
       ${isAdmin&&!isMe?`<button onclick="kickMember('${g.code}','${m.uid}')" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:5px 10px;font-size:11px;cursor:pointer;font-family:inherit">Entfernen</button>`:''}
     </div>`;
@@ -3170,7 +3187,6 @@ function kickMember(code,uid){
   saveGroups(groups);
   renderSharingPage();
 }
-
 // Override myItems to support group sharing
 const _origMyItems = window.myItems;
 window.myItems = function(){
