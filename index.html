@@ -93,7 +93,8 @@ body{background:var(--bg);color:var(--text);font-family:'Sora',sans-serif;height
 @keyframes splashLoad{0%{width:0%}60%{width:75%}100%{width:100%}}
 #app-screen{height:100vh;display:none;flex-direction:column;overflow:hidden}
 .page{display:none;flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:none}
-.page.active{display:block}
+.page.active{display:flex;flex-direction:column}
+#page-dashboard.active,#page-products.active,#page-stats.active,#page-recipes.active,#page-alerts.active,#page-settings.active,#page-shopping.active,#page-gamification.active,#page-sharing.active{display:block}
 
 /* AUTH */
 #auth-screen{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(135deg,#f5f5f3,#e8f4ee)}
@@ -322,10 +323,10 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
 /* ONBOARDING TUTORIAL */
 #onboarding{position:fixed;inset:0;z-index:500;display:none;flex-direction:column}
 #onboarding.active{display:flex}
-.ob-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(3px)}
-.ob-card{position:absolute;background:var(--white);border-radius:22px;padding:24px 20px;max-width:340px;width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.3);animation:obPop .3s cubic-bezier(.34,1.56,.64,1)}
-@keyframes obPop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
-.ob-highlight{position:absolute;border:3px solid #4ade80;border-radius:14px;box-shadow:0 0 0 4px rgba(74,222,128,.35);pointer-events:none;transition:all .35s cubic-bezier(.34,1.2,.64,1);animation:obPulse 1.8s ease infinite}
+.ob-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(2px)}
+.ob-card{position:absolute;background:var(--white);border-radius:20px;padding:20px 18px;max-width:320px;width:calc(100% - 32px);box-shadow:0 20px 60px rgba(0,0,0,.3);animation:obPop .3s cubic-bezier(.34,1.56,.64,1);z-index:2}
+@keyframes obPop{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+.ob-highlight{position:fixed;border:2.5px solid #4ade80;border-radius:14px;box-shadow:0 0 0 4px rgba(74,222,128,.3),0 0 0 9999px rgba(0,0,0,.0);pointer-events:none;transition:all .3s cubic-bezier(.34,1.2,.64,1);animation:obPulse 1.8s ease infinite;z-index:1}
 @keyframes obPulse{0%,100%{box-shadow:0 0 0 4px rgba(74,222,128,.35)}50%{box-shadow:0 0 0 10px rgba(74,222,128,.12)}}
 .ob-step-num{font-size:11px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px}
 .ob-emoji{font-size:40px;margin-bottom:10px;display:block;text-align:center}
@@ -612,23 +613,22 @@ nav{background:var(--white);border-bottom:1px solid var(--g2);flex-shrink:0;disp
     </div>
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- BOTTOM NAV - nur 4 Tabs -->
   <div class="bottom-nav">
     <div class="bnav-inner">
       <button class="bnav-btn on" id="bn-dashboard"><span class="bnav-icon">🏠</span>Home</button>
       <button class="bnav-btn" id="bn-products"><span class="bnav-icon">📦</span>Produkte</button>
       <button class="bnav-btn" id="bn-add"><span class="bnav-icon">➕</span>Neu</button>
       <button class="bnav-btn" id="bn-shopping"><span class="bnav-icon">🛒</span>Liste</button>
-      <button class="bnav-btn" id="bn-more"><span class="bnav-icon">☰</span>Mehr</button>
     </div>
   </div>
 
-  <!-- FAB MEHR-MENÜ -->
+  <!-- FAB -->
   <div class="fab-wrap" id="fab-wrap" style="display:none">
     <div class="fab-menu" id="fab-menu">
-      <div class="fab-item" data-page="gamification"><span class="fab-item-label">Achievements</span><button class="fab-item-btn" style="background:var(--yellow-l)">🏆</button></div>
-      <div class="fab-item" data-page="sharing"><span class="fab-item-label">Familie</span><button class="fab-item-btn" style="background:var(--purple-l)">👨‍👩‍👧</button></div>
       <div class="fab-item" data-page="chatbot"><span class="fab-item-label">KI-Tipps</span><button class="fab-item-btn" style="background:var(--blue-l)">🤖</button></div>
+      <div class="fab-item" data-page="sharing"><span class="fab-item-label">Familie</span><button class="fab-item-btn" style="background:var(--purple-l)">👨‍👩‍👧</button></div>
+      <div class="fab-item" data-page="gamification"><span class="fab-item-label">Achievements</span><button class="fab-item-btn" style="background:var(--yellow-l)">🏆</button></div>
       <div class="fab-item" data-page="stats"><span class="fab-item-label">Statistiken</span><button class="fab-item-btn" style="background:var(--blue-l)">📊</button></div>
       <div class="fab-item" data-page="recipes"><span class="fab-item-label">Rezepte</span><button class="fab-item-btn" style="background:var(--green-l)">🍽️</button></div>
       <div class="fab-item" data-page="alerts"><span class="fab-item-label">Warnungen</span><button class="fab-item-btn" style="background:var(--red-l)">🔔</button></div>
@@ -1224,47 +1224,47 @@ function friendlyErr(code){
 const OB_STEPS = [
   {
     emoji:'👋', title:'Willkommen bei FreshVault!',
-    desc:'Dein smarter Kühlschrank-Manager. Behalte den Überblick über deine Lebensmittel, spare Geld und reduziere Verschwendung. Wir zeigen dir kurz wie alles funktioniert!',
+    desc:'Dein smarter Kühlschrank-Manager. Behalte den Überblick über deine Lebensmittel, spare Geld und reduziere Food Waste. Wir zeigen dir in 8 Schritten wie alles funktioniert!',
     target:null, pos:'center'
   },
   {
     emoji:'🏠', title:'Das Dashboard',
-    desc:'Hier siehst du auf einen Blick: wie viele Produkte du hast, was bald abläuft, deinen Warenwert – und deine 4 Kühlzonen mit Temperatur.',
-    target:'page-dashboard', pos:'center'
+    desc:'Deine Übersicht: Wie viele Produkte, was bald abläuft, dein Warenwert – und deine 4 Kühlzonen mit aktueller Temperatur auf einen Blick.',
+    target:'kpi-total', pos:'below'
   },
   {
     emoji:'➕', title:'Produkt hinzufügen',
-    desc:'Tippe auf "+" um neue Produkte einzutragen. Du kannst einzeln tippen, mehrere mit Komma trennen – oder einfach per Sprache ansagen!',
-    target:'bn-add', pos:'top'
+    desc:'Tippe auf "+" um Produkte einzutragen. Einzeln, mehrere mit Komma trennen – oder direkt per Sprache ansagen! Die App erkennt Kategorie und Zone automatisch.',
+    target:'bn-add', pos:'above'
   },
   {
-    emoji:'❄️', title:'Die 4 Kühlzonen',
-    desc:'FreshVault teilt deinen Kühlschrank in 4 Bereiche: Kaltzone (Fleisch), Frischzone (Gemüse), Trockenzone (Käse/Tür) und Feuchtigkeitszone (Kräuter). Die App weist Produkte automatisch zu!',
-    target:'fridge-visual', pos:'top'
+    emoji:'🛒', title:'Einkaufsliste',
+    desc:'Abgelaufene Produkte landen automatisch auf deiner Liste. Du kannst auch manuell Sachen hinzufügen und abhaken wenn du einkaufen warst.',
+    target:'bn-shopping', pos:'above'
   },
   {
-    emoji:'🛒', title:'Einkaufsliste & Vorschläge',
-    desc:'Abgelaufene Produkte landen automatisch auf deiner Einkaufsliste. Unter Einstellungen findest du auch smarte Einkaufsvorschläge – was fehlt, was läuft bald ab.',
-    target:'bn-shopping', pos:'top'
+    emoji:'🤖', title:'KI-Assistent',
+    desc:'Dein persönlicher Küchen-KI! Stell Fragen zu Haltbarkeit, Rezeptideen oder Food-Waste-Tipps – die KI kennt deinen aktuellen Kühlschrankinhalt.',
+    target:'bn-chatbot', pos:'above'
   },
   {
-    emoji:'🍽️', title:'Rezeptvorschläge',
-    desc:'FreshVault schlägt dir Rezepte vor die du mit deinen aktuellen Zutaten kochen kannst – mit Kalorien, Nährwerten und Schritt-für-Schritt Anleitung. Fehlende Zutaten direkt zur Liste!',
-    target:'bn-more', pos:'top'
+    emoji:'👨‍👩‍👧', title:'Familien-Sharing',
+    desc:'Teile deinen Kühlschrank mit der ganzen Familie. Erstelle eine Gruppe, gib den Code weiter – alle sehen und verwalten denselben Inhalt.',
+    target:'bn-sharing', pos:'above'
   },
   {
-    emoji:'📊', title:'Statistiken & Wochenbericht',
-    desc:'Unter "Mehr" → Statistiken siehst du deinen Frische-Score, Warenwert und Kategorienverteilung. Der Wochenbericht zeigt dir was diese Woche neu kam und was ablief.',
-    target:'bn-more', pos:'top'
+    emoji:'🏆', title:'Achievements',
+    desc:'Sammle XP, steige in Levels auf und verdiene Badges. Je mehr du Food Waste vermeidest und die App nutzt, desto mehr schaltest du frei!',
+    target:'bn-gamification', pos:'above'
   },
   {
-    emoji:'⚙️', title:'Einstellungen & Dark Mode',
-    desc:'Unter "Mehr" → Einstellungen kannst du die Kühlschranktemperatur anpassen (Zonen berechnen sich automatisch!), Dark Mode aktivieren und die App auf deinem Homescreen installieren.',
-    target:'bn-more', pos:'top'
+    emoji:'➕', title:'Schnellmenü (➕)',
+    desc:'Über das grüne Plus erreichst du Statistiken, Rezeptvorschläge, Warnungen und Einstellungen – immer griffbereit.',
+    target:'fab-btn', pos:'above'
   },
   {
-    emoji:'🚀', title:'Los geht\'s!',
-    desc:'Du kennst jetzt alle Features. Füge dein erstes Produkt hinzu und leg los! Tipp: Probiere die Spracheingabe – einfach auf das Mikrofon tippen und Produkte ansagen.',
+    emoji:'🚀', title:'Alles klar – los geht\'s!',
+    desc:'Du kennst jetzt alle Features. Füge dein erstes Produkt hinzu und starte durch! Tipp: Probiere die Spracheingabe beim "+" – einfach Produkte ansagen.',
     target:null, pos:'center'
   },
 ];
@@ -1281,56 +1281,76 @@ function obRender(){
   const step = OB_STEPS[obStep];
   const total = OB_STEPS.length;
 
-  // Card content
   document.getElementById('ob-step-num').textContent = `Schritt ${obStep+1} von ${total}`;
   document.getElementById('ob-emoji').textContent = step.emoji;
   document.getElementById('ob-title').textContent = step.title;
   document.getElementById('ob-desc').textContent = step.desc;
   document.getElementById('ob-next').textContent = obStep === total-1 ? '🚀 Starten!' : 'Weiter →';
 
-  // Dots
   const dots = document.getElementById('ob-dots');
   dots.innerHTML = OB_STEPS.map((_,i) =>
     `<div class="ob-dot ${i===obStep?'on':''}"></div>`
   ).join('');
 
-  // Position card + highlight
   const card = document.getElementById('ob-card');
-  const hl = document.getElementById('ob-highlight');
+  const hl   = document.getElementById('ob-highlight');
 
-  if(!step.target || step.pos==='center'){
-    // Center card
+  // No target → center screen
+  if(!step.target){
     card.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%)';
     hl.style.opacity = '0';
     return;
   }
 
-  // Find target element
   const targetEl = document.getElementById(step.target) || document.querySelector('.'+step.target);
-  if(!targetEl){ card.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%)'; hl.style.opacity='0'; return; }
+  if(!targetEl){
+    card.style.cssText = 'left:50%;top:50%;transform:translate(-50%,-50%)';
+    hl.style.opacity = '0';
+    return;
+  }
 
-  const r = targetEl.getBoundingClientRect();
-  const pad = 8;
+  // getBoundingClientRect is always viewport-relative — works for both fixed + scrolled elements
+  const r   = targetEl.getBoundingClientRect();
+  const pad = 6;
+  const vp  = window.innerHeight;
+  const vw  = window.innerWidth;
 
-  // Highlight
+  // Highlight (position:fixed so it stays on top of everything)
   hl.style.cssText = `opacity:1;left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px`;
 
-  // Card position: above or below target
-  const cardH = 260;
-  const vp = window.innerHeight;
-  const cardW = Math.min(340, window.innerWidth - 32);
-  let cardTop, cardLeft;
+  // Card sizing
+  const cardW = Math.min(320, vw - 32);
+  const cardH = 240;
 
-  if(step.pos==='top'){
-    // Try above target, else below
-    cardTop = r.top - cardH - 20;
-    if(cardTop < 60) cardTop = r.bottom + 20;
+  const spaceAbove = r.top - pad - 12;
+  const spaceBelow = vp - r.bottom - pad - 12;
+
+  let cardTop;
+  if(step.pos === 'above'){
+    // Prefer above — if not enough room, go below
+    cardTop = spaceAbove >= cardH ? r.top - pad - cardH - 12 : r.bottom + pad + 12;
+  } else if(step.pos === 'below'){
+    // Prefer below — if not enough room, go above
+    cardTop = spaceBelow >= cardH ? r.bottom + pad + 12 : r.top - pad - cardH - 12;
   } else {
-    cardTop = r.bottom + 20;
-    if(cardTop + cardH > vp - 20) cardTop = r.top - cardH - 20;
+    // Auto: pick side with more space
+    cardTop = spaceAbove >= spaceBelow
+      ? r.top - pad - cardH - 12
+      : r.bottom + pad + 12;
   }
-  cardLeft = Math.max(16, Math.min(r.left + r.width/2 - cardW/2, window.innerWidth - cardW - 16));
-  cardTop = Math.max(60, Math.min(cardTop, vp - cardH - 20));
+
+  // Hard clamp — never overlap element, never go off screen
+  const elementTop    = r.top - pad - 12;
+  const elementBottom = r.bottom + pad + 12;
+  // If card would overlap element top, push above
+  if(cardTop + cardH > elementTop && cardTop < elementBottom){
+    cardTop = elementBottom;
+  }
+  cardTop = Math.max(56, Math.min(cardTop, vp - cardH - 8));
+
+  // Horizontal: center on element, clamp to screen edges
+  let cardLeft = r.left + r.width/2 - cardW/2;
+  cardLeft = Math.max(16, Math.min(cardLeft, vw - cardW - 16));
 
   card.style.cssText = `left:${cardLeft}px;top:${cardTop}px;transform:none;width:${cardW}px`;
 }
@@ -1423,7 +1443,7 @@ function showPage(id){
   const page = document.getElementById('page-'+id);
   if(page) page.classList.add('active');
   document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
-  const bn=document.getElementById('bn-'+id);
+  const bn = document.getElementById('bn-'+id);
   if(bn) bn.classList.add('on');
   closeFab();
   if(id==='stats') renderStats();
@@ -1441,9 +1461,6 @@ function toggleFab(){
     btn.classList.add('open');
     btn.textContent='✕';
     menu.classList.add('open');
-    // highlight "mehr"
-    document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('on'));
-    document.getElementById('bn-more').classList.add('on');
   }
 }
 
@@ -2487,14 +2504,13 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('bn-products').addEventListener('click',()=>showPage('products'));
   document.getElementById('bn-add').addEventListener('click',openModal);
   document.getElementById('bn-shopping').addEventListener('click',()=>showPage('shopping'));
-  document.getElementById('bn-more').addEventListener('click',toggleFab);
   document.getElementById('fab-btn').addEventListener('click',toggleFab);
   document.querySelectorAll('.fab-item').forEach(item=>{
-    item.addEventListener('click',()=>showPage(item.dataset.page));
+    item.addEventListener('click',()=>{ showPage(item.dataset.page); closeFab(); });
   });
   // Schließe FAB bei Klick außerhalb
   document.addEventListener('click',e=>{
-    if(!e.target.closest('.fab-wrap')&&!e.target.closest('.bnav-btn[id="bn-more"]')) closeFab();
+    if(!e.target.closest('.fab-wrap')) closeFab();
   });
 
   document.getElementById('nav-notif').addEventListener('click',()=>showPage('alerts'));
@@ -2718,7 +2734,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 
 <!-- ── KI CHATBOT PAGE ── -->
-<div class="page" id="page-chatbot" style="display:flex;flex-direction:column;overflow:hidden">
+<div class="page" id="page-chatbot" style="flex-direction:column;overflow:hidden">
   <!-- Header -->
   <div style="background:var(--white);border-bottom:1px solid var(--g2);padding:14px 16px;flex-shrink:0">
     <div style="display:flex;align-items:center;gap:10px">
