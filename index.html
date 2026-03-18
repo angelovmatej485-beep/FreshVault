@@ -833,14 +833,24 @@ nav{
         <span style="font-size:11px;color:var(--muted);white-space:nowrap">oder einzeln</span>
         <div style="flex:1;height:1px;background:var(--g2)"></div>
       </div>
-      <div class="field">
-        <label>Name</label>
-        <div class="autocomplete-wrap">
-          <input id="f-name" type="text" placeholder="z.B. Tomaten, Joghurt…" autocomplete="off">
-          <div class="autocomplete-dropdown" id="ac-dropdown"></div>
+      <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:end">
+        <div class="field" style="margin-bottom:0">
+          <label>Name</label>
+          <div class="autocomplete-wrap">
+            <input id="f-name" type="text" placeholder="z.B. Tomaten, Joghurt…" autocomplete="off">
+            <div class="autocomplete-dropdown" id="ac-dropdown"></div>
+          </div>
+        </div>
+        <div class="field" style="margin-bottom:0">
+          <label>Menge</label>
+          <div style="display:flex;align-items:center;gap:0;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);overflow:hidden">
+            <button type="button" onclick="changeQty(-1)" style="width:36px;height:46px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text);font-family:inherit;flex-shrink:0">−</button>
+            <input id="f-qty" type="number" min="1" max="99" value="1" style="width:36px;text-align:center;background:none;border:none;font-size:15px;font-weight:700;font-family:inherit;color:var(--text);outline:none;padding:0">
+            <button type="button" onclick="changeQty(1)" style="width:36px;height:46px;background:none;border:none;font-size:18px;cursor:pointer;color:var(--text);font-family:inherit;flex-shrink:0">+</button>
+          </div>
         </div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:11px">
         <div class="field"><label>Kategorie</label>
           <select id="f-cat">
             <option>🥬 Gemüse</option><option>🍎 Obst</option>
@@ -1296,155 +1306,146 @@ const FOOD_LIST = [
 // ── REZEPTE mit vollständigen Nährwerten ───────
 const RECIPES = [
   {title:"Caprese Salat",kcal:320,protein:18,carbs:8,fat:24,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Tomaten","Mozzarella","Basilikum"],
-   steps:"1. Tomaten und Mozzarella in Scheiben schneiden.\n2. Abwechselnd auf einem Teller anrichten.\n3. Mit frischem Basilikum, Olivenöl und Salz servieren."},
+   ing:["Tomaten","Mozzarella","Basilikum","Olivenöl","Salz","Pfeffer","Balsamico-Essig"],
+   steps:"1. Tomaten und Mozzarella in gleichmäßige Scheiben schneiden.\n2. Abwechselnd überlappend auf einem Teller anrichten.\n3. Frischen Basilikum darüber zupfen.\n4. Großzügig mit Olivenöl beträufeln.\n5. Mit Salz und Pfeffer würzen, optional etwas Balsamico drüber."},
   {title:"Rührei mit Schinken",kcal:480,protein:32,carbs:4,fat:36,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Eier","Schinken gekocht","Butter"],
-   steps:"1. Eier verquirlen, salzen und pfeffern.\n2. Butter in Pfanne bei mittlerer Hitze erhitzen.\n3. Eier zugeben, Schinken würfeln und unterheben.\n4. Unter Rühren stocken lassen."},
+   ing:["Eier","Schinken gekocht","Butter","Salz","Pfeffer","Schnittlauch","Milch (Spritzer)"],
+   steps:"1. Eier mit einem Spritzer Milch verquirlen, salzen und pfeffern.\n2. Butter bei mittlerer Hitze schmelzen.\n3. Eimasse eingießen, Schinken würfeln und unterheben.\n4. Langsam unter Rühren stocken lassen – nicht zu heiß!\n5. Mit frischem Schnittlauch bestreuen und servieren."},
   {title:"Joghurt mit Früchten",kcal:210,protein:10,carbs:32,fat:4,time:"5 Min",timeMin:5,diff:"Einfach",
-   ing:["Naturjoghurt 3,5%","Erdbeeren","Heidelbeeren"],
-   steps:"1. Joghurt in eine Schüssel geben.\n2. Früchte waschen, Erdbeeren halbieren.\n3. Früchte über den Joghurt geben.\n4. Optional: Honig oder Granola drüber."},
+   ing:["Naturjoghurt 3,5%","Erdbeeren","Heidelbeeren","Honig","Vanillezucker","Granola (optional)"],
+   steps:"1. Joghurt in eine Schüssel geben, mit Vanillezucker verrühren.\n2. Früchte waschen, Erdbeeren vierteln.\n3. Früchte dekorativ über den Joghurt geben.\n4. Mit Honig beträufeln.\n5. Optional mit Granola für Crunch toppen."},
   {title:"Hähnchen-Pfanne",kcal:520,protein:48,carbs:12,fat:28,time:"25 Min",timeMin:25,diff:"Mittel",
-   ing:["Hähnchenbrust","Paprika rot","Zwiebeln gelb"],
-   steps:"1. Hähnchenbrust in Streifen schneiden.\n2. Paprika und Zwiebeln würfeln.\n3. Öl in Pfanne erhitzen, Hähnchen anbraten (5 Min).\n4. Gemüse zugeben, 10 Min mitbraten.\n5. Mit Salz, Pfeffer und Paprika würzen."},
-  {title:"Tomaten-Mozzarella Toast",kcal:390,protein:20,carbs:38,fat:18,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Tomaten","Mozzarella","Basilikum"],
-   steps:"1. Brot toasten bis goldbraun.\n2. Tomaten in Scheiben schneiden.\n3. Mozzarella drauflegen, kurz überbacken.\n4. Mit Basilikum und etwas Olivenöl garnieren."},
+   ing:["Hähnchenbrust","Paprika rot","Zwiebeln gelb","Knoblauch","Olivenöl","Salz","Pfeffer","Paprikapulver","Oregano","Zitronensaft"],
+   steps:"1. Hähnchenbrust in gleichmäßige Streifen schneiden.\n2. Paprika und Zwiebeln würfeln, Knoblauch fein hacken.\n3. Hähnchen mit Salz, Pfeffer und Paprikapulver würzen.\n4. Öl in Pfanne erhitzen, Hähnchen 5–6 Min goldbraun anbraten.\n5. Gemüse und Knoblauch dazugeben, 8–10 Min mitbraten.\n6. Mit Oregano und einem Spritzer Zitronensaft abschmecken."},
   {title:"Gulasch",kcal:680,protein:52,carbs:18,fat:42,time:"2 Std",timeMin:120,diff:"Mittel",
-   ing:["Rindergulasch","Zwiebeln gelb","Tomatenmark"],
-   steps:"1. Fleisch in Würfel schneiden, Zwiebeln fein hacken.\n2. Öl erhitzen, Zwiebeln glasig dünsten.\n3. Fleisch anbraten bis gebräunt.\n4. Tomatenmark zugeben und kurz rösten.\n5. Mit Brühe aufgießen, 90 Min köcheln lassen.\n6. Mit Salz, Pfeffer und Paprika abschmecken."},
+   ing:["Rindergulasch","Zwiebeln gelb","Tomatenmark","Paprikapulver edelsüß","Paprikapulver scharf","Kümmel","Majoran","Salz","Pfeffer","Rinderfond","Knoblauch","Lorbeerblatt"],
+   steps:"1. Fleisch trocken tupfen, in 3cm Würfel schneiden.\n2. Zwiebeln und Knoblauch fein hacken, in Öl goldbraun rösten.\n3. Paprikapulver einrühren, kurz rösten (nicht verbrennen!).\n4. Fleisch portionsweise scharf anbraten.\n5. Tomatenmark, Kümmel, Majoran, Lorbeer dazugeben.\n6. Mit Fond aufgießen, 90 Min bei kleiner Hitze köcheln.\n7. Mit Salz und Pfeffer final abschmecken."},
   {title:"Lachs mit Zitrone",kcal:410,protein:44,carbs:2,fat:24,time:"15 Min",timeMin:15,diff:"Einfach",
-   ing:["Lachsfilet","Zitronen","Butter"],
-   steps:"1. Lachs mit Salz und Pfeffer würzen.\n2. Butter in Pfanne schmelzen.\n3. Lachs 4 Min pro Seite braten.\n4. Mit Zitronensaft beträufeln und servieren."},
+   ing:["Lachsfilet","Zitronen","Butter","Knoblauch","Dill","Salz","Pfeffer","Olivenöl"],
+   steps:"1. Lachs trocken tupfen, mit Salz und Pfeffer würzen.\n2. Knoblauch in dünne Scheiben schneiden.\n3. Olivenöl in Pfanne erhitzen, Lachs auf der Hautseite 4 Min braten.\n4. Wenden, Butter und Knoblauch dazugeben.\n5. Butter schmelzen und Lachs damit übergießen (2 Min).\n6. Mit Zitronensaft beträufeln und frischem Dill servieren."},
   {title:"Blattsalat",kcal:180,protein:4,carbs:12,fat:12,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Eisbergsalat","Kirschtomaten","Caesar Dressing"],
-   steps:"1. Salat waschen, in mundgerechte Stücke zupfen.\n2. Kirschtomaten halbieren.\n3. Alles in eine Schüssel geben.\n4. Mit Caesar Dressing vermengen und servieren."},
+   ing:["Eisbergsalat","Kirschtomaten","Caesar Dressing","Parmesan gerieben","Croutons","Salz","Pfeffer"],
+   steps:"1. Salat waschen und in mundgerechte Stücke zupfen.\n2. Kirschtomaten halbieren.\n3. Alles in eine große Schüssel geben.\n4. Caesar Dressing darübergeben und vermengen.\n5. Mit geriebenem Parmesan und Croutons toppen."},
   {title:"Käsebrot",kcal:350,protein:16,carbs:32,fat:18,time:"5 Min",timeMin:5,diff:"Einfach",
-   ing:["Gouda Scheiben","Butter"],
-   steps:"1. Brot mit Butter bestreichen.\n2. Käsescheiben auflegen.\n3. Optional: im Toaster oder Ofen kurz überbacken."},
+   ing:["Gouda Scheiben","Butter","Brot","Senf mittelscharf","Salz","Pfeffer","Schnittlauch"],
+   steps:"1. Brot mit weicher Butter gleichmäßig bestreichen.\n2. Optional: einen Hauch Senf drauf.\n3. Käsescheiben auflegen.\n4. Mit Salz und Pfeffer würzen.\n5. Mit frischem Schnittlauch bestreuen."},
   {title:"Smoothie",kcal:280,protein:8,carbs:52,fat:4,time:"5 Min",timeMin:5,diff:"Einfach",
-   ing:["Bananen","Erdbeeren","Naturjoghurt 3,5%"],
-   steps:"1. Banane schälen und in Stücke schneiden.\n2. Alle Zutaten in den Mixer geben.\n3. 30–60 Sek. pürieren bis cremig.\n4. In Glas füllen, sofort servieren."},
+   ing:["Bananen","Erdbeeren","Naturjoghurt 3,5%","Milch","Honig","Vanillezucker"],
+   steps:"1. Banane schälen und in Stücke brechen.\n2. Erdbeeren waschen und entstielen.\n3. Alle Zutaten in den Mixer geben.\n4. Mit einem Schuss Milch auf gewünschte Konsistenz anpassen.\n5. 45 Sek. auf höchster Stufe mixen, sofort servieren."},
   {title:"Spiegelei",kcal:220,protein:14,carbs:1,fat:18,time:"5 Min",timeMin:5,diff:"Einfach",
-   ing:["Eier","Butter"],
-   steps:"1. Butter in Pfanne bei mittlerer Hitze schmelzen.\n2. Ei vorsichtig aufschlagen und reingeben.\n3. Salzen und pfeffern.\n4. Braten bis das Eiweiß fest ist, Eigelb nach Wunsch."},
+   ing:["Eier","Butter","Salz","Pfeffer","Schnittlauch"],
+   steps:"1. Butter in Pfanne bei mittlerer Hitze schmelzen.\n2. Ei vorsichtig am Rand aufschlagen und hineingleiten lassen.\n3. Hitze reduzieren – das Weiß soll langsam stocken.\n4. Salzen und pfeffern wenn das Weiß fast fest ist.\n5. Mit Schnittlauch bestreuen, Eigelb nach Wunsch flüssig lassen."},
   {title:"Bratwurst mit Senf",kcal:560,protein:24,carbs:4,fat:48,time:"15 Min",timeMin:15,diff:"Einfach",
-   ing:["Bratwurst grob","Senf mittelscharf"],
-   steps:"1. Bratwurst in Pfanne ohne zusätzliches Fett garen.\n2. Bei mittlerer Hitze ca. 8–10 Min wenden.\n3. Bis außen knusprig und durch.\n4. Mit Senf servieren."},
+   ing:["Bratwurst grob","Senf mittelscharf","Zwiebeln gelb","Salz","Pfeffer","Öl"],
+   steps:"1. Pfanne ohne Öl auf mittlere Hitze vorheizen.\n2. Bratwurst hineingeben, bei mittlerer Hitze 8–10 Min braten, dabei regelmäßig wenden.\n3. Zwiebeln in Ringe schneiden, in wenig Öl goldbraun anbraten.\n4. Bratwurst auf Teller anrichten.\n5. Mit Röstzwiebeln und einem guten Klecks Senf servieren."},
   {title:"Avocado Toast",kcal:340,protein:8,carbs:30,fat:22,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Avocado","Zitronen"],
-   steps:"1. Avocado halbieren, Kern entfernen.\n2. Fruchtfleisch mit Gabel zerdrücken.\n3. Mit Zitronensaft, Salz und Pfeffer würzen.\n4. Auf getoastetem Brot verteilen."},
+   ing:["Avocado","Zitronen","Salz","Pfeffer","Chiliflocken","Olivenöl","Brot","Knoblauch"],
+   steps:"1. Brot kräftig toasten.\n2. Avocado halbieren, Kern entfernen, Fleisch herauslöffeln.\n3. Mit Gabel grob zerdrücken – nicht zu fein!\n4. Mit Zitronensaft, Salz und Pfeffer würzen.\n5. Toast mit Knoblauch abreiben, Avocado drauf.\n6. Mit Chiliflocken und Olivenöl abrunden."},
   {title:"Gemüsesuppe",kcal:190,protein:6,carbs:28,fat:4,time:"40 Min",timeMin:40,diff:"Einfach",
-   ing:["Karotten","Sellerie","Zwiebeln gelb"],
-   steps:"1. Gemüse schälen und klein schneiden.\n2. Zwiebeln in Öl glasig dünsten.\n3. Restliches Gemüse zugeben, kurz anrösten.\n4. Mit Gemüsebrühe aufgießen, 25 Min köcheln.\n5. Mit Salz, Pfeffer und Kräutern abschmecken."},
+   ing:["Karotten","Sellerie","Zwiebeln gelb","Knoblauch","Gemüsebrühe","Lorbeerblatt","Thymian","Petersilie","Salz","Pfeffer","Olivenöl"],
+   steps:"1. Gemüse schälen und in gleichmäßige Würfel schneiden.\n2. Zwiebeln und Knoblauch in Olivenöl 3 Min glasig dünsten.\n3. Restliches Gemüse dazugeben, kurz mitrösten.\n4. Mit Gemüsebrühe aufgießen, Lorbeer und Thymian dazu.\n5. 25 Min bei mittlerer Hitze köcheln.\n6. Lorbeer entfernen, mit Petersilie, Salz und Pfeffer abschmecken."},
   {title:"Pfannkuchen",kcal:420,protein:14,carbs:58,fat:16,time:"20 Min",timeMin:20,diff:"Einfach",
-   ing:["Eier","Vollmilch 3,5%","Butter"],
-   steps:"1. Eier, Milch und Mehl zu glattem Teig rühren.\n2. Butter in Pfanne erhitzen.\n3. Teig portionsweise eingießen.\n4. Bei mittlerer Hitze 2 Min pro Seite backen.\n5. Mit Zucker und Zimt oder Früchten servieren."},
+   ing:["Eier","Vollmilch 3,5%","Butter","Mehl","Salz","Vanillezucker","Zucker","Öl zum Braten"],
+   steps:"1. Mehl, Salz und Vanillezucker in Schüssel geben.\n2. Eier, Milch und geschmolzene Butter einrühren – klümpchenfrei!.\n3. Teig 10 Min ruhen lassen.\n4. Pfanne mit wenig Öl erhitzen.\n5. Eine Kelle Teig eingießen, schwenken bis Boden bedeckt.\n6. 2 Min braten bis Unterseite goldgelb, wenden, 1 Min fertig braten."},
   {title:"Tzatziki mit Gemüse",kcal:160,protein:8,carbs:12,fat:8,time:"15 Min",timeMin:15,diff:"Einfach",
-   ing:["Griechischer Joghurt 10%","Gurke","Knoblauch"],
-   steps:"1. Gurke raspeln, ausdrücken.\n2. Knoblauch fein hacken.\n3. Mit Joghurt, Olivenöl und Dill vermischen.\n4. 30 Min kühlen lassen.\n5. Mit frischem Gemüse als Dip servieren."},
+   ing:["Griechischer Joghurt 10%","Gurke","Knoblauch","Dill","Olivenöl","Salz","Zitronensaft","Pfeffer"],
+   steps:"1. Gurke grob raspeln, mit Salz vermengen, 5 Min ziehen lassen.\n2. Gurke in einem Tuch kräftig ausdrücken.\n3. Knoblauch fein pressen.\n4. Joghurt, Gurke, Knoblauch, Dill, Olivenöl und Zitronensaft verrühren.\n5. Mit Salz und Pfeffer abschmecken, mind. 30 Min kühlen."},
   {title:"Paprika-Frischkäse Wrap",kcal:380,protein:14,carbs:42,fat:18,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Frischkäse natur","Paprika rot","Rucola"],
-   steps:"1. Tortilla mit Frischkäse bestreichen.\n2. Paprika in Streifen schneiden.\n3. Rucola waschen.\n4. Alles auflegen, fest einrollen.\n5. Schräg aufschneiden und servieren."},
+   ing:["Frischkäse natur","Paprika rot","Rucola","Tortilla","Salz","Pfeffer","Zitronensaft","Knoblauchpulver"],
+   steps:"1. Frischkäse mit Salz, Pfeffer und Knoblauchpulver verrühren.\n2. Tortilla großzügig mit Frischkäse bestreichen.\n3. Paprika in dünne Streifen schneiden.\n4. Rucola waschen und trocken schütteln.\n5. Paprika und Rucola auflegen, mit Zitronensaft beträufeln.\n6. Fest einrollen, schräg halbieren."},
   {title:"Hähnchensalat",kcal:310,protein:36,carbs:8,fat:14,time:"20 Min",timeMin:20,diff:"Einfach",
-   ing:["Hähnchenbrust","Eisbergsalat","Kirschtomaten"],
-   steps:"1. Hähnchen in Öl anbraten, in Streifen schneiden.\n2. Salat waschen und zupfen.\n3. Tomaten halbieren.\n4. Alles mischen, mit Dressing servieren."},
-  {title:"Rührkuchen Grundrezept",kcal:380,protein:6,carbs:54,fat:16,time:"50 Min",timeMin:50,diff:"Mittel",
-   ing:["Eier","Butter","Vollmilch 3,5%"],
-   steps:"1. Butter und Zucker cremig schlagen.\n2. Eier einzeln unterrühren.\n3. Mehl und Backpulver abwechselnd mit Milch einrühren.\n4. In Form füllen, bei 175°C 35 Min backen."},
+   ing:["Hähnchenbrust","Eisbergsalat","Kirschtomaten","Olivenöl","Zitronensaft","Salz","Pfeffer","Paprikapulver","Honig","Senf mittelscharf"],
+   steps:"1. Hähnchen mit Salz, Pfeffer und Paprika würzen.\n2. In Olivenöl 5–6 Min pro Seite goldbraun braten.\n3. 5 Min ruhen lassen, dann in Streifen schneiden.\n4. Dressing: Olivenöl, Zitronensaft, Honig, Senf verrühren.\n5. Salat und Tomaten auf Teller, Hähnchen drauf.\n6. Dressing darüber träufeln."},
   {title:"Steak mit Butter",kcal:620,protein:54,carbs:1,fat:44,time:"15 Min",timeMin:15,diff:"Mittel",
-   ing:["Rindersteak","Butter"],
-   steps:"1. Steak 30 Min vor dem Braten aus dem Kühlschrank nehmen.\n2. Pfanne sehr heiß erhitzen.\n3. Steak ohne Öl 3 Min pro Seite scharf anbraten.\n4. Butter und Kräuter zugeben, übergießen.\n5. 5 Min ruhen lassen, dann servieren."},
+   ing:["Rindersteak","Butter","Knoblauch","Rosmarin","Thymian","Salz","Pfeffer","Olivenöl"],
+   steps:"1. Steak 30 Min vor dem Braten aus dem Kühlschrank nehmen.\n2. Trocken tupfen, mit Salz und Pfeffer kräftig würzen.\n3. Pfanne auf höchster Stufe erhitzen bis leicht rauchend.\n4. Olivenöl rein, Steak 2–3 Min pro Seite scharf anbraten.\n5. Butter, Knoblauch, Rosmarin und Thymian dazu.\n6. Schmelzende Butter über das Steak löffeln.\n7. Aus der Pfanne nehmen, 5 Min ruhen lassen."},
   {title:"Nudeln mit Tomatensauce",kcal:490,protein:16,carbs:82,fat:10,time:"20 Min",timeMin:20,diff:"Einfach",
-   ing:["Tomatensauce","Parmesan gerieben"],
-   steps:"1. Nudeln nach Packungsanweisung al dente kochen.\n2. Tomatensauce in Topf erhitzen.\n3. Knoblauch und Kräuter zugeben.\n4. Nudeln abgießen, mit Sauce vermengen.\n5. Mit Parmesan servieren."},
+   ing:["Tomatensauce","Parmesan gerieben","Knoblauch","Olivenöl","Basilikum","Salz","Pfeffer","Zucker","Nudeln"],
+   steps:"1. Nudeln in stark gesalzenem Wasser al dente kochen.\n2. Knoblauch in Olivenöl 1 Min goldbraun anbraten.\n3. Tomatensauce dazugeben, mit Salz, Pfeffer und einer Prise Zucker würzen.\n4. 10 Min bei kleiner Hitze köcheln.\n5. Nudeln abgießen, etwas Kochwasser auffangen.\n6. Nudeln in die Sauce, Parmesan und Basilikum dazu."},
   {title:"Käse-Omelette",kcal:440,protein:28,carbs:4,fat:34,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Eier","Gouda Scheiben","Butter"],
-   steps:"1. Eier verquirlen, salzen.\n2. Butter in Pfanne schmelzen.\n3. Eiermasse eingießen, stocken lassen.\n4. Käse auf eine Hälfte legen.\n5. Omelette zuklappen und servieren."},
+   ing:["Eier","Gouda Scheiben","Butter","Salz","Pfeffer","Schnittlauch","Milch"],
+   steps:"1. Eier mit Milch verquirlen, kräftig salzen und pfeffern.\n3. Butter in Pfanne bei mittlerer Hitze schmelzen.\n4. Eimasse eingießen, Ränder mit Spatel nach innen schieben.\n5. Wenn fast gestockt: Käse auf eine Hälfte legen.\n6. Omelette zusammenklappen, mit Schnittlauch servieren."},
   {title:"Avocado-Lachs Bowl",kcal:510,protein:38,carbs:14,fat:34,time:"15 Min",timeMin:15,diff:"Einfach",
-   ing:["Lachsfilet","Avocado","Zitronen"],
-   steps:"1. Lachs in der Pfanne braten, in Stücke teilen.\n2. Avocado würfeln.\n3. Auf Reis oder Salat anrichten.\n4. Mit Zitrone, Sojasauce und Sesam servieren."},
+   ing:["Lachsfilet","Avocado","Zitronen","Sojasauce","Sesamöl","Salz","Pfeffer","Sesam","Reis"],
+   steps:"1. Reis nach Packung kochen.\n2. Lachs würzen und in Olivenöl 3–4 Min pro Seite braten.\n3. Avocado würfeln, mit Zitronensaft und Salz marinieren.\n4. Sauce: Sojasauce und Sesamöl mischen.\n5. Reis in Bowl, Lachs und Avocado drauf.\n6. Sauce drüber, mit Sesam bestreuen."},
   {title:"Beerenmüsli",kcal:290,protein:12,carbs:48,fat:6,time:"5 Min",timeMin:5,diff:"Einfach",
-   ing:["Naturjoghurt 3,5%","Heidelbeeren","Himbeeren"],
-   steps:"1. Joghurt in Schüssel geben.\n2. Beeren waschen.\n3. Über Joghurt schichten.\n4. Mit Haferflocken und Honig toppen."},
+   ing:["Naturjoghurt 3,5%","Heidelbeeren","Himbeeren","Haferflocken","Honig","Vanillezucker","Nüsse (optional)"],
+   steps:"1. Joghurt mit Vanillezucker verrühren.\n2. Beeren waschen.\n3. Haferflocken in Schüssel geben, Joghurt drüber.\n4. Beeren obenauf schichten.\n5. Mit Honig beträufeln und optional mit gehackten Nüssen toppen."},
   {title:"Feta-Tomaten Pfanne",kcal:360,protein:16,carbs:14,fat:28,time:"15 Min",timeMin:15,diff:"Einfach",
-   ing:["Feta","Tomaten","Knoblauch"],
-   steps:"1. Knoblauch und Tomaten in Pfanne mit Öl anbraten.\n2. Feta in Würfel schneiden, zugeben.\n3. Mit Kräutern und Pfeffer würzen.\n4. 5 Min bei mittlerer Hitze garen.\n5. Mit Brot servieren."},
+   ing:["Feta","Tomaten","Knoblauch","Olivenöl","Oregano","Thymian","Pfeffer","Chiliflocken","Basilikum"],
+   steps:"1. Knoblauch in Scheiben schneiden, in Olivenöl anbraten.\n2. Tomaten halbieren oder vierteln, dazugeben.\n3. Feta in größere Würfel schneiden, drüber geben.\n4. Mit Oregano, Thymian und Chiliflocken würzen.\n5. Deckel drauf, 5–7 Min bei mittlerer Hitze garen.\n6. Mit frischem Basilikum und Brot servieren."},
   {title:"Schinken-Käse Sandwich",kcal:420,protein:26,carbs:36,fat:18,time:"5 Min",timeMin:5,diff:"Einfach",
-   ing:["Schinken gekocht","Gouda Scheiben","Butter"],
-   steps:"1. Brot mit Butter bestreichen.\n2. Schinken und Käse auflegen.\n3. Optional: in Pfanne von beiden Seiten goldbraun toasten.\n4. Halbieren und servieren."},
+   ing:["Schinken gekocht","Gouda Scheiben","Butter","Senf mittelscharf","Salz","Pfeffer","Toastbrot"],
+   steps:"1. Toastbrot mit weicher Butter bestreichen.\n2. Auf eine Seite einen Hauch Senf geben.\n3. Schinken und Käsescheiben gleichmäßig auflegen.\n4. Mit Pfeffer würzen.\n5. Optional: in Pfanne bei mittlerer Hitze von beiden Seiten goldbraun pressen."},
   {title:"Klassische Bolognese",kcal:580,protein:38,carbs:52,fat:22,time:"40 Min",timeMin:40,diff:"Mittel",
-   ing:["Rinderhack","Tomatensauce","Zwiebeln gelb"],
-   steps:"1. Zwiebeln fein hacken und in Öl glasig dünsten.\n2. Hackfleisch dazugeben und krümelig anbraten.\n3. Tomatensauce einrühren, salzen und pfeffern.\n4. 20 Min bei kleiner Hitze köcheln.\n5. Mit Nudeln und Parmesan servieren."},
+   ing:["Rinderhack","Tomatensauce","Zwiebeln gelb","Knoblauch","Karotten","Sellerie","Rotwein","Oregano","Lorbeerblatt","Salz","Pfeffer","Olivenöl","Parmesan gerieben"],
+   steps:"1. Zwiebeln, Karotten, Sellerie und Knoblauch fein würfeln.\n2. In Olivenöl 5 Min anschwitzen.\n3. Hackfleisch dazugeben, krümelig braten.\n4. Mit Rotwein ablöschen, einkochen lassen.\n5. Tomatensauce, Lorbeer und Oregano einrühren.\n6. 25–30 Min bei kleiner Hitze köcheln.\n7. Mit Salz und Pfeffer abschmecken, mit Parmesan servieren."},
   {title:"Griechischer Bauernsalat",kcal:280,protein:10,carbs:12,fat:22,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Feta","Tomaten","Gurke"],
-   steps:"1. Tomaten und Gurke in Würfel schneiden.\n2. Feta grob zerbröseln.\n3. Alles in eine Schüssel geben.\n4. Mit Olivenöl, Oregano und Pfeffer würzen.\n5. Kalt servieren."},
+   ing:["Feta","Tomaten","Gurke","Zwiebeln gelb","Olivenöl","Oregano","Salz","Pfeffer","Zitronensaft","Oliven (optional)"],
+   steps:"1. Tomaten in Spalten, Gurke in Halbmonde schneiden.\n2. Zwiebel in dünne Ringe schneiden.\n3. Alles in eine Schüssel geben.\n4. Feta in großen Würfeln drüber bröseln.\n5. Oregano drüberstreuen.\n6. Olivenöl und Zitronensaft darüber – fertig. Nicht zu viel rühren!"},
   {title:"Bacon-Spiegeleier",kcal:520,protein:28,carbs:2,fat:44,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Eier","Bacon Streifen","Butter"],
-   steps:"1. Bacon in der Pfanne knusprig braten, herausnehmen.\n2. Butter in die Pfanne, Eier aufschlagen.\n3. Spiegeleier nach Wunsch braten.\n4. Mit Bacon servieren, salzen und pfeffern."},
+   ing:["Eier","Bacon Streifen","Butter","Salz","Pfeffer","Schnittlauch"],
+   steps:"1. Bacon ohne Fett in kalte Pfanne, langsam erhitzen bis knusprig.\n2. Bacon herausnehmen, Fett im Pfanne lassen.\n3. Butter dazugeben, Eier einzeln aufschlagen.\n4. Bei niedriger Hitze stocken lassen.\n5. Mit Salz und Pfeffer würzen, mit Bacon und Schnittlauch servieren."},
   {title:"Kartoffelsuppe",kcal:320,protein:8,carbs:42,fat:12,time:"35 Min",timeMin:35,diff:"Einfach",
-   ing:["Kartoffel","Zwiebeln gelb","Butter"],
-   steps:"1. Kartoffeln schälen und würfeln.\n2. Zwiebeln in Butter andünsten.\n3. Kartoffeln dazu, mit Brühe aufgießen.\n4. 20 Min köcheln bis weich.\n5. Mit Stabmixer pürieren, abschmecken."},
+   ing:["Kartoffel","Zwiebeln gelb","Butter","Gemüsebrühe","Sahne","Muskatnuss","Salz","Pfeffer","Schnittlauch","Lorbeerblatt"],
+   steps:"1. Kartoffeln schälen und grob würfeln.\n2. Zwiebeln in Butter glasig dünsten.\n3. Kartoffeln dazu, kurz mitbraten.\n4. Mit Brühe und Lorbeer aufgießen, 20 Min köcheln.\n5. Lorbeer entfernen, pürieren.\n6. Sahne einrühren, mit Muskatnuss, Salz und Pfeffer abschmecken.\n7. Mit Schnittlauch bestreuen."},
   {title:"Putenbrust mit Paprika",kcal:380,protein:44,carbs:10,fat:16,time:"25 Min",timeMin:25,diff:"Einfach",
-   ing:["Putenbrust","Paprika rot","Zwiebeln gelb"],
-   steps:"1. Putenbrust in Scheiben schneiden.\n2. In Öl von beiden Seiten anbraten.\n3. Paprika und Zwiebeln dazugeben.\n4. 10 Min mitbraten, würzen.\n5. Mit Reis oder Brot servieren."},
+   ing:["Putenbrust","Paprika rot","Zwiebeln gelb","Knoblauch","Olivenöl","Paprikapulver","Oregano","Salz","Pfeffer","Zitronensaft"],
+   steps:"1. Putenbrust in 1cm-Scheiben schneiden, mit Salz, Pfeffer und Paprikapulver würzen.\n2. In Olivenöl 3–4 Min pro Seite goldbraun braten.\n3. Herausnehmen.\n4. Paprika, Zwiebeln und Knoblauch im selben Fett 8 Min braten.\n5. Fleisch zurück, mit Oregano und Zitronensaft abschmecken."},
   {title:"Champignon-Rahm-Sauce",kcal:310,protein:8,carbs:12,fat:26,time:"20 Min",timeMin:20,diff:"Einfach",
-   ing:["Champignon","Sahne","Butter"],
-   steps:"1. Champignons in Scheiben schneiden.\n2. In Butter anbraten bis goldbraun.\n3. Sahne angießen, aufkochen lassen.\n4. Mit Salz, Pfeffer und Thymian würzen.\n5. Zu Nudeln oder Fleisch servieren."},
+   ing:["Champignon","Sahne","Butter","Zwiebeln gelb","Knoblauch","Thymian","Weißwein","Salz","Pfeffer","Petersilie"],
+   steps:"1. Champignons vierteln, Zwiebeln und Knoblauch fein hacken.\n2. Butter schmelzen, Zwiebeln glasig dünsten.\n3. Champignons bei hoher Hitze goldbraun braten – nicht rühren!\n4. Knoblauch und Thymian kurz mitbraten.\n5. Mit Weißwein ablöschen, einkochen.\n6. Sahne angießen, 5 Min sämig köcheln.\n7. Mit Salz, Pfeffer und Petersilie abschmecken."},
   {title:"Lachs-Nudeln",kcal:560,protein:36,carbs:58,fat:18,time:"20 Min",timeMin:20,diff:"Einfach",
-   ing:["Räucherlachs","Sahne","Zitrone"],
-   steps:"1. Nudeln nach Packung kochen.\n2. Sahne in Pfanne erhitzen.\n3. Räucherlachs in Streifen dazugeben.\n4. Mit Zitronensaft und Dill würzen.\n5. Nudeln unterheben und servieren."},
+   ing:["Räucherlachs","Sahne","Zitronen","Knoblauch","Dill","Salz","Pfeffer","Olivenöl","Nudeln","Parmesan gerieben"],
+   steps:"1. Nudeln in gesalzenem Wasser kochen.\n2. Knoblauch in Olivenöl kurz anbraten.\n3. Sahne angießen, aufkochen, bei kleiner Hitze reduzieren.\n4. Räucherlachs in Streifen einrühren – nicht mehr kochen!\n5. Mit Zitronensaft, Dill, Salz und Pfeffer würzen.\n6. Nudeln abgießen, in der Sauce schwenken.\n7. Mit Parmesan servieren."},
   {title:"Tomatensuppe",kcal:180,protein:4,carbs:22,fat:6,time:"20 Min",timeMin:20,diff:"Einfach",
-   ing:["Tomaten","Zwiebeln gelb","Tomatensauce"],
-   steps:"1. Zwiebeln andünsten.\n2. Tomaten würfeln und dazugeben.\n3. Tomatensauce und Brühe angießen.\n4. 15 Min köcheln lassen.\n5. Pürieren, mit Sahne und Basilikum servieren."},
+   ing:["Tomaten","Tomatensauce","Zwiebeln gelb","Knoblauch","Olivenöl","Zucker","Basilikum","Salz","Pfeffer","Sahne","Gemüsebrühe"],
+   steps:"1. Zwiebeln und Knoblauch in Olivenöl glasig dünsten.\n2. Tomaten würfeln, dazugeben.\n3. Tomatensauce und Brühe angießen.\n4. 15 Min köcheln.\n5. Pürieren, durch Sieb streichen für extra Feinheit.\n6. Mit Sahne, Zucker, Salz und Pfeffer abschmecken.\n7. Mit frischem Basilikum servieren."},
   {title:"Zucchini-Pfanne",kcal:220,protein:6,carbs:14,fat:14,time:"15 Min",timeMin:15,diff:"Einfach",
-   ing:["Zucchini","Knoblauch","Tomaten"],
-   steps:"1. Zucchini in Scheiben schneiden.\n2. Knoblauch fein hacken.\n3. In Olivenöl anbraten.\n4. Tomaten würfeln und dazugeben.\n5. Mit Salz, Pfeffer und Basilikum würzen."},
+   ing:["Zucchini","Knoblauch","Tomaten","Olivenöl","Basilikum","Oregano","Salz","Pfeffer","Parmesan gerieben"],
+   steps:"1. Zucchini in 5mm-Scheiben schneiden, Knoblauch fein hacken.\n2. Olivenöl in Pfanne erhitzen, Zucchini in einer Lage anbraten.\n3. Wenden wenn goldbraun – nicht rühren!\n4. Knoblauch dazugeben, 1 Min mitbraten.\n5. Tomaten würfeln und dazugeben, 5 Min köcheln.\n6. Mit Oregano, Basilikum, Salz und Pfeffer abschmecken.\n7. Mit Parmesan bestreut servieren."},
   {title:"Hackfleisch-Auflauf",kcal:620,protein:42,carbs:28,fat:38,time:"45 Min",timeMin:45,diff:"Mittel",
-   ing:["Hackfleisch gemischt","Kartoffel","Zwiebeln gelb"],
-   steps:"1. Kartoffeln in Scheiben kochen, Zwiebeln hacken.\n2. Hackfleisch anbraten und würzen.\n3. Alles in Auflaufform schichten.\n4. Mit Käse bestreuen.\n5. Bei 200°C 25 Min backen."},
+   ing:["Hackfleisch gemischt","Kartoffel","Zwiebeln gelb","Knoblauch","Paprikapulver","Tomatenmark","Salz","Pfeffer","Gouda Scheiben","Olivenöl","Thymian"],
+   steps:"1. Kartoffeln schälen, in 4mm-Scheiben kochen bis halbgar.\n2. Zwiebeln und Knoblauch anbraten, Hackfleisch dazu.\n3. Mit Paprika, Tomatenmark, Salz, Pfeffer und Thymian würzen.\n4. Hackfleisch als erste Schicht in Auflaufform.\n5. Kartoffelscheiben drüber.\n6. Mit Käse bedecken.\n7. Bei 200°C 25 Min backen bis goldbraun."},
   {title:"Hähnchen-Wrap",kcal:450,protein:36,carbs:40,fat:16,time:"20 Min",timeMin:20,diff:"Einfach",
-   ing:["Hähnchenbrust","Paprika rot","Eisbergsalat"],
-   steps:"1. Hähnchen in Streifen schneiden und anbraten.\n2. Paprika in Streifen schneiden.\n3. Salat waschen.\n4. Tortilla mit allen Zutaten belegen.\n5. Fest einrollen und servieren."},
+   ing:["Hähnchenbrust","Paprika rot","Eisbergsalat","Tortilla","Olivenöl","Salz","Pfeffer","Paprikapulver","Limettensaft","Knoblauchpulver","Joghurt"],
+   steps:"1. Hähnchen mit Salz, Pfeffer, Paprika und Knoblauchpulver würzen.\n2. In Olivenöl 5–6 Min pro Seite braten, in Streifen schneiden.\n3. Joghurt-Dip: Joghurt mit Limettensaft und Salz verrühren.\n4. Tortilla kurz in der Pfanne oder Mikrowelle wärmen.\n5. Mit Joghurt bestreichen.\n6. Salat, Paprika und Hähnchen auflegen, fest einrollen."},
   {title:"Spinat mit Ei",kcal:280,protein:18,carbs:8,fat:18,time:"15 Min",timeMin:15,diff:"Einfach",
-   ing:["Spinat","Eier","Knoblauch"],
-   steps:"1. Knoblauch in Öl anbraten.\n2. Spinat dazugeben und zusammenfallen lassen.\n3. Mulden drücken, Eier hineingeben.\n4. Deckel drauf, stocken lassen.\n5. Mit Brot servieren."},
+   ing:["Spinat","Eier","Knoblauch","Butter","Muskatnuss","Salz","Pfeffer","Olivenöl"],
+   steps:"1. Knoblauch in Olivenöl goldbraun anbraten.\n2. Spinat portionsweise dazugeben und zusammenfallen lassen.\n3. Mit Muskatnuss, Salz und Pfeffer würzen.\n4. Mulden in den Spinat drücken.\n5. Eier in die Mulden aufschlagen.\n6. Deckel drauf, 4–5 Min bei kleiner Hitze stocken lassen.\n7. Mit Brot servieren."},
   {title:"Karotten-Ingwer-Suppe",kcal:160,protein:3,carbs:24,fat:5,time:"30 Min",timeMin:30,diff:"Einfach",
-   ing:["Karotten","Ingwer","Zwiebeln gelb"],
-   steps:"1. Karotten, Zwiebeln und Ingwer schälen und klein schneiden.\n2. In Öl andünsten.\n3. Mit Brühe aufgießen, 20 Min köcheln.\n4. Pürieren und abschmecken.\n5. Mit Sahne und Koriander servieren."},
-  {title:"Mozzarella-Tomate Bruschetta",kcal:340,protein:14,carbs:34,fat:16,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Mozzarella","Tomaten","Basilikum"],
-   steps:"1. Brot toasten.\n2. Tomaten würfeln, mit Olivenöl und Basilikum marinieren.\n3. Mozzarella reißen.\n4. Beides auf das Brot geben.\n5. Mit Salz und Pfeffer abschmecken."},
+   ing:["Karotten","Ingwer","Zwiebeln gelb","Knoblauch","Kokosmilch","Gemüsebrühe","Olivenöl","Salz","Pfeffer","Limettensaft","Koriander"],
+   steps:"1. Karotten, Zwiebeln schälen und grob würfeln.\n2. Knoblauch und Ingwer fein hacken.\n3. In Olivenöl 3 Min anschwitzen.\n4. Karotten dazu, mit Brühe aufgießen.\n5. 20 Min köcheln bis weich.\n6. Kokosmilch dazugeben, pürieren.\n7. Mit Limettensaft, Salz und Pfeffer abschmecken, mit Koriander garnieren."},
   {title:"Wiener Würstchen mit Kartoffeln",kcal:540,protein:22,carbs:38,fat:34,time:"25 Min",timeMin:25,diff:"Einfach",
-   ing:["Wiener Würstchen","Kartoffel","Senf mittelscharf"],
-   steps:"1. Kartoffeln als Pellkartoffeln kochen.\n2. Würstchen in heißem Wasser erhitzen.\n3. Kartoffeln schälen und halbieren.\n4. Alles auf dem Teller anrichten.\n5. Mit Senf servieren."},
+   ing:["Wiener Würstchen","Kartoffel","Senf mittelscharf","Butter","Salz","Schnittlauch","Pfeffer"],
+   steps:"1. Kartoffeln als Pellkartoffeln in Salzwasser 20 Min kochen.\n2. Würstchen in heißes (nicht kochendes!) Wasser legen, 8 Min ziehen.\n3. Kartoffeln schälen, mit Butter und Salz schwenken.\n4. Alles auf dem Teller anrichten.\n5. Mit Schnittlauch bestreuen, großzügig Senf dazu."},
   {title:"Kräuterquark mit Gemüse",kcal:180,protein:12,carbs:14,fat:6,time:"10 Min",timeMin:10,diff:"Einfach",
-   ing:["Quark","Gurke","Karotten"],
-   steps:"1. Quark mit Salz, Pfeffer und Kräutern verrühren.\n2. Gurke und Karotten in Stifte schneiden.\n3. Quark in Schüssel geben.\n4. Gemüse daneben anrichten.\n5. Als Dip oder Brotaufstrich genießen."},
+   ing:["Quark","Gurke","Karotten","Schnittlauch","Knoblauch","Salz","Pfeffer","Zitronensaft","Olivenöl"],
+   steps:"1. Quark glatt rühren.\n2. Knoblauch pressen, Schnittlauch fein schneiden.\n3. Mit Zitronensaft, Olivenöl, Salz und Pfeffer zum Quark mischen.\n4. Gurke in Scheiben, Karotten in Stifte schneiden.\n5. Quark in einer Schüssel, Gemüse drumherum anrichten."},
   {title:"Speck-Käse-Omelette",kcal:480,protein:30,carbs:4,fat:38,time:"12 Min",timeMin:12,diff:"Einfach",
-   ing:["Eier","Speck","Gouda Scheiben"],
-   steps:"1. Speck in Würfel schneiden und anbraten.\n2. Eier verquirlen, salzen.\n3. In die Pfanne geben und stocken lassen.\n4. Käse und Speck auf eine Hälfte.\n5. Zusammenklappen und servieren."},
+   ing:["Eier","Speck","Gouda Scheiben","Butter","Salz","Pfeffer","Schnittlauch","Milch"],
+   steps:"1. Speck in Würfel schneiden, in Pfanne knusprig braten.\n2. Eier mit Milch verquirlen, würzen.\n3. Speck herausnehmen, Butter in die Pfanne.\n4. Eimasse bei mittlerer Hitze einlaufen lassen.\n5. Wenn Oberseite fast gestockt: Käse und Speck auf eine Hälfte.\n6. Zusammenklappen, mit Schnittlauch servieren."},
   {title:"Rindfleisch-Gemüse-Pfanne",kcal:490,protein:42,carbs:16,fat:28,time:"30 Min",timeMin:30,diff:"Mittel",
-   ing:["Rindersteak","Paprika rot","Zucchini"],
-   steps:"1. Rind in Streifen schneiden und scharf anbraten.\n2. Herausnehmen, Gemüse in derselben Pfanne braten.\n3. Fleisch wieder dazu.\n4. Mit Sojasauce und Knoblauch würzen.\n5. Mit Reis servieren."},
+   ing:["Rindersteak","Paprika rot","Zucchini","Knoblauch","Sojasauce","Sesamöl","Ingwer","Salz","Pfeffer","Olivenöl","Sesam"],
+   steps:"1. Steak in dünne Streifen gegen die Faser schneiden.\n2. Mit Sojasauce, Sesamöl und geriebenem Ingwer marinieren (10 Min).\n3. In Olivenöl bei hoher Hitze scharf anbraten, herausnehmen.\n4. Paprika und Zucchini in Streifen, mit Knoblauch braten.\n5. Fleisch zurück, alles vermengen.\n6. Mit Salz, Pfeffer und Sesam abschmecken."},
   {title:"Käsesuppe",kcal:420,protein:16,carbs:20,fat:32,time:"25 Min",timeMin:25,diff:"Einfach",
-   ing:["Schmelzkäse","Kartoffel","Zwiebeln gelb"],
-   steps:"1. Zwiebeln andünsten, Kartoffeln würfeln.\n2. Mit Brühe aufkochen, 15 Min köcheln.\n3. Schmelzkäse einrühren.\n4. Mit Pfeffer und Petersilie würzen.\n5. Mit Brot servieren."},
-  {title:"Thunfisch-Pasta",kcal:470,protein:32,carbs:56,fat:10,time:"15 Min",timeMin:15,diff:"Einfach",
-   ing:["Thunfisch","Tomatensauce","Knoblauch"],
-   steps:"1. Nudeln kochen.\n2. Knoblauch in Öl anbraten.\n3. Thunfisch und Tomatensauce dazugeben.\n4. 5 Min köcheln.\n5. Mit Nudeln und Petersilie servieren."},
+   ing:["Schmelzkäse","Kartoffel","Zwiebeln gelb","Butter","Gemüsebrühe","Salz","Pfeffer","Muskatnuss","Schnittlauch","Speck"],
+   steps:"1. Zwiebeln und Speck in Butter anbraten.\n2. Kartoffeln würfeln, dazugeben.\n3. Mit Brühe aufgießen, 15 Min köcheln.\n4. Schmelzkäse stückweise einrühren bis aufgelöst.\n5. Mit Muskatnuss, Salz und Pfeffer abschmecken.\n6. Mit Schnittlauch bestreuen, mit Brot servieren."},
   {title:"Brokkoli-Auflauf",kcal:380,protein:20,carbs:22,fat:24,time:"40 Min",timeMin:40,diff:"Mittel",
-   ing:["Brokkoli","Sahne","Parmesan gerieben"],
-   steps:"1. Brokkoli in Röschen teilen, kurz blanchieren.\n2. In Auflaufform geben.\n3. Sahne mit Salz und Pfeffer darübergießen.\n4. Mit Parmesan bestreuen.\n5. Bei 200°C 20 Min backen."},
-  {title:"Leberwurst-Brot",kcal:380,protein:16,carbs:28,fat:24,time:"5 Min",timeMin:5,diff:"Einfach",
-   ing:["Leberwurst fein","Butter","Zwiebeln gelb"],
-   steps:"1. Brot mit Butter bestreichen.\n2. Leberwurst großzügig aufstreichen.\n3. Zwiebeln in Ringe schneiden.\n4. Ringe auf die Leberwurst legen.\n5. Mit Salz und Pfeffer abschmecken."},
+   ing:["Brokkoli","Sahne","Parmesan gerieben","Knoblauch","Muskatnuss","Salz","Pfeffer","Butter","Semmelbröseln"],
+   steps:"1. Brokkoli in Röschen teilen, 3 Min in Salzwasser blanchieren.\n2. Gut abschütteln, in gebutterte Auflaufform geben.\n3. Knoblauch pressen, mit Sahne, Muskatnuss, Salz und Pfeffer mischen.\n4. Über den Brokkoli gießen.\n5. Parmesan und Semmelbrösel mischen, drüberstreuen.\n6. Bei 200°C 20–25 Min backen bis goldbraun."},
   {title:"Mango-Joghurt Bowl",kcal:260,protein:10,carbs:42,fat:4,time:"5 Min",timeMin:5,diff:"Einfach",
-   ing:["Griechischer Joghurt 10%","Mango","Heidelbeeren"],
-   steps:"1. Joghurt in eine Schüssel geben.\n2. Mango schälen und würfeln.\n3. Beeren waschen.\n4. Früchte auf dem Joghurt anrichten.\n5. Optional mit Granola oder Honig toppen."},
+   ing:["Griechischer Joghurt 10%","Mango","Heidelbeeren","Honig","Vanillezucker","Kokosflocken","Limettensaft"],
+   steps:"1. Joghurt mit Vanillezucker und einem Spritzer Limettensaft verrühren.\n2. Mango schälen und in Würfel schneiden.\n3. Beeren waschen.\n4. Joghurt in eine Bowl, Früchte dekorativ drauf.\n5. Mit Honig beträufeln und mit Kokosflocken toppen."},
   {title:"Chorizo-Paprika-Pfanne",kcal:540,protein:24,carbs:14,fat:42,time:"20 Min",timeMin:20,diff:"Einfach",
-   ing:["Chorizo","Paprika rot","Zwiebeln gelb"],
-   steps:"1. Chorizo in Scheiben schneiden.\n2. In der Pfanne anbraten bis das Fett austritt.\n3. Paprika und Zwiebeln dazugeben.\n4. 10 Min mitbraten.\n5. Mit Brot oder Reis servieren."},
+   ing:["Chorizo","Paprika rot","Zwiebeln gelb","Knoblauch","Olivenöl","Paprikapulver","Petersilie","Salz","Pfeffer"],
+   steps:"1. Chorizo in 5mm-Scheiben schneiden.\n2. In Pfanne ohne Öl braten bis das Fett austritt und sie knusprig sind.\n3. Paprika und Zwiebeln grob würfeln, Knoblauch hacken.\n4. Zum Chorizo geben, 8–10 Min mitbraten.\n5. Mit Paprikapulver, Salz und Pfeffer würzen.\n6. Mit frischer Petersilie und Brot servieren."},
+  {title:"Leberwurst-Brot",kcal:380,protein:16,carbs:28,fat:24,time:"5 Min",timeMin:5,diff:"Einfach",
+   ing:["Leberwurst fein","Butter","Zwiebeln gelb","Pfeffer","Gürkchen","Senf mittelscharf"],
+   steps:"1. Brot mit weicher Butter dünn bestreichen.\n2. Leberwurst großzügig aufstreichen.\n3. Zwiebeln in feine Ringe schneiden.\n4. Ringe auf die Leberwurst legen.\n5. Mit einem Hauch Senf und frisch gemahlenem Pfeffer abrunden.\n6. Optional: Gürkchen in Scheiben als Beilage."},
+  {title:"Mozzarella-Tomate Bruschetta",kcal:340,protein:14,carbs:34,fat:16,time:"10 Min",timeMin:10,diff:"Einfach",
+   ing:["Mozzarella","Tomaten","Basilikum","Knoblauch","Olivenöl","Balsamico-Essig","Salz","Pfeffer","Brot"],
+   steps:"1. Brot in 2cm-Scheiben schneiden, anrösten oder toasten.\n2. Tomaten fein würfeln, abtropfen lassen.\n3. Mit Olivenöl, Balsamico, Salz und Pfeffer marinieren.\n4. Noch heißes Brot mit Knoblauchzehe abreiben.\n5. Tomatenmix auf das Brot.\n6. Mozzarella zerreißen und drauflegen.\n7. Mit frischem Basilikum und Olivenöl vollenden."},
 ];
 
 // ── HELPERS ────────────────────────────────────
@@ -1878,25 +1879,49 @@ function renderItems(targetId, items, filter){
   else if(filter.startsWith('zone-')) list=list.filter(i=>i.zone===filter.replace('zone-',''));
   const el=document.getElementById(targetId);
   if(!list.length){el.innerHTML='<div class="empty">Noch keine Produkte – füge welche hinzu! 🌿</div>';return;}
-  el.innerHTML=list.map(item=>{
+
+  // Group items with same name + expiry into one card
+  const groups=[];
+  const seen={};
+  list.forEach(item=>{
+    const key=item.name.toLowerCase()+'|'+item.expiry;
+    if(seen[key]!==undefined){
+      groups[seen[key]].count++;
+      groups[seen[key]].ids.push(item.id);
+    } else {
+      seen[key]=groups.length;
+      groups.push({...item, count:1, ids:[item.id]});
+    }
+  });
+
+  el.innerHTML=groups.map(item=>{
     const d=dl(item.expiry),s=state(d);
     const emoji=getEmoji(item.name);
     const catName=item.cat.replace(/^\S+\s/,'');
     const zone=ZONES[item.zone];
-    const price=getPrice(item.name,item.cat).toFixed(2);
+    const price=(getPrice(item.name,item.cat)*item.count).toFixed(2);
+    const countBadge = item.count>1
+      ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:var(--green);color:white;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px;margin-left:5px;letter-spacing:.3px">×${item.count}</span>`
+      : '';
+    const delIds = JSON.stringify(item.ids);
     return `<div class="card ${s}">
       <div class="card-emoji">${emoji}</div>
       <div class="card-body">
-        <div class="card-name">${item.name}</div>
+        <div class="card-name" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">${item.name}${countBadge}</div>
         <div class="card-sub">${catName} · ${zone?zone.icon+' '+zone.name:''} · ${fmt(item.expiry)}</div>
         <div class="card-price">~${price}€</div>
       </div>
       <div class="tag ${s}">${tagTxt(d)}</div>
       <button class="edit-btn" data-edit="${item.id}">✎</button>
-      <button class="del" data-del="${item.id}">✕</button>
+      <button class="del" data-del-ids='${delIds}'>✕</button>
     </div>`;
   }).join('');
-  el.querySelectorAll('[data-del]').forEach(btn=>btn.addEventListener('click',()=>{ deleteItemFromStorage(btn.dataset.del); renderAll(); }));
+
+  el.querySelectorAll('[data-del-ids]').forEach(btn=>btn.addEventListener('click',()=>{
+    const ids=JSON.parse(btn.getAttribute('data-del-ids'));
+    ids.forEach(id=>deleteItemFromStorage(id));
+    renderAll();
+  }));
   el.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('click',()=>openEditModal(btn.dataset.edit)));
 }
 
@@ -2428,6 +2453,13 @@ window.addToShopList=(name,cat)=>{
 };
 
 // ── MODAL ──────────────────────────────────────
+function changeQty(delta){
+  const el = document.getElementById('f-qty');
+  if(!el) return;
+  const val = Math.max(1, Math.min(99, (parseInt(el.value)||1) + delta));
+  el.value = val;
+}
+
 function openModal(){
   editingId=null; multiProducts=[];
   document.getElementById('f-multi').value='';
@@ -2437,7 +2469,7 @@ function openModal(){
   document.getElementById('f-cat').value='🥬 Gemüse';
   document.getElementById('f-zone').value='frisch';
   document.getElementById('f-date').value=off(4);
-  document.getElementById('modal-title').textContent='Produkte hinzufügen';
+  document.getElementById('f-qty').value='1';
   document.getElementById('edit-badge').classList.remove('show');
   document.getElementById('btn-confirm').textContent='Hinzufügen';
   document.getElementById('btn-scan').style.display='';
@@ -2491,8 +2523,12 @@ function confirmItem(){
   const expiry=document.getElementById('f-date').value;
   if(!name){ document.getElementById('f-name').style.borderColor='var(--red)'; document.getElementById('f-name').focus(); setTimeout(()=>document.getElementById('f-name').style.borderColor='',1400); return; }
   if(!expiry){ document.getElementById('f-date').style.borderColor='var(--red)'; setTimeout(()=>document.getElementById('f-date').style.borderColor='',1400); return; }
-  if(editingId) updateItemInStorage(editingId,{name,cat,zone,expiry});
-  else addItemToStorage({name,cat,zone,expiry});
+  if(editingId){
+    updateItemInStorage(editingId,{name,cat,zone,expiry});
+  } else {
+    const qty = Math.max(1, Math.min(99, parseInt(document.getElementById('f-qty')?.value)||1));
+    for(let i=0; i<qty; i++) addItemToStorage({name,cat,zone,expiry});
+  }
   closeModal(); renderAll();
   if(obWaitingForProduct) obProductAdded();
 }
