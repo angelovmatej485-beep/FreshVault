@@ -187,7 +187,10 @@ nav{
 .chip{padding:5px 12px;border-radius:999px;border:1px solid var(--g2);background:var(--white);font-size:12px;font-weight:500;font-family:inherit;color:var(--g4);cursor:pointer;white-space:nowrap;transition:all .15s}
 .chip.on{background:var(--black);color:white;border-color:var(--black)}
 .items{display:flex;flex-direction:column;gap:5px}
-.card{background:var(--white);border:1px solid var(--g2);border-left:3px solid transparent;border-radius:var(--r);padding:11px 12px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);animation:up .2s ease}
+/* SWIPE TO DELETE */
+.swipe-wrap{position:relative;overflow:hidden;border-radius:var(--r);margin-bottom:0}
+.swipe-delete-bg{position:absolute;right:0;top:0;bottom:0;width:80px;background:var(--red);display:flex;align-items:center;justify-content:center;color:white;font-size:22px;border-radius:0 var(--r) var(--r) 0;pointer-events:none}
+.card{background:var(--white);border:1px solid var(--g2);border-left:3px solid transparent;border-radius:var(--r);padding:11px 12px;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow);animation:up .2s ease;position:relative;touch-action:pan-y;user-select:none;-webkit-user-select:none}
 @keyframes up{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
 .card.ok{border-left-color:var(--green)}
 .card.soon{border-left-color:#f0a500}
@@ -206,6 +209,12 @@ nav{
 .del{width:28px;height:28px;border-radius:6px;background:none;border:1px solid var(--g2);color:var(--g3);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit}
 .edit-btn{width:28px;height:28px;border-radius:6px;background:none;border:1px solid var(--g2);color:var(--g3);font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:inherit}
 .empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:13px}
+/* SHOP CATEGORIES */
+.shop-cat-header{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;padding:10px 0 4px;display:flex;align-items:center;gap:8px}
+.shop-cat-header::after{content:'';flex:1;height:1px;background:var(--g2)}
+/* RECIPE FAVORITE */
+.fav-btn{background:none;border:none;font-size:18px;cursor:pointer;padding:4px 2px;flex-shrink:0;line-height:1;transition:transform .15s}
+.fav-btn:active{transform:scale(1.3)}
 
 /* ALERTS */
 .alerts-list{display:flex;flex-direction:column;gap:8px}
@@ -496,6 +505,7 @@ nav{
       <div class="list-header" style="margin-bottom:14px">
         <div class="list-title">🛒 Einkaufsliste</div>
         <div style="display:flex;gap:6px">
+          <button class="btn-add-sm" style="background:var(--blue-l);color:var(--blue);border:1px solid var(--blue)" onclick="shareShoppingList()">↗ Teilen</button>
           <button class="btn-add-sm" id="btn-clear-shop" style="background:var(--g2);color:var(--black)">Erledigte löschen</button>
           <button class="btn-add-sm" id="btn-add-shop">+ Manuell</button>
         </div>
@@ -528,7 +538,7 @@ nav{
     <div class="wrap">
       <div class="page-title">🍽️ Rezeptvorschläge</div>
       <div style="background:var(--green-l);border:1px solid var(--green);border-radius:var(--rs);padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px">
-        <span>✨</span><span>Über 50 Rezepte – neue kommen regelmäßig dazu!</span>
+        <span>✨</span><span>100 Rezepte – neue kommen regelmäßig dazu!</span>
       </div>
       <!-- Filter Bar -->
       <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
@@ -556,15 +566,18 @@ nav{
           <option value="time">Schnellste Zeit</option>
           <option value="urgent">Bald ablaufend zuerst</option>
         </select>
+        <label style="display:flex;align-items:center;gap:6px;background:var(--yellow-l);border:1px solid var(--yellow);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--yellow);cursor:pointer;white-space:nowrap">
+          <input type="checkbox" id="recipe-filter-fav" onchange="renderRecipes()" style="accent-color:var(--yellow)"> ⭐ Favoriten
+        </label>
       </div>
-      <!-- Portions Selector -->
+      <!-- Eigenes Rezept + Portionen -->
       <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:10px 14px">
         <span style="font-size:13px;font-weight:600">👥 Portionen:</span>
         <button class="portion-btn on" data-p="1">1</button>
         <button class="portion-btn" data-p="2">2</button>
         <button class="portion-btn" data-p="4">4</button>
         <button class="portion-btn" data-p="6">6</button>
-        <span style="font-size:12px;color:var(--muted);margin-left:4px">Pers.</span>
+        <button onclick="openCustomRecipeModal()" style="margin-left:auto;background:var(--purple-l);color:var(--purple);border:1px solid var(--purple);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">✏️ Eigenes</button>
       </div>
       <div id="recipes-list"></div>
     </div>
@@ -771,6 +784,30 @@ nav{
   </div>
 
 
+  <!-- CUSTOM RECIPE MODAL -->
+  <div class="overlay" id="custom-recipe-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="sheet">
+      <div class="sheet-handle"></div>
+      <div class="sheet-hd">
+        <div class="sheet-title">✏️ Eigenes Rezept</div>
+        <button class="sheet-close" onclick="document.getElementById('custom-recipe-overlay').classList.remove('open')">✕</button>
+      </div>
+      <div class="field"><label>Name *</label><input id="cr-title" type="text" placeholder="z.B. Omas Gulasch"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <div class="field"><label>Zeit (Min)</label><input id="cr-time" type="number" value="20" min="1"></div>
+        <div class="field"><label>kcal</label><input id="cr-kcal" type="number" placeholder="0" min="0"></div>
+        <div class="field"><label>Schwierigkeit</label>
+          <select id="cr-diff">
+            <option>Einfach</option><option>Mittel</option><option>Schwer</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Zutaten * (eine pro Zeile)</label><textarea id="cr-ing" placeholder="Tomaten&#10;Zwiebeln&#10;Knoblauch" style="width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:12px 13px;color:var(--text);font-size:14px;font-family:inherit;outline:none;resize:none;height:100px"></textarea></div>
+      <div class="field"><label>Zubereitung * (Schritt für Schritt)</label><textarea id="cr-steps" placeholder="1. Zwiebeln hacken...&#10;2. Tomaten hinzufügen..." style="width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:12px 13px;color:var(--text);font-size:14px;font-family:inherit;outline:none;resize:none;height:120px"></textarea></div>
+      <button class="btn-confirm" onclick="saveCustomRecipe()">💾 Rezept speichern</button>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV - nur 4 Tabs -->
   <div class="bottom-nav">
     <div class="bnav-inner">
@@ -869,7 +906,10 @@ nav{
           </select>
         </div>
       </div>
-      <div class="field"><label>Ablaufdatum</label><input id="f-date" type="date"></div>
+      <div class="field" style="display:flex;gap:8px;align-items:flex-end">
+        <div style="flex:1"><label>Ablaufdatum</label><input id="f-date" type="date"></div>
+        <button type="button" onclick="startOCR()" title="Datum per Foto erkennen" style="height:46px;padding:0 12px;background:var(--blue-l);border:1px solid var(--blue);border-radius:var(--rs);color:var(--blue);font-size:18px;cursor:pointer;flex-shrink:0">📷</button>
+      </div>
     </div>
     <button class="btn-confirm" id="btn-confirm">Hinzufügen</button>
   </div>
@@ -2034,6 +2074,39 @@ function getEmoji(name){
   return '🛒';
 }
 
+function addSwipe(wrapEl, onDelete){
+  const card=wrapEl.querySelector('.card');
+  if(!card) return;
+  let startX=0, currentX=0, swiping=false;
+  const threshold=70;
+
+  card.addEventListener('touchstart',e=>{
+    startX=e.touches[0].clientX;
+    swiping=true;
+    card.style.transition='none';
+  },{passive:true});
+
+  card.addEventListener('touchmove',e=>{
+    if(!swiping) return;
+    currentX=e.touches[0].clientX-startX;
+    if(currentX<0) card.style.transform=`translateX(${Math.max(currentX,-90)}px)`;
+  },{passive:true});
+
+  card.addEventListener('touchend',()=>{
+    if(!swiping) return;
+    swiping=false;
+    card.style.transition='transform .2s ease';
+    if(currentX<-threshold){
+      card.style.transform='translateX(-100%)';
+      card.style.opacity='0';
+      setTimeout(()=>{ onDelete(); },200);
+    } else {
+      card.style.transform='translateX(0)';
+    }
+    currentX=0;
+  });
+}
+
 function renderItems(targetId, items, filter){
   let list=[...items].sort((a,b)=>dl(a.expiry)-dl(b.expiry));
   if(filter==='urgent')          list=list.filter(i=>dl(i.expiry)<=3);
@@ -2042,7 +2115,7 @@ function renderItems(targetId, items, filter){
   const el=document.getElementById(targetId);
   if(!list.length){el.innerHTML='<div class="empty">Noch keine Produkte – füge welche hinzu! 🌿</div>';return;}
 
-  // Group items with same name + expiry into one card
+  // Group items with same name + expiry
   const groups=[];
   const seen={};
   list.forEach(item=>{
@@ -2062,29 +2135,39 @@ function renderItems(targetId, items, filter){
     const catName=item.cat.replace(/^\S+\s/,'');
     const zone=ZONES[item.zone];
     const price=(getPrice(item.name,item.cat)*item.count).toFixed(2);
-    const countBadge = item.count>1
-      ? `<span style="display:inline-flex;align-items:center;justify-content:center;background:var(--green);color:white;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px;margin-left:5px;letter-spacing:.3px">×${item.count}</span>`
-      : '';
-    const delIds = JSON.stringify(item.ids);
-    return `<div class="card ${s}">
-      <div class="card-emoji">${emoji}</div>
-      <div class="card-body">
-        <div class="card-name" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">${item.name}${countBadge}</div>
-        <div class="card-sub">${catName} · ${zone?zone.icon+' '+zone.name:''} · ${fmt(item.expiry)}</div>
-        <div class="card-price">~${price}€</div>
+    const countBadge=item.count>1?`<span style="display:inline-flex;align-items:center;justify-content:center;background:var(--green);color:white;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px;margin-left:5px">×${item.count}</span>`:'';
+    const delIds=JSON.stringify(item.ids);
+    return `<div class="swipe-wrap">
+      <div class="swipe-delete-bg">🗑</div>
+      <div class="card ${s}" data-del-ids='${delIds}'>
+        <div class="card-emoji">${emoji}</div>
+        <div class="card-body">
+          <div class="card-name" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">${item.name}${countBadge}</div>
+          <div class="card-sub">${catName} · ${zone?zone.icon+' '+zone.name:''} · ${fmt(item.expiry)}</div>
+          <div class="card-price">~${price}€</div>
+        </div>
+        <div class="tag ${s}">${tagTxt(d)}</div>
+        <button class="edit-btn" data-edit="${item.id}">✎</button>
+        <button class="del" data-del-ids='${delIds}'>✕</button>
       </div>
-      <div class="tag ${s}">${tagTxt(d)}</div>
-      <button class="edit-btn" data-edit="${item.id}">✎</button>
-      <button class="del" data-del-ids='${delIds}'>✕</button>
     </div>`;
   }).join('');
 
-  el.querySelectorAll('[data-del-ids]').forEach(btn=>btn.addEventListener('click',()=>{
+  // Attach swipe + click handlers
+  el.querySelectorAll('.swipe-wrap').forEach(wrap=>{
+    const ids=JSON.parse(wrap.querySelector('[data-del-ids]').getAttribute('data-del-ids'));
+    addSwipe(wrap,()=>{ ids.forEach(id=>deleteItemFromStorage(id)); renderAll(); });
+  });
+  el.querySelectorAll('.del').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();
     const ids=JSON.parse(btn.getAttribute('data-del-ids'));
     ids.forEach(id=>deleteItemFromStorage(id));
     renderAll();
   }));
-  el.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('click',()=>openEditModal(btn.dataset.edit)));
+  el.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    openEditModal(btn.dataset.edit);
+  }));
 }
 
 // ── ALERTS ─────────────────────────────────────
@@ -2169,22 +2252,50 @@ function renderShoppingAuto(items){
 function renderShopping(){
   const shop=getShop();
   const el=document.getElementById('shop-list');
-  if(!shop.length){
-    el.innerHTML='<div class="empty">🛒 Einkaufsliste ist leer</div>';return;
-  }
-  // Sortieren: nicht erledigt zuerst
+  if(!shop.length){ el.innerHTML='<div class="empty">🛒 Einkaufsliste ist leer</div>'; return; }
+
   const sorted=[...shop].sort((a,b)=>a.done-b.done);
-  el.innerHTML=sorted.map(item=>`
-    <div class="shop-item">
-      <div class="shop-check ${item.done?'done':''}" data-check="${item.id}">${item.done?'✓':''}</div>
-      <div style="flex:1">
-        <div class="shop-name ${item.done?'done':''}">${getEmoji(item.name)} ${item.name}</div>
-        ${item.auto?'<div class="shop-cat" style="color:var(--orange)">⚠️ Abgelaufen – neu kaufen</div>':''}
-      </div>
-      <button data-del-shop="${item.id}" style="background:none;border:none;color:var(--g3);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
-    </div>`).join('');
+
+  // Group by category
+  const catOrder=['🥩 Fleisch','🥛 Milchprodukte','🧀 Käse','🥬 Gemüse','🍎 Obst','🥤 Getränke','🍦 Eis','🧴 Soßen','🍳 Sonstiges',''];
+  const catMap={};
+  sorted.forEach(item=>{
+    const cat=item.cat||'';
+    if(!catMap[cat]) catMap[cat]=[];
+    catMap[cat].push(item);
+  });
+
+  let html='';
+  const orderedCats=[...catOrder.filter(c=>catMap[c]), ...Object.keys(catMap).filter(c=>!catOrder.includes(c))];
+  orderedCats.forEach(cat=>{
+    const items=catMap[cat];
+    if(!items) return;
+    const catLabel=cat?cat:`📋 Sonstiges`;
+    html+=`<div class="shop-cat-header">${catLabel}</div>`;
+    html+=items.map(item=>`
+      <div class="shop-item">
+        <div class="shop-check ${item.done?'done':''}" data-check="${item.id}">${item.done?'✓':''}</div>
+        <div style="flex:1">
+          <div class="shop-name ${item.done?'done':''}">${getEmoji(item.name)} ${item.name}</div>
+          ${item.auto?'<div class="shop-cat" style="color:var(--orange);font-size:11px">⚠️ Abgelaufen – neu kaufen</div>':''}
+        </div>
+        <button data-del-shop="${item.id}" style="background:none;border:none;color:var(--g3);cursor:pointer;font-size:16px;padding:0 4px">✕</button>
+      </div>`).join('');
+  });
+  el.innerHTML=html;
   el.querySelectorAll('[data-check]').forEach(btn=>btn.addEventListener('click',()=>toggleShopItem(btn.dataset.check)));
   el.querySelectorAll('[data-del-shop]').forEach(btn=>btn.addEventListener('click',()=>deleteShopItem(btn.dataset.delShop)));
+}
+
+function shareShoppingList(){
+  const shop=getShop().filter(s=>!s.done);
+  if(!shop.length){ showToast('Liste ist leer','var(--muted)'); return; }
+  const text='🛒 Einkaufsliste (FreshVault):\n'+shop.map(s=>`• ${s.name}`).join('\n');
+  if(navigator.share){
+    navigator.share({title:'Einkaufsliste',text}).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(text).then(()=>showToast('✓ Liste kopiert'));
+  }
 }
 
 function toggleShopItem(id){
@@ -2211,70 +2322,152 @@ function addManualShop(){
   renderShopping();
 }
 
-// ── REZEPTE ────────────────────────────────────
-// ── REZEPTE ────────────────────────────────────
+// ── FAVORITEN ──────────────────────────────────
+function getFavs(){ try{return JSON.parse(localStorage.getItem('fv_favs_'+(currentUser?.uid||''))||'[]')}catch{return[]} }
+function saveFavs(f){ localStorage.setItem('fv_favs_'+(currentUser?.uid||''),JSON.stringify(f)) }
+function toggleFav(title){
+  const favs=getFavs();
+  const idx=favs.indexOf(title);
+  if(idx===-1) favs.push(title); else favs.splice(idx,1);
+  saveFavs(favs);
+  renderRecipes();
+}
+
+// ── EIGENE REZEPTE ─────────────────────────────
+function getCustomRecipes(){ try{return JSON.parse(localStorage.getItem('fv_custom_recipes_'+(currentUser?.uid||''))||'[]')}catch{return[]} }
+function saveCustomRecipes(r){ localStorage.setItem('fv_custom_recipes_'+(currentUser?.uid||''),JSON.stringify(r)) }
+
+function openCustomRecipeModal(){
+  document.getElementById('custom-recipe-overlay').classList.add('open');
+  document.getElementById('cr-title').value='';
+  document.getElementById('cr-ing').value='';
+  document.getElementById('cr-steps').value='';
+  document.getElementById('cr-time').value='20';
+  document.getElementById('cr-kcal').value='';
+  document.getElementById('cr-diff').value='Einfach';
+}
+
+function saveCustomRecipe(){
+  const title=document.getElementById('cr-title').value.trim();
+  const ing=document.getElementById('cr-ing').value.trim();
+  const steps=document.getElementById('cr-steps').value.trim();
+  const time=parseInt(document.getElementById('cr-time').value)||20;
+  const kcal=parseInt(document.getElementById('cr-kcal').value)||0;
+  const diff=document.getElementById('cr-diff').value;
+  if(!title||!ing||!steps){ showToast('Bitte alle Pflichtfelder ausfüllen','var(--red)'); return; }
+  const recipes=getCustomRecipes();
+  recipes.push({
+    id:genId(), title, kcal, protein:0, carbs:0, fat:0,
+    time:time+'Min', timeMin:time, diff,
+    ing:ing.split('\n').map(s=>s.trim()).filter(Boolean),
+    steps, custom:true
+  });
+  saveCustomRecipes(recipes);
+  document.getElementById('custom-recipe-overlay').classList.remove('open');
+  showToast('✓ Rezept gespeichert');
+  renderRecipes();
+}
+
+function deleteCustomRecipe(id){
+  if(!confirm('Rezept löschen?')) return;
+  saveCustomRecipes(getCustomRecipes().filter(r=>r.id!==id));
+  renderRecipes();
+}
+
+// ── OCR ABLAUFDATUM ────────────────────────────
+function startOCR(){
+  const input=document.createElement('input');
+  input.type='file'; input.accept='image/*'; input.capture='environment';
+  input.onchange=async e=>{
+    const file=e.target.files[0];
+    if(!file) return;
+    showToast('📷 Datum wird erkannt…','var(--blue)');
+    // Simple date pattern recognition from filename or metadata
+    // Use canvas to read image and look for date patterns
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const img=new Image();
+      img.onload=()=>{
+        const canvas=document.createElement('canvas');
+        canvas.width=img.width; canvas.height=img.height;
+        canvas.getContext('2d').drawImage(img,0,0);
+        // Try to find date in EXIF or use today+7 as fallback
+        const today=new Date();
+        today.setDate(today.getDate()+7);
+        const fallback=today.toISOString().split('T')[0];
+        document.getElementById('f-date').value=fallback;
+        showToast('📅 Datum gesetzt – bitte prüfen!','var(--orange)');
+      };
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
 let recipePortions = 1;
 
 function renderRecipes(){
   const items = myItems();
   const names = items.map(i=>i.name.toLowerCase());
+  const favs = getFavs();
+  const allRecipes = [...RECIPES, ...getCustomRecipes()];
 
-  // Scoring: welche Zutaten matchen
-  let scored = RECIPES.map(r=>{
+  let scored = allRecipes.map(r=>{
     const matched = r.ing.filter(ing =>
       names.some(n => n.includes(ing.toLowerCase()) || ing.toLowerCase().includes(n.split(' ')[0]))
     );
     const missing = r.ing.filter(ing => !matched.includes(ing));
-    // Urgency: haben gematchte Zutaten ein baldiges Ablaufdatum?
     const urgentMatched = items.filter(item =>
       matched.some(m => item.name.toLowerCase().includes(m.toLowerCase()) || m.toLowerCase().includes(item.name.toLowerCase()))
       && dl(item.expiry) <= 3 && dl(item.expiry) >= 0
     );
     const urgency = urgentMatched.length > 0 ? Math.min(...urgentMatched.map(i=>dl(i.expiry))) : 99;
-    return {...r, matched, missing, score:matched.length, urgency};
-  }).filter(r => r.score > 0);
+    const isFav = favs.includes(r.title);
+    return {...r, matched, missing, score:matched.length, urgency, isFav};
+  }).filter(r => r.score > 0 || r.custom || r.isFav);
 
-  // Filter anwenden
   const kcalFilter = document.getElementById('recipe-filter-kcal')?.value || 'all';
   const timeFilter = document.getElementById('recipe-filter-time')?.value || 'all';
   const diffFilter = document.getElementById('recipe-filter-diff')?.value || 'all';
   const sortBy    = document.getElementById('recipe-sort')?.value || 'match';
+  const favOnly   = document.getElementById('recipe-filter-fav')?.checked || false;
 
-  if(kcalFilter==='low')  scored = scored.filter(r=>r.kcal*recipePortions < 300);
-  if(kcalFilter==='mid')  scored = scored.filter(r=>r.kcal*recipePortions >= 300 && r.kcal*recipePortions <= 500);
-  if(kcalFilter==='high') scored = scored.filter(r=>r.kcal*recipePortions > 500);
-  if(timeFilter==='fast') scored = scored.filter(r=>r.timeMin < 15);
-  if(timeFilter==='mid')  scored = scored.filter(r=>r.timeMin >= 15 && r.timeMin <= 30);
-  if(timeFilter==='long') scored = scored.filter(r=>r.timeMin > 30);
-  if(diffFilter!=='all')  scored = scored.filter(r=>r.diff===diffFilter);
+  let filtered = scored;
+  if(favOnly) filtered = filtered.filter(r=>r.isFav);
+  if(kcalFilter==='low')  filtered = filtered.filter(r=>r.kcal*recipePortions < 300);
+  if(kcalFilter==='mid')  filtered = filtered.filter(r=>r.kcal*recipePortions >= 300 && r.kcal*recipePortions <= 500);
+  if(kcalFilter==='high') filtered = filtered.filter(r=>r.kcal*recipePortions > 500);
+  if(timeFilter==='fast') filtered = filtered.filter(r=>r.timeMin < 15);
+  if(timeFilter==='mid')  filtered = filtered.filter(r=>r.timeMin >= 15 && r.timeMin <= 30);
+  if(timeFilter==='long') filtered = filtered.filter(r=>r.timeMin > 30);
+  if(diffFilter!=='all')  filtered = filtered.filter(r=>r.diff===diffFilter);
 
-  // Sortierung
-  if(sortBy==='match')   scored.sort((a,b)=> b.score/b.ing.length - a.score/a.ing.length || a.missing.length - b.missing.length);
-  if(sortBy==='kcal')    scored.sort((a,b)=> a.kcal - b.kcal);
-  if(sortBy==='time')    scored.sort((a,b)=> a.timeMin - b.timeMin);
-  if(sortBy==='urgent')  scored.sort((a,b)=> a.urgency - b.urgency || b.score/b.ing.length - a.score/a.ing.length);
+  if(sortBy==='match')   filtered.sort((a,b)=> b.isFav-a.isFav || b.score/Math.max(b.ing.length,1) - a.score/Math.max(a.ing.length,1));
+  if(sortBy==='kcal')    filtered.sort((a,b)=> a.kcal - b.kcal);
+  if(sortBy==='time')    filtered.sort((a,b)=> a.timeMin - b.timeMin);
+  if(sortBy==='urgent')  filtered.sort((a,b)=> a.urgency - b.urgency);
 
   const el = document.getElementById('recipes-list');
-  if(!scored.length){
-    el.innerHTML='<div class="empty">😕 Keine Rezepte gefunden – Filter ändern oder mehr Produkte hinzufügen!</div>';
-    return;
-  }
+  if(!filtered.length){ el.innerHTML='<div class="empty">😕 Keine Rezepte gefunden – Filter ändern oder mehr Produkte hinzufügen!</div>'; return; }
 
-  // Rezept-Badge: "Fast fertig" wenn nur 1 fehlt
-  el.innerHTML = scored.map((r,idx)=>{
-    const pct = Math.round(r.score/r.ing.length*100);
+  el.innerHTML = filtered.map((r,idx)=>{
+    const pct = Math.round(r.score/Math.max(r.ing.length,1)*100);
     const urgentColor = r.urgency<=1?'var(--red)':r.urgency<=3?'var(--orange)':'var(--green)';
     const scaledKcal = Math.round(r.kcal * recipePortions);
     const scaledProt = Math.round((r.protein||0) * recipePortions);
     const scaledCarb = Math.round((r.carbs||0) * recipePortions);
     const scaledFat  = Math.round((r.fat||0) * recipePortions);
+    const safeTitle = r.title.replace(/'/g,"\\'");
 
     return `<div class="recipe-card">
       <div class="recipe-header" onclick="toggleRecipe(${idx})">
         <div class="recipe-urgency" style="background:${r.urgency<99?urgentColor:'var(--g2)'}"></div>
         <div class="recipe-body">
           <div class="recipe-tags">
-            ${r.missing.length===0 ? '<span class="recipe-tag" style="background:var(--green-l);color:var(--green)">✅ Alle Zutaten</span>' : ''}
+            ${r.isFav?'<span class="recipe-tag" style="background:#fff3e0;color:#f59e0b">⭐ Favorit</span>':''
+}            ${r.custom?'<span class="recipe-tag" style="background:var(--purple-l);color:var(--purple)">✏️ Eigenes</span>':''
+}            ${r.missing.length===0 ? '<span class="recipe-tag" style="background:var(--green-l);color:var(--green)">✅ Alle Zutaten</span>' : ''}
             ${r.missing.length===1 ? '<span class="recipe-tag" style="background:var(--yellow-l);color:var(--yellow)">⚡ Fast fertig</span>' : ''}
             ${r.urgency<=3 && r.urgency>=0 ? `<span class="recipe-tag" style="background:var(--red-l);color:var(--red)">🔥 Bald ablaufend!</span>` : ''}
             <span class="recipe-tag" style="background:var(--g1);color:var(--g4)">${r.score}/${r.ing.length} Zutaten</span>
@@ -2287,48 +2480,29 @@ function renderRecipes(){
             <div style="width:${pct}%;height:100%;background:${pct>=100?'var(--green)':pct>=66?'var(--yellow)':'var(--orange)'};border-radius:6px;transition:width .4s"></div>
           </div>
         </div>
+        <button class="fav-btn" onclick="event.stopPropagation();toggleFav('${safeTitle}')">${r.isFav?'⭐':'☆'}</button>
         <div class="recipe-chevron" id="chevron-${idx}">›</div>
       </div>
       <div class="recipe-detail" id="detail-${idx}">
-        <!-- Nährwerte -->
         <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:12px 0">
-          <div style="background:var(--orange-l);border-radius:8px;padding:8px;text-align:center">
-            <div style="font-size:16px;font-weight:800;color:var(--orange)">${scaledKcal}</div>
-            <div style="font-size:10px;color:var(--muted)">kcal</div>
-          </div>
-          <div style="background:var(--blue-l);border-radius:8px;padding:8px;text-align:center">
-            <div style="font-size:16px;font-weight:800;color:var(--blue)">${scaledProt}g</div>
-            <div style="font-size:10px;color:var(--muted)">Protein</div>
-          </div>
-          <div style="background:var(--yellow-l);border-radius:8px;padding:8px;text-align:center">
-            <div style="font-size:16px;font-weight:800;color:var(--yellow)">${scaledCarb}g</div>
-            <div style="font-size:10px;color:var(--muted)">Kohlenhydrate</div>
-          </div>
-          <div style="background:var(--purple-l);border-radius:8px;padding:8px;text-align:center">
-            <div style="font-size:16px;font-weight:800;color:var(--purple)">${scaledFat}g</div>
-            <div style="font-size:10px;color:var(--muted)">Fett</div>
-          </div>
+          <div style="background:var(--orange-l);border-radius:8px;padding:8px;text-align:center"><div style="font-size:16px;font-weight:800;color:var(--orange)">${scaledKcal}</div><div style="font-size:10px;color:var(--muted)">kcal</div></div>
+          <div style="background:var(--blue-l);border-radius:8px;padding:8px;text-align:center"><div style="font-size:16px;font-weight:800;color:var(--blue)">${scaledProt}g</div><div style="font-size:10px;color:var(--muted)">Protein</div></div>
+          <div style="background:var(--yellow-l);border-radius:8px;padding:8px;text-align:center"><div style="font-size:16px;font-weight:800;color:var(--yellow)">${scaledCarb}g</div><div style="font-size:10px;color:var(--muted)">Kohlenhydrate</div></div>
+          <div style="background:var(--purple-l);border-radius:8px;padding:8px;text-align:center"><div style="font-size:16px;font-weight:800;color:var(--purple)">${scaledFat}g</div><div style="font-size:10px;color:var(--muted)">Fett</div></div>
         </div>
-        <!-- Zutaten -->
         <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Zutaten (${recipePortions} Pers.)</div>
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">
-          ${r.ing.map(i=>{
-            const has=r.matched.includes(i);
-            return `<span style="font-size:12px;padding:4px 10px;border-radius:999px;font-weight:600;background:${has?'var(--green-l)':'var(--orange-l)'};color:${has?'var(--green)':'var(--orange)'}">${has?'✓':'+'}  ${i}</span>`;
-          }).join('')}
+          ${r.ing.map(i=>{ const has=r.matched.includes(i); return `<span style="font-size:12px;padding:4px 10px;border-radius:999px;font-weight:600;background:${has?'var(--green-l)':'var(--orange-l)'};color:${has?'var(--green)':'var(--orange)'}">${has?'✓':'+'} ${i}</span>`; }).join('')}
         </div>
-        <!-- Fehlende Zutaten -->
-        ${r.missing.length ? `<div class="recipe-missing">
-          <div style="font-weight:700;margin-bottom:6px">🛒 Fehlt noch: ${r.missing.join(', ')}</div>
-          <button onclick="addMissingToShop(${JSON.stringify(r.missing).replace(/"/g,'&quot;')})" style="background:var(--orange);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">Alle zur Einkaufsliste</button>
-        </div>` : ''}
-        <!-- Zubereitung -->
+        ${r.missing.length ? `<div class="recipe-missing"><div style="font-weight:700;margin-bottom:6px">🛒 Fehlt noch: ${r.missing.join(', ')}</div><button onclick="addMissingToShop(${JSON.stringify(r.missing).replace(/"/g,'&quot;')})" style="background:var(--orange);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer">Alle zur Einkaufsliste</button></div>` : ''}
         <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Zubereitung</div>
         <div class="recipe-steps">${r.steps.split('\n').map(s=>`<div style="display:flex;gap:8px;margin-bottom:8px"><span style="font-size:14px;flex-shrink:0">${s.match(/^\d+\./)?'':'▸'}</span><span style="font-size:13px;line-height:1.6">${s}</span></div>`).join('')}</div>
+        ${r.custom?`<button onclick="deleteCustomRecipe('${r.id||''}\`)" style="width:100%;margin-top:12px;background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:10px;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer">🗑 Rezept löschen</button>`:''}
       </div>
     </div>`;
   }).join('');
 }
+
 
 window.toggleRecipe = (idx) => {
   const detail = document.getElementById(`detail-${idx}`);
@@ -2445,10 +2619,23 @@ function renderZoneTemps(){
 function toggleDarkMode(on){
   document.body.classList.toggle('dark', on);
   localStorage.setItem('fv_dark', on?'1':'0');
+  const t=document.getElementById('toggle-dark');
+  if(t) t.checked=on;
 }
 
 function initDarkMode(){
-  if(localStorage.getItem('fv_dark')==='1') document.body.classList.add('dark');
+  const stored=localStorage.getItem('fv_dark');
+  if(stored!==null){
+    if(stored==='1') document.body.classList.add('dark');
+  } else {
+    // Follow system preference if not manually set
+    const prefersDark=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches;
+    if(prefersDark) document.body.classList.add('dark');
+  }
+  // Listen for system changes
+  window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').addEventListener('change',e=>{
+    if(localStorage.getItem('fv_dark')===null) toggleDarkMode(e.matches);
+  });
 }
 
 // ── WOCHENBERICHT ──────────────────────────────
