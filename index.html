@@ -758,6 +758,39 @@ nav{
   </div>
 
 
+  <!-- ── COMMUNITY PAGE ── -->
+  <div class="page" id="page-community">
+    <div class="wrap">
+      <div class="page-title">🌍 Community-Rezepte</div>
+      <div style="background:var(--orange-l);border:1px solid var(--orange);border-radius:var(--rs);padding:10px 12px;margin-bottom:14px;font-size:12px;color:var(--orange);display:flex;align-items:center;gap:8px">
+        <span>💡</span><span>Teile deine Rezepte und entdecke Rezepte anderer Nutzer. Rezepte werden lokal geteilt – nutze den Import-Code um Rezepte geräteübergreifend zu teilen.</span>
+      </div>
+      <!-- Tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="comm-tab-discover" onclick="switchCommTab('discover')" style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--g2);background:var(--black);color:white;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">🔍 Entdecken</button>
+        <button id="comm-tab-share" onclick="switchCommTab('share')" style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--g2);background:var(--g1);color:var(--muted);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">📤 Teilen</button>
+        <button id="comm-tab-import" onclick="switchCommTab('import')" style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--g2);background:var(--g1);color:var(--muted);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">📥 Import</button>
+      </div>
+      <!-- Entdecken -->
+      <div id="comm-discover">
+        <div id="community-recipes-list"></div>
+      </div>
+      <!-- Teilen -->
+      <div id="comm-share" style="display:none">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">Wähle eines deiner eigenen Rezepte zum Teilen:</div>
+        <div id="comm-share-list"></div>
+      </div>
+      <!-- Import -->
+      <div id="comm-import" style="display:none">
+        <div class="field">
+          <label>Rezept-Code einfügen</label>
+          <textarea id="comm-import-code" placeholder="Füge hier den Rezept-Code ein…" style="width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;resize:none;height:80px"></textarea>
+        </div>
+        <button onclick="importCommunityRecipe()" class="btn-confirm">📥 Rezept importieren</button>
+      </div>
+    </div>
+  </div>
+
   <!-- ── OVERLAYS (QR + Join) ── -->
   <div class="overlay" id="qr-overlay" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="sheet" style="max-width:320px;text-align:center">
@@ -821,6 +854,7 @@ nav{
   <!-- FAB -->
   <div class="fab-wrap" id="fab-wrap">
     <div class="fab-menu" id="fab-menu">
+      <div class="fab-item" data-page="community"><span class="fab-item-label">Community</span><button class="fab-item-btn" style="background:var(--orange-l)">🌍</button></div>
       <div class="fab-item" data-page="sharing"><span class="fab-item-label">Familie</span><button class="fab-item-btn" style="background:var(--purple-l)">👨‍👩‍👧</button></div>
       <div class="fab-item" data-page="gamification"><span class="fab-item-label">Achievements</span><button class="fab-item-btn" style="background:var(--yellow-l)">🏆</button></div>
       <div class="fab-item" data-page="stats"><span class="fab-item-label">Statistiken</span><button class="fab-item-btn" style="background:var(--blue-l)">📊</button></div>
@@ -829,6 +863,24 @@ nav{
       <div class="fab-item" data-page="settings"><span class="fab-item-label">Einstellungen</span><button class="fab-item-btn" style="background:var(--g1)">⚙️</button></div>
     </div>
     <button class="fab-btn" id="fab-btn">＋</button>
+  </div>
+</div>
+
+<!-- NOTIZ MODAL -->
+<div class="overlay" id="note-overlay" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-hd">
+      <div class="sheet-title">📝 Notiz</div>
+      <button class="sheet-close" onclick="document.getElementById('note-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:10px" id="note-item-name"></div>
+    <div class="field">
+      <label>Kommentar</label>
+      <textarea id="note-text" placeholder="z.B. Für Sonntag aufheben · Nicht für Max · Schon geöffnet…" style="width:100%;background:var(--g1);border:1px solid var(--g2);border-radius:var(--rs);padding:12px 13px;color:var(--text);font-size:14px;font-family:inherit;outline:none;resize:none;height:100px"></textarea>
+    </div>
+    <button class="btn-confirm" onclick="saveNote()">💾 Notiz speichern</button>
+    <button id="note-delete-btn" onclick="deleteNote()" style="width:100%;margin-top:8px;background:none;border:none;color:var(--red);font-size:13px;font-family:inherit;cursor:pointer;padding:8px;display:none">Notiz löschen</button>
   </div>
 </div>
 
@@ -1882,6 +1934,7 @@ function showPage(id){
   if(id==='shopping') renderShopping();
   if(id==='sharing') renderSharingPage();
   if(id==='gamification') renderGamification();
+  if(id==='community'){ switchCommTab('discover'); }
 }
 
 function toggleFab(){
@@ -2137,6 +2190,8 @@ function renderItems(targetId, items, filter){
     const price=(getPrice(item.name,item.cat)*item.count).toFixed(2);
     const countBadge=item.count>1?`<span style="display:inline-flex;align-items:center;justify-content:center;background:var(--green);color:white;font-size:11px;font-weight:800;border-radius:999px;padding:1px 7px;margin-left:5px">×${item.count}</span>`:'';
     const delIds=JSON.stringify(item.ids);
+    const note = getNotes()[item.id]||'';
+    const noteBadge = note ? `<div style="font-size:11px;color:var(--blue);margin-top:3px;display:flex;align-items:center;gap:4px"><span>📝</span><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:160px">${note}</span></div>` : '';
     return `<div class="swipe-wrap">
       <div class="swipe-delete-bg">🗑</div>
       <div class="card ${s}" data-del-ids='${delIds}'>
@@ -2145,8 +2200,10 @@ function renderItems(targetId, items, filter){
           <div class="card-name" style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">${item.name}${countBadge}</div>
           <div class="card-sub">${catName} · ${zone?zone.icon+' '+zone.name:''} · ${fmt(item.expiry)}</div>
           <div class="card-price">~${price}€</div>
+          ${noteBadge}
         </div>
         <div class="tag ${s}">${tagTxt(d)}</div>
+        <button class="edit-btn note-btn" data-note-id="${item.id}" data-note-name="${item.name}" title="Notiz">📝</button>
         <button class="edit-btn" data-edit="${item.id}">✎</button>
         <button class="del" data-del-ids='${delIds}'>✕</button>
       </div>
@@ -2163,6 +2220,10 @@ function renderItems(targetId, items, filter){
     const ids=JSON.parse(btn.getAttribute('data-del-ids'));
     ids.forEach(id=>deleteItemFromStorage(id));
     renderAll();
+  }));
+  el.querySelectorAll('.note-btn').forEach(btn=>btn.addEventListener('click',e=>{
+    e.stopPropagation();
+    openNote(btn.dataset.noteId, btn.dataset.noteName);
   }));
   el.querySelectorAll('[data-edit]').forEach(btn=>btn.addEventListener('click',e=>{
     e.stopPropagation();
@@ -2372,6 +2433,195 @@ function deleteCustomRecipe(id){
   if(!confirm('Rezept löschen?')) return;
   saveCustomRecipes(getCustomRecipes().filter(r=>r.id!==id));
   renderRecipes();
+}
+
+// ── PRODUKT-NOTIZEN ────────────────────────────
+let _noteItemId = null;
+
+function getNotes(){ try{return JSON.parse(localStorage.getItem('fv_notes_'+(currentUser?.uid||''))||'{}')}catch{return{}} }
+function saveNotes(n){ localStorage.setItem('fv_notes_'+(currentUser?.uid||''),JSON.stringify(n)) }
+
+function openNote(itemId, itemName){
+  _noteItemId = itemId;
+  const notes = getNotes();
+  const existing = notes[itemId]||'';
+  document.getElementById('note-item-name').textContent = '📦 '+itemName;
+  document.getElementById('note-text').value = existing;
+  document.getElementById('note-delete-btn').style.display = existing ? 'block' : 'none';
+  document.getElementById('note-overlay').classList.add('open');
+}
+
+function saveNote(){
+  if(!_noteItemId) return;
+  const text = document.getElementById('note-text').value.trim();
+  const notes = getNotes();
+  if(text) notes[_noteItemId] = text;
+  else delete notes[_noteItemId];
+  saveNotes(notes);
+  document.getElementById('note-overlay').classList.remove('open');
+  renderAll();
+  showToast('✓ Notiz gespeichert');
+}
+
+function deleteNote(){
+  if(!_noteItemId) return;
+  const notes = getNotes();
+  delete notes[_noteItemId];
+  saveNotes(notes);
+  document.getElementById('note-overlay').classList.remove('open');
+  renderAll();
+}
+
+// ── COMMUNITY REZEPTE ──────────────────────────
+const COMM_KEY = 'fv_community_recipes'; // shared across all users on same device/browser
+
+function getCommunityRecipes(){
+  try{ return JSON.parse(localStorage.getItem(COMM_KEY)||'[]'); }catch{ return []; }
+}
+function saveCommunityRecipes(r){ localStorage.setItem(COMM_KEY, JSON.stringify(r)); }
+
+function switchCommTab(tab){
+  ['discover','share','import'].forEach(t=>{
+    document.getElementById('comm-'+t).style.display = t===tab?'block':'none';
+    const btn = document.getElementById('comm-tab-'+t);
+    if(btn){ btn.style.background=t===tab?'var(--black)':'var(--g1)'; btn.style.color=t===tab?'white':'var(--muted)'; }
+  });
+  if(tab==='discover') renderCommunityDiscover();
+  if(tab==='share') renderCommunityShare();
+}
+
+function renderCommunityDiscover(){
+  const recipes = getCommunityRecipes();
+  const el = document.getElementById('community-recipes-list');
+  if(!recipes.length){
+    el.innerHTML=`<div class="empty">🌍 Noch keine Community-Rezepte.<br>Sei der Erste und teile deins!</div>`;
+    return;
+  }
+  // Sort by upvotes
+  const sorted = [...recipes].sort((a,b)=>(b.upvotes||0)-(a.upvotes||0));
+  el.innerHTML = sorted.map(r=>{
+    const myVotes = JSON.parse(localStorage.getItem('fv_comm_votes_'+(currentUser?.uid||''))||'[]');
+    const hasVoted = myVotes.includes(r.id);
+    return `<div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
+        <div style="flex:1">
+          <div style="font-weight:700;font-size:15px;margin-bottom:3px">${r.title}</div>
+          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">von <b>${r.author||'Anonym'}</b> · ⏱ ${r.time} · 🔥 ${r.kcal} kcal · ${r.diff}</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">
+            ${r.ing.slice(0,5).map(i=>`<span style="font-size:11px;padding:2px 8px;border-radius:999px;background:var(--g1);color:var(--g4)">${i}</span>`).join('')}
+            ${r.ing.length>5?`<span style="font-size:11px;color:var(--muted)">+${r.ing.length-5} mehr</span>`:''}
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
+          <button onclick="upvoteCommunityRecipe('${r.id}')" style="background:${hasVoted?'var(--orange)':'var(--orange-l)'};color:${hasVoted?'white':'var(--orange)'};border:none;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer">🔥</button>
+          <span style="font-size:12px;font-weight:700;color:var(--orange)">${r.upvotes||0}</span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <button onclick="expandCommRecipe('${r.id}')" style="background:var(--g1);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);cursor:pointer">📖 Rezept ansehen</button>
+        <button onclick="importThisRecipe('${r.id}')" style="background:var(--green-l);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;font-family:inherit;color:var(--green);cursor:pointer">➕ Zu meinen Rezepten</button>
+      </div>
+      <div id="comm-detail-${r.id}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--g1)">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">ZUBEREITUNG</div>
+        ${r.steps.split('\n').map(s=>`<div style="font-size:13px;line-height:1.7;margin-bottom:4px">${s}</div>`).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function expandCommRecipe(id){
+  const el = document.getElementById('comm-detail-'+id);
+  if(el) el.style.display = el.style.display==='none'?'block':'none';
+  trackStat('recipesViewed');
+}
+
+function upvoteCommunityRecipe(id){
+  const votesKey = 'fv_comm_votes_'+(currentUser?.uid||'');
+  const myVotes = JSON.parse(localStorage.getItem(votesKey)||'[]');
+  if(myVotes.includes(id)){ showToast('Bereits bewertet','var(--muted)'); return; }
+  const recipes = getCommunityRecipes();
+  const r = recipes.find(x=>x.id===id);
+  if(!r) return;
+  r.upvotes = (r.upvotes||0)+1;
+  saveCommunityRecipes(recipes);
+  myVotes.push(id);
+  localStorage.setItem(votesKey, JSON.stringify(myVotes));
+  renderCommunityDiscover();
+  showToast('🔥 Bewertet!','var(--orange)');
+}
+
+function importThisRecipe(id){
+  const recipes = getCommunityRecipes();
+  const r = recipes.find(x=>x.id===id);
+  if(!r) return;
+  const custom = getCustomRecipes();
+  if(custom.find(c=>c.title===r.title)){ showToast('Rezept bereits vorhanden','var(--muted)'); return; }
+  custom.push({...r, id:genId(), custom:true, imported:true});
+  saveCustomRecipes(custom);
+  showToast('✓ Rezept gespeichert!');
+}
+
+function renderCommunityShare(){
+  const customs = getCustomRecipes();
+  const el = document.getElementById('comm-share-list');
+  if(!customs.length){
+    el.innerHTML=`<div class="empty">Du hast noch keine eigenen Rezepte.<br>Erstelle eins über ➕ → Rezepte → ✏️ Eigenes</div>`;
+    return;
+  }
+  el.innerHTML = customs.filter(r=>!r.imported).map(r=>{
+    const shared = getCommunityRecipes().find(c=>c.title===r.title && c.authorUid===currentUser?.uid);
+    return `<div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px;margin-bottom:8px;box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;gap:10px">
+      <div>
+        <div style="font-weight:600;font-size:14px">${r.title}</div>
+        <div style="font-size:11px;color:var(--muted)">⏱ ${r.time} · ${r.ing.length} Zutaten</div>
+      </div>
+      ${shared
+        ? `<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+            <span style="font-size:11px;color:var(--green);font-weight:600">✓ Geteilt · 🔥${shared.upvotes||0}</span>
+            <button onclick="shareRecipeCode('${r.id}')" style="background:var(--g1);border:1px solid var(--g2);border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">📋 Code kopieren</button>
+          </div>`
+        : `<button onclick="publishRecipe('${r.id}')" style="background:var(--orange);color:white;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">🌍 Teilen</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+function publishRecipe(id){
+  const r = getCustomRecipes().find(x=>x.id===id);
+  if(!r) return;
+  const author = localStorage.getItem('fv_name_'+(currentUser?.uid||'')) || currentUser?.email?.split('@')[0] || 'Anonym';
+  const community = getCommunityRecipes();
+  community.push({...r, id:genId(), author, authorUid:currentUser?.uid||'', upvotes:0, sharedAt:Date.now()});
+  saveCommunityRecipes(community);
+  showToast('🌍 Rezept geteilt!','var(--orange)');
+  renderCommunityShare();
+}
+
+function shareRecipeCode(id){
+  const r = getCustomRecipes().find(x=>x.id===id);
+  if(!r) return;
+  const code = btoa(unescape(encodeURIComponent(JSON.stringify(r))));
+  const text = 'FreshVault Rezept-Code:\n'+code;
+  if(navigator.share){ navigator.share({title:r.title, text}).catch(()=>{}); }
+  else { navigator.clipboard?.writeText(text); showToast('✓ Code kopiert'); }
+}
+
+function importCommunityRecipe(){
+  const raw = document.getElementById('comm-import-code').value.trim();
+  if(!raw){ showToast('Bitte Code eingeben','var(--red)'); return; }
+  // Strip prefix if user copied the full text
+  const codeMatch = raw.match(/([A-Za-z0-9+/=]{20,})/);
+  if(!codeMatch){ showToast('Ungültiger Code','var(--red)'); return; }
+  try{
+    const r = JSON.parse(decodeURIComponent(escape(atob(codeMatch[1]))));
+    if(!r.title||!r.ing||!r.steps) throw new Error();
+    const custom = getCustomRecipes();
+    if(custom.find(c=>c.title===r.title)){ showToast('Rezept bereits vorhanden','var(--muted)'); return; }
+    custom.push({...r, id:genId(), custom:true, imported:true});
+    saveCustomRecipes(custom);
+    document.getElementById('comm-import-code').value='';
+    showToast('✓ Rezept importiert!');
+  }catch(e){ showToast('Ungültiger Rezept-Code','var(--red)'); }
 }
 
 // ── OCR ABLAUFDATUM ────────────────────────────
