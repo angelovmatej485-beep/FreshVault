@@ -537,49 +537,66 @@ nav{
   <div class="page" id="page-recipes">
     <div class="wrap">
       <div class="page-title">🍽️ Rezeptvorschläge</div>
-      <div style="background:var(--green-l);border:1px solid var(--green);border-radius:var(--rs);padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px">
-        <span>✨</span><span>100 Rezepte – neue kommen regelmäßig dazu!</span>
+
+      <!-- Tab Switcher -->
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button id="rtab-all" onclick="switchRecipeTab('all')" style="flex:1;padding:9px;border-radius:9px;border:none;background:var(--black);color:white;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">🍽️ Alle</button>
+        <button id="rtab-mine" onclick="switchRecipeTab('mine')" style="flex:1;padding:9px;border-radius:9px;border:1px solid var(--g2);background:var(--g1);color:var(--muted);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer">✏️ Meine</button>
       </div>
-      <!-- Filter Bar -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
-        <select id="recipe-filter-kcal" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
-          <option value="all">🔥 Alle Kalorien</option>
-          <option value="low">unter 300 kcal</option>
-          <option value="mid">300–500 kcal</option>
-          <option value="high">über 500 kcal</option>
-        </select>
-        <select id="recipe-filter-time" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
-          <option value="all">⏱ Alle Zeiten</option>
-          <option value="fast">unter 15 Min</option>
-          <option value="mid">15–30 Min</option>
-          <option value="long">über 30 Min</option>
-        </select>
-        <select id="recipe-filter-diff" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
-          <option value="all">📊 Alle Level</option>
-          <option value="Einfach">Einfach</option>
-          <option value="Mittel">Mittel</option>
-          <option value="Schwer">Schwer</option>
-        </select>
-        <select id="recipe-sort" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
-          <option value="match">Beste Übereinstimmung</option>
-          <option value="kcal">Wenigste Kalorien</option>
-          <option value="time">Schnellste Zeit</option>
-          <option value="urgent">Bald ablaufend zuerst</option>
-        </select>
-        <label style="display:flex;align-items:center;gap:6px;background:var(--yellow-l);border:1px solid var(--yellow);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--yellow);cursor:pointer;white-space:nowrap">
-          <input type="checkbox" id="recipe-filter-fav" onchange="renderRecipes()" style="accent-color:var(--yellow)"> ⭐ Favoriten
-        </label>
+
+      <!-- ALL TAB -->
+      <div id="recipes-tab-all">
+        <div style="background:var(--green-l);border:1px solid var(--green);border-radius:var(--rs);padding:9px 12px;margin-bottom:12px;font-size:12px;color:var(--green);display:flex;align-items:center;gap:8px">
+          <span>✨</span><span>100 Rezepte – neue kommen regelmäßig dazu!</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+          <select id="recipe-filter-kcal" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
+            <option value="all">🔥 Alle Kalorien</option>
+            <option value="low">unter 300 kcal</option>
+            <option value="mid">300–500 kcal</option>
+            <option value="high">über 500 kcal</option>
+          </select>
+          <select id="recipe-filter-time" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
+            <option value="all">⏱ Alle Zeiten</option>
+            <option value="fast">unter 15 Min</option>
+            <option value="mid">15–30 Min</option>
+            <option value="long">über 30 Min</option>
+          </select>
+          <select id="recipe-filter-diff" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
+            <option value="all">📊 Alle Level</option>
+            <option value="Einfach">Einfach</option>
+            <option value="Mittel">Mittel</option>
+            <option value="Schwer">Schwer</option>
+          </select>
+          <select id="recipe-sort" style="background:var(--g1);border:1px solid var(--g2);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);outline:none;cursor:pointer">
+            <option value="match">Beste Übereinstimmung</option>
+            <option value="kcal">Wenigste Kalorien</option>
+            <option value="time">Schnellste Zeit</option>
+            <option value="urgent">Bald ablaufend zuerst</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:6px;background:var(--yellow-l);border:1px solid var(--yellow);border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--yellow);cursor:pointer;white-space:nowrap">
+            <input type="checkbox" id="recipe-filter-fav" onchange="renderRecipes()" style="accent-color:var(--yellow)"> ⭐ Favoriten
+          </label>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:10px 14px">
+          <span style="font-size:13px;font-weight:600">👥 Portionen:</span>
+          <button class="portion-btn on" data-p="1">1</button>
+          <button class="portion-btn" data-p="2">2</button>
+          <button class="portion-btn" data-p="4">4</button>
+          <button class="portion-btn" data-p="6">6</button>
+        </div>
+        <div id="recipes-list"></div>
       </div>
-      <!-- Eigenes Rezept + Portionen -->
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:10px 14px">
-        <span style="font-size:13px;font-weight:600">👥 Portionen:</span>
-        <button class="portion-btn on" data-p="1">1</button>
-        <button class="portion-btn" data-p="2">2</button>
-        <button class="portion-btn" data-p="4">4</button>
-        <button class="portion-btn" data-p="6">6</button>
-        <button onclick="openCustomRecipeModal()" style="margin-left:auto;background:var(--purple-l);color:var(--purple);border:1px solid var(--purple);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">✏️ Eigenes</button>
+
+      <!-- MEINE TAB -->
+      <div id="recipes-tab-mine" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:13px;color:var(--muted)">Eigene & importierte Rezepte</div>
+          <button onclick="openCustomRecipeModal()" style="background:var(--purple-l);color:var(--purple);border:1px solid var(--purple);border-radius:8px;padding:6px 12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap">✏️ Neues Rezept</button>
+        </div>
+        <div id="recipes-mine-list"></div>
       </div>
-      <div id="recipes-list"></div>
+
     </div>
   </div>
 
@@ -2427,12 +2444,14 @@ function saveCustomRecipe(){
   document.getElementById('custom-recipe-overlay').classList.remove('open');
   showToast('✓ Rezept gespeichert');
   renderRecipes();
+  renderMyRecipes();
 }
 
 function deleteCustomRecipe(id){
   if(!confirm('Rezept löschen?')) return;
   saveCustomRecipes(getCustomRecipes().filter(r=>r.id!==id));
   renderRecipes();
+  renderMyRecipes();
 }
 
 // ── PRODUKT-NOTIZEN ────────────────────────────
@@ -2490,54 +2509,133 @@ function switchCommTab(tab){
   if(tab==='share') renderCommunityShare();
 }
 
-function renderCommunityDiscover(){
-  const recipes = getCommunityRecipes();
-  const el = document.getElementById('community-recipes-list');
-  if(!recipes.length){
-    el.innerHTML=`<div class="empty">🌍 Noch keine Community-Rezepte.<br>Sei der Erste und teile deins!</div>`;
+function switchRecipeTab(tab){
+  document.getElementById('recipes-tab-all').style.display  = tab==='all'  ? 'block' : 'none';
+  document.getElementById('recipes-tab-mine').style.display = tab==='mine' ? 'block' : 'none';
+  const allBtn  = document.getElementById('rtab-all');
+  const mineBtn = document.getElementById('rtab-mine');
+  if(allBtn){  allBtn.style.background  = tab==='all'  ? 'var(--black)' : 'var(--g1)';
+               allBtn.style.color       = tab==='all'  ? 'white' : 'var(--muted)';
+               allBtn.style.border      = tab==='all'  ? 'none'  : '1px solid var(--g2)'; }
+  if(mineBtn){ mineBtn.style.background = tab==='mine' ? 'var(--black)' : 'var(--g1)';
+               mineBtn.style.color      = tab==='mine' ? 'white' : 'var(--muted)';
+               mineBtn.style.border     = tab==='mine' ? 'none'  : '1px solid var(--g2)'; }
+  if(tab==='all')  renderRecipes();
+  if(tab==='mine') renderMyRecipes();
+}
+
+function renderMyRecipes(){
+  const customs = getCustomRecipes();
+  const favs    = getFavs();
+  const el      = document.getElementById('recipes-mine-list');
+  if(!el) return;
+  if(!customs.length){
+    el.innerHTML = '<div class="empty">Noch keine eigenen Rezepte.<br><br>'
+      + '<button onclick="openCustomRecipeModal()" style="background:var(--purple);color:white;border:none;'
+      + 'border-radius:10px;padding:12px 20px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer">'
+      + '&#10015; Erstes Rezept erstellen</button></div>';
     return;
   }
-  // Sort by upvotes
-  const sorted = [...recipes].sort((a,b)=>(b.upvotes||0)-(a.upvotes||0));
-  el.innerHTML = sorted.map(r=>{
-    const myVotes = JSON.parse(localStorage.getItem('fv_comm_votes_'+(currentUser?.uid||''))||'[]');
-    const hasVoted = myVotes.includes(r.id);
-    return `<div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)">
-      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">
-        <div style="flex:1">
-          <div style="font-weight:700;font-size:15px;margin-bottom:3px">${r.title}</div>
-          <div style="font-size:11px;color:var(--muted);margin-bottom:8px">von <b>${r.author||'Anonym'}</b> · ⏱ ${r.time} · 🔥 ${r.kcal} kcal · ${r.diff}</div>
-          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">
-            ${r.ing.slice(0,5).map(i=>`<span style="font-size:11px;padding:2px 8px;border-radius:999px;background:var(--g1);color:var(--g4)">${i}</span>`).join('')}
-            ${r.ing.length>5?`<span style="font-size:11px;color:var(--muted)">+${r.ing.length-5} mehr</span>`:''}
-          </div>
-        </div>
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">
-          <button onclick="upvoteCommunityRecipe('${r.id}')" style="background:${hasVoted?'var(--orange)':'var(--orange-l)'};color:${hasVoted?'white':'var(--orange)'};border:none;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer">🔥</button>
-          <span style="font-size:12px;font-weight:700;color:var(--orange)">${r.upvotes||0}</span>
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-        <button onclick="expandCommRecipe('${r.id}')" style="background:var(--g1);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);cursor:pointer">📖 Rezept ansehen</button>
-        <button onclick="importThisRecipe('${r.id}')" style="background:var(--green-l);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;font-family:inherit;color:var(--green);cursor:pointer">➕ Zu meinen Rezepten</button>
-      </div>
-      <div id="comm-detail-${r.id}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--g1)">
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">ZUBEREITUNG</div>
-        ${r.steps.split('\n').map(s=>`<div style="font-size:13px;line-height:1.7;margin-bottom:4px">${s}</div>`).join('')}
-      </div>
-    </div>`;
+  el.innerHTML = customs.map(function(r, idx){
+    const isFav = favs.includes(r.title);
+    const badge = r.imported
+      ? '<span style="font-size:10px;background:var(--blue-l);color:var(--blue);border-radius:999px;padding:2px 8px;font-weight:600">&#x1F4E5; Importiert</span>'
+      : '<span style="font-size:10px;background:var(--purple-l);color:var(--purple);border-radius:999px;padding:2px 8px;font-weight:600">&#9999;&#xFE0F; Eigenes</span>';
+    const favBadge = isFav ? '<span style="font-size:10px;background:#fff3e0;color:#f59e0b;border-radius:999px;padding:2px 8px;font-weight:600">&#11088;</span>' : '';
+    const ingHtml = r.ing.map(function(i){
+      return '<span style="font-size:12px;padding:4px 10px;border-radius:999px;background:var(--g1);color:var(--g4);font-weight:600">' + i + '</span>';
+    }).join('');
+    const stepsHtml = r.steps.split('\n').map(function(s){
+      return '<div style="font-size:13px;line-height:1.7;margin-bottom:4px">' + s + '</div>';
+    }).join('');
+    const safeId    = (r.id||'').replace(/'/g, "\\'");
+    const safeTitle = r.title.replace(/'/g, "\\'");
+    const ingJson   = JSON.stringify(r.ing).replace(/"/g, '&quot;');
+    return '<div class="recipe-card">'
+      + '<div style="padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer" onclick="toggleMyRecipe(' + idx + ')">'
+      +   '<div style="flex:1">'
+      +     '<div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:4px">' + badge + favBadge + '</div>'
+      +     '<div style="font-weight:700;font-size:15px">' + r.title + '</div>'
+      +     '<div style="font-size:11px;color:var(--muted);margin-top:2px">&#x23F1; ' + r.time + ' &middot; &#x1F525; ' + (r.kcal||0) + ' kcal &middot; ' + r.diff + ' &middot; ' + r.ing.length + ' Zutaten</div>'
+      +   '</div>'
+      +   '<button class="fav-btn" onclick="event.stopPropagation();toggleFav(\'' + safeTitle + '\')">' + (isFav ? '&#11088;' : '&#9734;') + '</button>'
+      +   '<div style="font-size:18px;color:var(--muted);transition:transform .2s" id="mchevron-' + idx + '">&#x203A;</div>'
+      + '</div>'
+      + '<div id="mdetail-' + idx + '" style="display:none;padding:0 16px 14px;border-top:1px solid var(--g1)">'
+      +   '<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:10px 0 6px">Zutaten</div>'
+      +   '<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px">' + ingHtml + '</div>'
+      +   '<div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">Zubereitung</div>'
+      +   '<div>' + stepsHtml + '</div>'
+      +   '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px">'
+      +     '<button onclick="addMissingToShop(' + ingJson + ')" style="background:var(--orange-l);color:var(--orange);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">&#x1F6D2; Alle zur Liste</button>'
+      +     '<button onclick="deleteCustomRecipe(\'' + safeId + '\')" style="background:var(--red-l);color:var(--red);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;font-family:inherit;cursor:pointer">&#x1F5D1; L&ouml;schen</button>'
+      +   '</div>'
+      + '</div>'
+      + '</div>';
   }).join('');
 }
 
+window.toggleMyRecipe = function(idx){
+  var detail  = document.getElementById('mdetail-'  + idx);
+  var chevron = document.getElementById('mchevron-' + idx);
+  if(!detail) return;
+  var open = detail.style.display !== 'none';
+  detail.style.display  = open ? 'none'  : 'block';
+  if(chevron) chevron.style.transform = open ? 'none' : 'rotate(90deg)';
+};
+
+function renderCommunityDiscover(){
+  var recipes = getCommunityRecipes();
+  var el      = document.getElementById('community-recipes-list');
+  if(!recipes.length){
+    el.innerHTML = '<div class="empty">&#x1F30D; Noch keine Community-Rezepte.<br>Sei der Erste und teile deins!</div>';
+    return;
+  }
+  var sorted = recipes.slice().sort(function(a,b){ return (b.upvotes||0)-(a.upvotes||0); });
+  el.innerHTML = sorted.map(function(r){
+    var votesKey = 'fv_comm_votes_' + (currentUser ? currentUser.uid : '');
+    var myVotes  = JSON.parse(localStorage.getItem(votesKey)||'[]');
+    var hasVoted = myVotes.includes(r.id);
+    var ingPills = r.ing.slice(0,5).map(function(i){
+      return '<span style="font-size:11px;padding:2px 8px;border-radius:999px;background:var(--g1);color:var(--g4)">' + i + '</span>';
+    }).join('') + (r.ing.length > 5 ? '<span style="font-size:11px;color:var(--muted)">+' + (r.ing.length-5) + ' mehr</span>' : '');
+    var stepsHtml = r.steps.split('\n').map(function(s){
+      return '<div style="font-size:13px;line-height:1.7;margin-bottom:4px">' + s + '</div>';
+    }).join('');
+    return '<div style="background:var(--white);border:1px solid var(--g2);border-radius:var(--r);padding:14px;margin-bottom:10px;box-shadow:var(--shadow)">'
+      + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'
+      +   '<div style="flex:1">'
+      +     '<div style="font-weight:700;font-size:15px;margin-bottom:3px">' + r.title + '</div>'
+      +     '<div style="font-size:11px;color:var(--muted);margin-bottom:8px">von <b>' + (r.author||'Anonym') + '</b> &middot; &#x23F1; ' + r.time + ' &middot; &#x1F525; ' + r.kcal + ' kcal &middot; ' + r.diff + '</div>'
+      +     '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">' + ingPills + '</div>'
+      +   '</div>'
+      +   '<div style="display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0">'
+      +     '<button onclick="upvoteCommunityRecipe(\'' + r.id + '\')" style="background:' + (hasVoted?'var(--orange)':'var(--orange-l)') + ';color:' + (hasVoted?'white':'var(--orange)') + ';border:none;border-radius:8px;padding:6px 10px;font-size:14px;cursor:pointer">&#x1F525;</button>'
+      +     '<span style="font-size:12px;font-weight:700;color:var(--orange)">' + (r.upvotes||0) + '</span>'
+      +   '</div>'
+      + '</div>'
+      + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">'
+      +   '<button onclick="expandCommRecipe(\'' + r.id + '\')" style="background:var(--g1);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;font-family:inherit;color:var(--text);cursor:pointer">&#x1F4D6; Rezept ansehen</button>'
+      +   '<button onclick="importThisRecipe(\'' + r.id + '\')" style="background:var(--green-l);border:none;border-radius:8px;padding:9px;font-size:12px;font-weight:600;font-family:inherit;color:var(--green);cursor:pointer">&#x2795; Zu meinen Rezepten</button>'
+      + '</div>'
+      + '<div id="comm-detail-' + r.id + '" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--g1)">'
+      +   '<div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px">ZUBEREITUNG</div>'
+      +   stepsHtml
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+
 function expandCommRecipe(id){
   const el = document.getElementById('comm-detail-'+id);
-  if(el) el.style.display = el.style.display==='none'?'block':'none';
+  if(el) el.style.display = el.style.display==='none' ? 'block' : 'none';
   trackStat('recipesViewed');
 }
 
 function upvoteCommunityRecipe(id){
   const votesKey = 'fv_comm_votes_'+(currentUser?.uid||'');
-  const myVotes = JSON.parse(localStorage.getItem(votesKey)||'[]');
+  const myVotes  = JSON.parse(localStorage.getItem(votesKey)||'[]');
   if(myVotes.includes(id)){ showToast('Bereits bewertet','var(--muted)'); return; }
   const recipes = getCommunityRecipes();
   const r = recipes.find(x=>x.id===id);
